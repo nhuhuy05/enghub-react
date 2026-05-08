@@ -6,6 +6,9 @@ import { RegisterForm } from '../features/auth/components/RegisterForm';
 import { LoginVisual } from '../features/auth/components/LoginVisual';
 import { RegisterVisual } from '../features/auth/components/RegisterVisual';
 import { DashboardPage } from '../features/dashboard/components/DashboardPage';
+import { VocabularyPage } from '../features/vocabulary/components/VocabularyPage';
+import { GrammarPage } from '../features/grammar/components/GrammarPage';
+import { ExamPage } from '../features/exam/components/ExamPage';
 
 export const AppRoutes = () => {
   return (
@@ -13,6 +16,9 @@ export const AppRoutes = () => {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/vocabulary" element={<VocabularyPage />} />
+        <Route path="/grammar" element={<GrammarPage />} />
+        <Route path="/exam" element={<ExamPage />} />
       </Route>
 
       <Route
