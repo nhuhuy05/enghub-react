@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Check, FileText, NotebookText, Clock4, Info } from 'lucide-react';
+import { X, FileText, NotebookText, Clock4, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ExamModalProps {

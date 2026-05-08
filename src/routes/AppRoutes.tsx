@@ -8,6 +8,7 @@ import { RegisterVisual } from '../features/auth/components/RegisterVisual';
 import { DashboardPage } from '../features/dashboard/components/DashboardPage';
 import { VocabularyPage } from '../features/vocabulary/components/VocabularyPage';
 import { GrammarPage } from '../features/grammar/components/GrammarPage';
+import { GrammarDetail } from '../features/grammar/components/GrammarDetail';
 import { ExamPage } from '../features/exam/components/ExamPage';
 import { ExamInterface } from '../features/exam/components/ExamInterface';
 
@@ -19,6 +20,7 @@ export const AppRoutes = () => {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/vocabulary" element={<VocabularyPage />} />
         <Route path="/grammar" element={<GrammarPage />} />
+        <Route path="/grammar/:id" element={<GrammarDetail />} />
         <Route path="/exam" element={<ExamPage />} />
       </Route>
 
