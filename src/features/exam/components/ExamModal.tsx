@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Check, FileText, NotebookText, Clock4, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ExamModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface ExamModalProps {
 type ExamMode = 'exam' | 'practice';
 
 export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, examTitle }) => {
+  const navigate = useNavigate();
   const [activeMode, setActiveMode] = useState<ExamMode>('exam');
   const [selectedParts, setSelectedParts] = useState<string[]>([]);
 
@@ -110,14 +112,9 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, examTitle
                   {activeMode === 'exam' ? 'Thông tin bài thi' : 'Chọn Part'}
                 </h3>
               </div>
-              <button
-                type="button"
-                disabled={activeMode === 'practice' && selectedParts.length === 0}
-                className={`rounded-lg px-4 py-1.5 text-xs font-bold text-white transition-all ${
-                  activeMode === 'practice' && selectedParts.length === 0
-                    ? 'cursor-not-allowed bg-[#9ca3af] opacity-60'
-                    : 'bg-[#004ac6] shadow-lg shadow-blue-200 hover:bg-[#003896] active:scale-95'
-                }`}
+              <button 
+                onClick={() => navigate('/exam/take')}
+                className="rounded-lg bg-[#004ac6] px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-[#003896] active:scale-95"
               >
                 Bắt đầu
               </button>

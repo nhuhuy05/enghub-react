@@ -9,6 +9,7 @@ import { DashboardPage } from '../features/dashboard/components/DashboardPage';
 import { VocabularyPage } from '../features/vocabulary/components/VocabularyPage';
 import { GrammarPage } from '../features/grammar/components/GrammarPage';
 import { ExamPage } from '../features/exam/components/ExamPage';
+import { ExamInterface } from '../features/exam/components/ExamInterface';
 
 export const AppRoutes = () => {
   return (
@@ -20,6 +21,8 @@ export const AppRoutes = () => {
         <Route path="/grammar" element={<GrammarPage />} />
         <Route path="/exam" element={<ExamPage />} />
       </Route>
+
+      <Route path="/exam/take" element={<ExamInterface />} />
 
       <Route
         path="/login"
