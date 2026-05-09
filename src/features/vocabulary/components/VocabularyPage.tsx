@@ -1,122 +1,42 @@
-import { ArrowRight, Flame, GraduationCap, Headphones, NotebookPen, Sparkles, BookOpenText } from 'lucide-react';
-
-const topicCards = [
-  {
-    title: 'Business',
-    description: '500 từ vựng chuyên ngành',
-    progress: 65,
-    icon: GraduationCap,
-    badge: 'Mới',
-    iconBg: 'bg-[#dbe1ff]',
-    iconColor: 'text-[#003ea8]',
-  },
-  {
-    title: 'Travel',
-    description: '320 từ vựng du lịch',
-    progress: 40,
-    icon: Sparkles,
-    iconBg: 'bg-[#ffdbcd]',
-    iconColor: 'text-[#7d2d00]',
-  },
-  {
-    title: 'Office',
-    description: '450 từ vựng công sở',
-    progress: 12,
-    icon: NotebookPen,
-    iconBg: 'bg-[#d3e4fe]',
-    iconColor: 'text-[#0b1c30]',
-  },
-  {
-    title: 'Entertainment',
-    description: '280 từ vựng giải trí',
-    progress: 85,
-    icon: Headphones,
-    iconBg: 'bg-[#dbe1ff]',
-    iconColor: 'text-[#003ea8]',
-  },
-  {
-    title: 'Health',
-    description: '260 từ vựng về sức khỏe',
-    progress: 58,
-    icon: Headphones,
-    iconBg: 'bg-[#dbe1ff]',
-    iconColor: 'text-[#003ea8]',
-  },
-  {
-    title: 'Technology',
-    description: '340 từ vựng về công nghệ',
-    progress: 22,
-    icon: NotebookPen,
-    iconBg: 'bg-[#d3e4fe]',
-    iconColor: 'text-[#0b1c30]',
-  },
-  {
-    title: 'Education',
-    description: '300 từ vựng học thuật',
-    progress: 73,
-    icon: GraduationCap,
-    iconBg: 'bg-[#dbe1ff]',
-    iconColor: 'text-[#003ea8]',
-  },
-];
-
-const etsCards = [
-  {
-    title: 'ETS 2024 Series',
-    description: 'Trọn bộ từ vựng xuất hiện trong 10 đề thi thật mới nhất của ETS 2024.',
-    words: '850+',
-    sets: '10',
-    cta: 'Bắt đầu học ngay',
-    featured: true,
-  },
-  {
-    title: 'ETS 2023 Series',
-    description: 'Tập hợp từ vựng trọng tâm từ các đề thi ETS 2023 phổ biến.',
-    words: '720',
-    sets: '05',
-    cta: 'Tiếp tục học',
-    featured: false,
-    progress: 30,
-  },
-  {
-    title: 'ETS 2022 Series',
-    description: 'Từ vựng nền tảng từ các đề thi ETS 2022 theo chủ đề thường gặp.',
-    words: '680',
-    sets: '05',
-    cta: 'Học tiếp',
-    featured: false,
-    progress: 50,
-  },
-  {
-    title: 'ETS 2021 Series',
-    description: 'Bộ từ vựng trọng tâm giúp ôn tập nhanh các câu xuất hiện lặp lại.',
-    words: '640',
-    sets: '04',
-    cta: 'Ôn ngay',
-    featured: false,
-    progress: 18,
-  },
-  {
-    title: 'ETS Mini Test',
-    description: 'Bộ đề ngắn để luyện từ vựng nhanh trong 15 phút mỗi ngày.',
-    words: '120',
-    sets: '12',
-    cta: 'Luyện nhanh',
-    featured: false,
-    progress: 76,
-  },
-  {
-    title: 'Advanced ETS',
-    description: 'Từ vựng nâng cao dành cho mục tiêu 800+ và 900+ TOEIC.',
-    words: '500+',
-    sets: '08',
-    cta: 'Khám phá',
-    featured: false,
-    progress: 44,
-  },
-];
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  ArrowRight, 
+  Flame, 
+  GraduationCap, 
+  Headphones, 
+  NotebookPen, 
+  Sparkles, 
+  BookOpenText,
+  Loader2
+} from 'lucide-react';
+import { useVocabulary } from '../hooks/useVocabulary';
 
 export const VocabularyPage = () => {
+  const { topics, isLoading, error } = useVocabulary();
+  const navigate = useNavigate();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#faf8ff]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#004ac6]" />
+        <p className="font-bold text-[#505f76]">Đang tải từ vựng...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center text-center gap-4 bg-[#faf8ff]">
+        <h2 className="text-xl font-bold text-red-500">Lỗi: {error}</h2>
+        <button onClick={() => window.location.reload()} className="rounded-lg bg-blue-600 px-4 py-2 text-white">Thử lại</button>
+      </div>
+    );
+  }
+
+  const topicCards = topics.filter(t => t.category === 'Chủ đề phổ biến');
+  const etsCards = topics.filter(t => t.category === 'Theo bộ đề ETS');
+
   return (
     <div className="min-h-screen bg-[#faf8ff] text-[#191b23]">
       <main className="mx-auto max-w-[1200px] px-4 pb-24 pt-8 sm:px-6 lg:px-8">
@@ -149,20 +69,26 @@ export const VocabularyPage = () => {
             </button>
           </div>
 
-          <div className="-mx-4 overflow-x-auto px-4 pb-2">
+          <div className="-mx-4 overflow-x-auto px-4 pb-2 scrollbar-hide">
             <div className="flex w-max gap-4">
               {topicCards.map((item) => {
-                const Icon = item.icon;
+                const Icon = item.title === 'Business' ? GraduationCap : Sparkles;
                 return (
-                  <article key={item.title} className="group w-[224px] shrink-0 rounded-2xl border border-[#c3c6d7] bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[#004ac6] hover:shadow-md">
+                  <article 
+                    key={item.id} 
+                    onClick={() => navigate(`/vocabulary/${item.id}`)}
+                    className="group w-[224px] shrink-0 cursor-pointer rounded-2xl border border-[#c3c6d7] bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[#004ac6] hover:shadow-md"
+                  >
                     <div className="mb-3 flex items-start justify-between">
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${item.iconBg}`}>
-                        <Icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${item.iconBg || 'bg-[#dbe1ff]'}`}>
+                        <Icon className={`h-3.5 w-3.5 ${item.iconColor || 'text-[#003ea8]'}`} />
                       </div>
-                      <span className="rounded-md bg-[#e7e7f3] px-2 py-1 text-[10px] font-medium text-[#505f76]">{item.badge}</span>
+                      {item.badge && (
+                        <span className="rounded-md bg-[#e7e7f3] px-2 py-1 text-[10px] font-medium text-[#505f76]">{item.badge}</span>
+                      )}
                     </div>
                     <h3 className="mb-1 text-[16px] font-semibold leading-[1.35] text-[#191b23]">{item.title}</h3>
-                    <p className="mb-3 text-xs text-[#505f76]">{item.description}</p>
+                    <p className="mb-3 text-xs text-[#505f76] line-clamp-2">{item.description}</p>
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-medium text-[#505f76]">
                         <span>Tiến độ</span>
@@ -184,8 +110,9 @@ export const VocabularyPage = () => {
           <div className="grid gap-6 lg:grid-cols-3">
             {etsCards.map((item) => (
               <article
-                key={item.title}
-                className={`relative overflow-hidden rounded-2xl p-4 shadow-sm ${item.featured ? 'bg-[#004ac6] text-white' : 'border border-[#c3c6d7] bg-[#ededf9] text-[#191b23]'}`}
+                key={item.id}
+                onClick={() => navigate(`/vocabulary/${item.id}`)}
+                className={`group relative cursor-pointer overflow-hidden rounded-2xl p-4 shadow-sm transition-all hover:shadow-lg ${item.featured ? 'bg-[#004ac6] text-white' : 'border border-[#c3c6d7] bg-[#ededf9] text-[#191b23]'}`}
               >
                 <div className="relative z-10 min-h-[216px]">
                   <h3 className={`mb-2 text-[20px] font-semibold leading-[1.35] ${item.featured ? 'text-white' : 'text-[#191b23]'}`}>{item.title}</h3>
@@ -193,35 +120,35 @@ export const VocabularyPage = () => {
 
                   <div className="mb-6 flex items-center gap-5">
                     <div>
-                      <p className="text-[20px] font-semibold leading-[1.3]">{item.words}</p>
+                      <p className="text-[20px] font-semibold leading-[1.3]">{item.wordCount}+</p>
                       <p className={`text-[10px] uppercase tracking-[0.02em] ${item.featured ? 'text-white/80' : 'text-[#505f76]'}`}>Từ vựng</p>
                     </div>
                     <div className={`h-8 w-px ${item.featured ? 'bg-white/20' : 'bg-[#c3c6d7]'}`} />
                     <div>
-                      <p className="text-[20px] font-semibold leading-[1.3]">{item.sets}</p>
+                      <p className="text-[20px] font-semibold leading-[1.3]">{item.sets || '0'}</p>
                       <p className={`text-[10px] uppercase tracking-[0.02em] ${item.featured ? 'text-white/80' : 'text-[#505f76]'}`}>Bộ đề</p>
                     </div>
                   </div>
 
                   {item.featured ? (
-                    <button className="rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-[#004ac6] transition hover:bg-[#dbe1ff]">
-                      {item.cta}
+                    <button className="rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-[#004ac6] transition group-hover:bg-[#dbe1ff]">
+                      Bắt đầu học ngay
                     </button>
                   ) : (
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs text-[#505f76]">
-                        <span>Đã hoàn thành 30%</span>
+                        <span>Đã hoàn thành {item.progress}%</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-white/60">
-                        <div className="h-full w-[30%] rounded-full bg-[#004ac6]" />
+                        <div className="h-full rounded-full bg-[#004ac6]" style={{ width: `${item.progress}%` }} />
                       </div>
-                      <button className="text-sm font-bold text-[#004ac6] hover:underline">{item.cta}</button>
+                      <button className="text-sm font-bold text-[#004ac6] hover:underline">Tiếp tục học</button>
                     </div>
                   )}
                 </div>
 
                 <div className="absolute right-3 top-1/2 hidden -translate-y-1/2 sm:block">
-                  <BookOpenText className={`h-[112px] w-[112px] ${item.featured ? 'text-white/20' : 'text-[#004ac6]/10'}`} />
+                  <BookOpenText className={`h-[112px] w-[112px] transition-transform group-hover:scale-110 ${item.featured ? 'text-white/20' : 'text-[#004ac6]/10'}`} />
                 </div>
               </article>
             ))}
