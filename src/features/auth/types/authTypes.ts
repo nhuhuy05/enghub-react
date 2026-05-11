@@ -8,6 +8,10 @@ export interface LoginResponse {
   authenticated: boolean;
 }
 
+export interface IntrospectResponse {
+  valid: boolean;
+}
+
 export interface RegisterRequest {
   email: string;
   password: string;

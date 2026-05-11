@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:8080/enghub', // Cập nhật port nếu backend của bạn chạy ở port khác
@@ -21,8 +22,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      useAuthStore.getState().logout();
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

@@ -1,6 +1,11 @@
 import type { ApiResponse, User } from '@/types/apiTypes';
 import apiClient from '@/api/apiClient';
-import type { LoginRequest, LoginResponse, RegisterRequest } from '../types/authTypes';
+import type {
+  IntrospectResponse,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+} from '../types/authTypes';
 
 export const authService = {
   login: async (data: LoginRequest): Promise<ApiResponse<LoginResponse>> => {
@@ -10,6 +15,11 @@ export const authService = {
 
   register: async (data: RegisterRequest): Promise<ApiResponse<User>> => {
     const response = await apiClient.post<ApiResponse<User>>('/users', data);
+    return response.data;
+  },
+
+  introspect: async (token: string): Promise<ApiResponse<IntrospectResponse>> => {
+    const response = await apiClient.post<ApiResponse<IntrospectResponse>>('/auth/introspect', { token });
     return response.data;
   },
 

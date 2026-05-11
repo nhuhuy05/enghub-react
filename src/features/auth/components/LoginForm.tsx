@@ -48,7 +48,14 @@ export const LoginForm: React.FC = () => {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <label className="block text-sm font-medium text-[#434655]" htmlFor="password">Password</label>
-            <a href="#" className="text-sm font-bold text-[#004ac6] hover:underline">Forgot password?</a>
+            <button
+              type="button"
+              className="cursor-not-allowed text-sm font-bold text-[#94a3b8]"
+              disabled
+              title="Password reset is not available yet"
+            >
+              Forgot password?
+            </button>
           </div>
           <input
             id="password"
@@ -96,7 +103,9 @@ export const LoginForm: React.FC = () => {
 
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-3 rounded-lg border border-[#c3c6d7] bg-transparent px-6 py-2.5 text-sm font-medium text-[#191b23] transition-all duration-200 hover:bg-[#ededf9]"
+          className="flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-lg border border-[#c3c6d7] bg-transparent px-6 py-2.5 text-sm font-medium text-[#94a3b8] opacity-70"
+          disabled
+          title="Google sign-in is not available yet"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
