@@ -25,11 +25,11 @@ export const DictationInlineSentence = ({
 
   if (isFullHidden) {
     return (
-      <div className="mt-4 rounded-2xl bg-[#f7f9fc] px-4 py-3">
+      <div className="mt-3 rounded-xl bg-[#f7f9fc] px-3 py-2.5">
         <textarea
           value={fullAnswer}
           onChange={(event) => onFullChange(event.target.value)}
-          className="min-h-[92px] w-full resize-none rounded-xl bg-[#dfe5ee] px-4 py-3 font-mono text-base outline-none transition placeholder:text-[#94a3b8] focus:ring-2 focus:ring-cyan-100"
+          className="min-h-[78px] w-full resize-none rounded-lg bg-[#dfe5ee] px-3 py-2.5 font-mono text-sm outline-none transition placeholder:text-[#94a3b8] focus:ring-2 focus:ring-cyan-100"
           placeholder="Nhập toàn bộ câu nghe được..."
           aria-label="Full dictation answer"
         />
@@ -38,7 +38,7 @@ export const DictationInlineSentence = ({
   }
 
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-2.5 rounded-2xl bg-[#f7f9fc] px-4 py-3 text-base">
+    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-[#f7f9fc] px-3 py-2.5 text-sm">
       {tokens.map(({ token, tokenIndex, wordIndex }) => {
         if (wordIndex === null) {
           return <span key={`${token}-${tokenIndex}`}>{token}</span>;
@@ -67,7 +67,7 @@ export const DictationInlineSentence = ({
               if (nextHiddenIndex === undefined) return;
               inputRefs.current[nextHiddenIndex]?.focus();
             }}
-            className="h-9 max-w-[140px] min-w-[82px] rounded-md bg-white px-2.5 text-center font-mono text-base outline-none transition focus:ring-2 focus:ring-cyan-100"
+            className="h-8 max-w-[124px] min-w-[72px] rounded-md bg-white px-2 text-center font-mono text-sm outline-none transition focus:ring-2 focus:ring-cyan-100"
             placeholder={'•'.repeat(Math.min(8, Math.max(3, token.length)))}
             aria-label={`Word ${currentWordIndex + 1}`}
           />

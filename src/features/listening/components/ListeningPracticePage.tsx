@@ -109,13 +109,13 @@ export const ListeningPracticePage = () => {
 
   return (
     <div className="fixed inset-x-0 bottom-0 top-20 flex flex-col overflow-hidden bg-[#f6f8fb] text-[#0f172a]">
-      <header className="flex h-14 shrink-0 items-center justify-center border-b border-[#dbe3ef] bg-white/90">
-        <div className="rounded-xl bg-[#f1f5f9] p-1">
+      <header className="flex h-12 shrink-0 items-center justify-center border-b border-[#dbe3ef] bg-white/90">
+        <div className="rounded-lg bg-[#f1f5f9] p-0.5">
           {modes.map((item) => (
             <button
               key={item.id}
               onClick={() => setMode(item.id)}
-              className={`rounded-lg px-4 py-1.5 text-sm font-bold transition ${
+              className={`rounded-md px-3 py-1.5 text-xs font-bold transition ${
                 mode === item.id ? 'bg-[#173b68] text-white shadow' : 'text-[#526985] hover:text-[#173b68]'
               }`}
             >
@@ -125,14 +125,14 @@ export const ListeningPracticePage = () => {
         </div>
       </header>
 
-      <div className="mx-auto grid min-h-0 w-full max-w-[1120px] flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="flex h-full min-h-0 flex-col overflow-hidden border-r border-[#dbe3ef] bg-white/70 px-5 py-5">
-          <div className="mb-4">
-            <h1 className="text-lg font-black">{session.title}</h1>
-            <p className="mt-1.5 text-base text-[#526985]">{session.groups.length} bài • {totalSessionSentences} câu</p>
+      <div className="mx-auto grid min-h-0 w-full max-w-[1120px] flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="flex h-full min-h-0 flex-col overflow-hidden border-r border-[#dbe3ef] bg-white/70 px-3.5 py-3.5">
+          <div className="mb-3">
+            <h1 className="truncate text-base font-black">{session.title}</h1>
+            <p className="mt-1 text-sm text-[#526985]">{session.groups.length} bài • {totalSessionSentences} câu</p>
           </div>
 
-          <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain border-t border-[#e5edf6] pt-4 pr-1">
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain border-t border-[#e5edf6] pt-3 pr-1">
             {session.groups.map((group) => {
               const isOpen = group.id === activeGroupId;
               const groupDone = group.sentences.filter((sentence) => sentence.completed).length;
@@ -140,31 +140,31 @@ export const ListeningPracticePage = () => {
                 <div key={group.id}>
                   <button
                     onClick={() => selectSentence(group.id, group.sentences[0].id)}
-                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left transition ${
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition ${
                       isOpen ? 'bg-[#18bd84] text-white' : 'text-[#0f172a] hover:bg-[#eef6fb]'
                     }`}
                   >
-                    <span className="flex items-center gap-2.5 text-base font-black">
-                      <ChevronRight className={`h-4 w-4 transition ${isOpen ? 'rotate-90' : ''}`} />
-                      <Headphones className="h-5 w-5" />
+                    <span className="flex items-center gap-2 text-sm font-black">
+                      <ChevronRight className={`h-3.5 w-3.5 transition ${isOpen ? 'rotate-90' : ''}`} />
+                      <Headphones className="h-4 w-4" />
                       {group.title}
                     </span>
-                    <span className="text-sm font-bold">{isOpen ? completedCount : groupDone}/{group.sentences.length}</span>
+                    <span className="text-xs font-bold">{isOpen ? completedCount : groupDone}/{group.sentences.length}</span>
                   </button>
 
                   {isOpen && (
-                    <div className="ml-5 border-l-2 border-[#dbeafe] py-1 pl-2.5">
+                    <div className="ml-4 border-l-2 border-[#dbeafe] py-1 pl-2">
                       {group.sentences.map((sentence, index) => {
                         const isActive = sentence.id === activeSentenceId;
                         return (
                           <button
                             key={sentence.id}
                             onClick={() => selectSentence(group.id, sentence.id)}
-                            className={`mt-1 flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                            className={`mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs font-semibold transition ${
                               isActive ? 'bg-[#dff1fb] text-[#0ea5e9]' : 'text-[#526985] hover:bg-[#f1f5f9]'
                             }`}
                           >
-                            <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
                               isActive ? 'bg-[#0ea5e9] text-white' : 'bg-white text-[#526985]'
                             }`}>
                               {index + 1}
@@ -181,9 +181,9 @@ export const ListeningPracticePage = () => {
           </div>
         </aside>
 
-        <main className="h-full min-h-0 overflow-y-auto overscroll-contain px-5 py-6 lg:px-5">
+        <main className="h-full min-h-0 overflow-y-auto overscroll-contain px-3 py-3 lg:px-4">
           {mode !== 'full' ? (
-            <section className="max-w-[820px] rounded-2xl border border-[#dbe3ef] bg-white p-5 shadow-sm">
+            <section className="max-w-[820px] rounded-xl border border-[#dbe3ef] bg-white p-3.5 shadow-sm">
               <AudioToolbar
                 current={currentSentenceNumber}
                 total={totalSentencesInGroup}
@@ -194,7 +194,7 @@ export const ListeningPracticePage = () => {
               {mode === 'check' && (
                 <>
                   <HintTabs value={hintLevel} onChange={setHintLevel} />
-                  <div className="mt-4 rounded-2xl bg-[#f7f9fc] px-5 py-4 text-lg">
+                  <div className="mt-3 rounded-xl bg-[#f7f9fc] px-3.5 py-3 text-[15px] leading-6">
                     <SentenceTokens
                       tokens={indexedTokens}
                       hiddenWordIndexes={wordIndexesToHide}
@@ -203,18 +203,18 @@ export const ListeningPracticePage = () => {
                     />
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2.5">
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
                     {revealOptions.map((option) => (
                       <button
                         key={option.label}
                         onClick={() => revealWords(option.value, dictationTargetIndexes)}
-                        className="rounded-xl border border-[#dbe3ef] px-3.5 py-1.5 text-sm font-bold text-[#526985] hover:border-[#0ea5e9] hover:text-[#0ea5e9] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg border border-[#dbe3ef] px-3 py-1.5 text-xs font-bold text-[#526985] hover:border-[#0ea5e9] hover:text-[#0ea5e9] disabled:cursor-not-allowed disabled:opacity-40"
                         disabled={revealedAll}
                       >
                         {option.label}
                       </button>
                     ))}
-                    <button onClick={resetReveal} className="ml-2 flex items-center gap-2 px-2 py-1.5 text-sm font-bold">
+                    <button onClick={resetReveal} className="ml-1 flex items-center gap-1.5 px-2 py-1.5 text-xs font-bold">
                       <RotateCcw className="h-4 w-4" />
                       Reset
                     </button>
@@ -226,8 +226,8 @@ export const ListeningPracticePage = () => {
 
               {mode === 'dictation' && (
                 <>
-                  <div className="mt-5 flex items-center gap-3">
-                    <span className="font-bold text-[#526985]">Ẩn từ:</span>
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="text-sm font-bold text-[#526985]">Ẩn từ:</span>
                     <HintTabs value={hintLevel} onChange={setHintLevel} compact />
                   </div>
                   <DictationInlineSentence
@@ -239,20 +239,20 @@ export const ListeningPracticePage = () => {
                     onChange={(wordIndex, value) => setDictationWordAnswer(activeSentence.id, wordIndex, value)}
                     onFullChange={(value) => setDictationFullAnswer(activeSentence.id, value)}
                   />
-                  <div className="mt-4 flex justify-between text-lg font-semibold text-[#526985]">
+                  <div className="mt-3 flex justify-between text-sm font-semibold text-[#526985]">
                     <span>{dictationCorrectWords} / {dictationTargetIndexes.length} từ đúng</span>
                     <span>{dictationAccuracy}%</span>
                   </div>
-                  <div className="mt-5 rounded-2xl bg-[#f7f9fc] p-4">
+                  <div className="mt-3 rounded-xl bg-[#f7f9fc] p-3">
                     {dictationResultWords.map((word, index) => (
-                      <span key={`${word}-${index}`} className="mr-2 inline-flex rounded-md bg-[#eef2f7] px-3 py-2 font-bold tracking-widest text-[#526985]">
+                      <span key={`${word}-${index}`} className="mr-1.5 inline-flex rounded-md bg-[#eef2f7] px-2.5 py-1.5 text-sm font-bold tracking-widest text-[#526985]">
                         {'•'.repeat(Math.max(2, word.length))}
                       </span>
                     ))}
                   </div>
                   {dictationAccuracy === 100 && (
                     <>
-                      <p className="mt-5 text-lg font-bold text-emerald-600">✓ Độ chính xác: 100%</p>
+                      <p className="mt-3 text-sm font-bold text-emerald-600">✓ Độ chính xác: 100%</p>
                       <AnswerTokens tokens={answerTokens} translation={activeSentence.translation} />
                     </>
                   )}
