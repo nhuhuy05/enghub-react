@@ -12,6 +12,8 @@ import { GrammarPage } from '../features/grammar/components/GrammarPage';
 import { GrammarDetail } from '../features/grammar/components/GrammarDetail';
 import { ExamPage } from '../features/exam/components/ExamPage';
 import { ExamInterface } from '../features/exam/components/ExamInterface';
+import { ListeningPage } from '../features/listening/components/ListeningPage';
+import { ListeningPracticePage } from '../features/listening/components/ListeningPracticePage';
 
 export const AppRoutes = () => {
   return (
@@ -24,6 +26,8 @@ export const AppRoutes = () => {
         <Route path="/grammar" element={<GrammarPage />} />
         <Route path="/grammar/:id" element={<GrammarDetail />} />
         <Route path="/exam" element={<ExamPage />} />
+        <Route path="/listening" element={<ListeningPage />} />
+        <Route path="/listening/:testId/:partId" element={<ListeningPracticePage />} />
       </Route>
 
       <Route path="/exam/take" element={<ExamInterface />} />
