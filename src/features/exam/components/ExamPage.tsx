@@ -8,7 +8,8 @@ import {
   Home, 
   ChevronRight,
   Loader2,
-  Search
+  Search,
+  Trophy
 } from 'lucide-react';
 import { ExamModal } from './ExamModal';
 import { useExams } from '../hooks/useExams';
@@ -46,27 +47,28 @@ export const ExamPage = () => {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-[1200px] px-4 py-10 pb-24 sm:px-6 lg:px-8">
+    <main className="mx-auto min-h-screen max-w-[1200px] px-4 py-6 pb-16 sm:px-6 lg:px-8">
       {/* Hero Section */}
-      <section className="mb-12">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+      <section className="mb-6">
+        <div>
           <div>
-            <h1 className="mb-3 text-[40px] font-black leading-tight tracking-tight text-[#191b23]">Kho đề thi thử</h1>
-            <p className="text-[18px] font-medium text-[#505f76] max-w-2xl">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#004ac6]">
+                <Trophy className="h-5 w-5" />
+              </div>
+              <span className="text-sm font-black uppercase tracking-widest text-[#004ac6]">Kho đề thi thử</span>
+            </div>
+            <p className="max-w-2xl text-[14px] font-medium leading-6 text-[#505f76]">
               Nâng cao kỹ năng với hệ thống đề thi TOEIC chuẩn cấu trúc ETS mới nhất. 
               Tự động chấm điểm và giải thích chi tiết.
             </p>
-          </div>
-          <div className="flex items-center gap-2 rounded-2xl bg-[#eff6ff] px-4 py-2 border border-blue-100">
-            <History className="h-5 w-5 text-[#2563eb]" />
-            <span className="text-sm font-bold text-[#2563eb]">Lịch sử làm bài</span>
           </div>
         </div>
       </section>
 
       {/* Filter & Search Bar */}
-      <section className="mb-8 space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <section className="mb-6 space-y-4">
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <nav className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {tabs.map((tab) => (
               <button
@@ -92,7 +94,7 @@ export const ExamPage = () => {
           <p className="font-bold text-[#505f76]">Đang tải danh sách đề thi...</p>
         </div>
       ) : filteredExams.length > 0 ? (
-        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {filteredExams.map((exam) => (
             <article 
               key={exam.id} 
@@ -104,22 +106,18 @@ export const ExamPage = () => {
                 </div>
               )}
               
-              <div className="mb-4">
-                <div className="mb-3 flex items-center justify-between">
+              <div className="mb-3">
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-[20px] font-bold leading-tight text-[#191b23] transition-colors line-clamp-2 group-hover:text-[#004ac6]">
+                    {exam.title}
+                  </h2>
                   <span className="rounded-lg bg-blue-50 px-3 py-1 text-[11px] font-bold text-[#004ac6]">
                     {exam.tab}
                   </span>
-                  <div className="flex items-center gap-1.5 text-[#94a3b8]">
-                    <User className="h-3.5 w-3.5" />
-                    <span className="text-[11px] font-bold">{exam.learnersCount}</span>
-                  </div>
                 </div>
-                <h2 className="text-[20px] font-bold leading-tight text-[#191b23] group-hover:text-[#004ac6] transition-colors line-clamp-2">
-                  {exam.title}
-                </h2>
               </div>
 
-              <div className="mb-6 flex items-center gap-4 text-[#64748b]">
+              <div className="mb-5 flex items-center gap-4 text-[#64748b]">
                 <div className="flex items-center gap-1.5">
                   <BookText className="h-4 w-4 text-blue-400" />
                   <span className="text-xs font-bold">{exam.totalQuestions} câu</span>
@@ -130,7 +128,7 @@ export const ExamPage = () => {
                 </div>
               </div>
 
-              <div className="mt-auto space-y-4">
+              <div className="mt-auto space-y-3">
                 <div>
                   <div className="mb-2 flex items-center justify-between text-[11px] font-black uppercase tracking-wider">
                     <span className="text-[#94a3b8]">Trạng thái</span>
@@ -148,7 +146,7 @@ export const ExamPage = () => {
 
                 <button
                   onClick={() => setSelectedExam(exam)}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#004ac6] py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-[#003896] hover:shadow-blue-300 active:scale-95"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#004ac6] bg-white py-3 text-sm font-bold text-[#004ac6] transition-all hover:bg-blue-50 active:scale-95"
                 >
                   Luyện tập ngay
                   <ChevronRight className="h-4 w-4" />

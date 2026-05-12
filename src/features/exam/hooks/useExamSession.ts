@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { ExamDetail, Part, Question } from '../types';
+import type { ExamDetail } from '../types';
 import { examService } from '../services/examService';
 
 export const useExamSession = (examId: string) => {
@@ -11,6 +11,7 @@ export const useExamSession = (examId: string) => {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [markedForReview, setMarkedForReview] = useState<Record<number, boolean>>({});
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -43,6 +44,33 @@ export const useExamSession = (examId: string) => {
 
   const answeredCount = Object.keys(selectedAnswers).length;
 
+  const answerKey = useMemo(() => {
+    if (!exam) return {};
+
+    return exam.parts.reduce<Record<number, string>>((acc, part) => {
+      part.questions.forEach((question) => {
+        if (question.subQuestions) {
+          question.subQuestions.forEach((subQuestion) => {
+            acc[subQuestion.id] = subQuestion.correctAnswer;
+          });
+          return;
+        }
+
+        if (question.correctAnswer) {
+          acc[question.id] = question.correctAnswer;
+        }
+      });
+
+      return acc;
+    }, {});
+  }, [exam]);
+
+  const correctCount = useMemo(() => {
+    return Object.entries(answerKey).reduce((count, [questionId, correctAnswer]) => {
+      return count + (selectedAnswers[Number(questionId)] === correctAnswer ? 1 : 0);
+    }, 0);
+  }, [answerKey, selectedAnswers]);
+
   const handleNext = () => {
     if (!exam || !currentPart) return;
     if (currentQuestionIndex < currentPart.questions.length - 1) {
@@ -71,6 +99,7 @@ export const useExamSession = (examId: string) => {
   };
 
   const setAnswer = (questionId: number, answer: string) => {
+    if (isSubmitted) return;
     setSelectedAnswers(prev => ({ ...prev, [questionId]: answer }));
   };
 
@@ -79,6 +108,7 @@ export const useExamSession = (examId: string) => {
   };
 
   const togglePalette = () => setIsPaletteOpen(prev => !prev);
+  const submitExam = () => setIsSubmitted(true);
 
   return {
     exam,
@@ -92,13 +122,16 @@ export const useExamSession = (examId: string) => {
     markedForReview,
     totalQuestionsCount,
     answeredCount,
+    correctCount,
     isPaletteOpen,
+    isSubmitted,
     handleNext,
     handlePrev,
     jumpToQuestion,
     setAnswer,
     toggleReview,
     togglePalette,
+    submitExam,
     isFirst: currentPartIndex === 0 && currentQuestionIndex === 0,
     isLast: exam ? (currentPartIndex === exam.parts.length - 1 && currentQuestionIndex === (exam.parts[currentPartIndex]?.questions.length - 1)) : false
   };

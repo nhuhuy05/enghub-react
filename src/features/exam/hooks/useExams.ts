@@ -13,7 +13,7 @@ export const useExams = () => {
         setIsLoading(true);
         const data = await examService.getExams();
         setExams(data);
-      } catch (err) {
+      } catch {
         setError('Không thể tải danh sách đề thi. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);

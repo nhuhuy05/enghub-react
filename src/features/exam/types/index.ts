@@ -16,6 +16,8 @@ export interface SubQuestion {
   id: number;
   text: string;
   options: string[];
+  correctAnswer: string;
+  explanation: string;
 }
 
 export interface Stimulus {
@@ -32,6 +34,8 @@ export interface Question {
   text?: string;
   instruction?: string;
   options?: string[];
+  correctAnswer?: string;
+  explanation?: string;
   content?: {
     passage?: string;
     stimuli?: Stimulus[];

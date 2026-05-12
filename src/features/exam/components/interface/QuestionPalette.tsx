@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, CheckCircle2, Flag, Circle } from 'lucide-react';
+import { X, Flag } from 'lucide-react';
 import type { ExamDetail } from '../../types';
 
 interface QuestionPaletteProps {

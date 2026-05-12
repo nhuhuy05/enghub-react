@@ -108,7 +108,7 @@ export const ListeningPracticePage = () => {
   const totalSessionSentences = session.groups.reduce((total, group) => total + group.sentences.length, 0);
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-20 flex flex-col overflow-hidden bg-[#f6f8fb] text-[#0f172a]">
+    <div className="fixed inset-x-0 bottom-0 top-16 flex flex-col overflow-hidden bg-[#f6f8fb] text-[#0f172a]">
       <header className="flex h-12 shrink-0 items-center justify-center border-b border-[#dbe3ef] bg-white/90">
         <div className="rounded-lg bg-[#f1f5f9] p-0.5">
           {modes.map((item) => (

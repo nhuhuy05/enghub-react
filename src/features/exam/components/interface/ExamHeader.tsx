@@ -8,6 +8,9 @@ interface ExamHeaderProps {
   answeredCount: number;
   timeLeft: number;
   onBack: () => void;
+  onSubmit: () => void;
+  isSubmitted: boolean;
+  showSubmit?: boolean;
 }
 
 export const ExamHeader: React.FC<ExamHeaderProps> = ({ 
@@ -16,7 +19,10 @@ export const ExamHeader: React.FC<ExamHeaderProps> = ({
   totalQuestions, 
   answeredCount, 
   timeLeft,
-  onBack
+  onBack,
+  onSubmit,
+  isSubmitted,
+  showSubmit = true,
 }) => {
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -61,9 +67,16 @@ export const ExamHeader: React.FC<ExamHeaderProps> = ({
           </span>
         </div>
 
-        <button className="rounded-md bg-[#f29d38] px-6 py-2 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#e08b2a] active:scale-95">
-          Submit
-        </button>
+        {showSubmit && (
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={isSubmitted}
+            className="rounded-md bg-[#f29d38] px-6 py-2 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#e08b2a] active:scale-95 disabled:cursor-default disabled:opacity-60"
+          >
+            {isSubmitted ? 'Submitted' : 'Submit'}
+          </button>
+        )}
       </div>
     </header>
   );

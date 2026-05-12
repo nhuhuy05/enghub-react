@@ -25,12 +25,16 @@ const mockExamDetail: ExamDetail = {
           type: 'picture',
           image: 'https://images.unsplash.com/photo-1600880212319-78443973dd11?q=80&w=2070&auto=format&fit=crop',
           options: ['(A)', '(B)', '(C)', '(D)'],
+          correctAnswer: '(B)',
+          explanation: 'Option (B) best describes the main action shown in the picture.',
         },
         {
           id: 2,
           type: 'picture',
           image: 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=2069&auto=format&fit=crop',
           options: ['(A)', '(B)', '(C)', '(D)'],
+          correctAnswer: '(C)',
+          explanation: 'Option (C) matches the visible workplace situation most closely.',
         }
       ]
     },
@@ -39,9 +43,9 @@ const mockExamDetail: ExamDetail = {
       name: 'Part 2',
       instruction: 'Select the best response to the question.',
       questions: [
-        { id: 7, type: 'audio_only', options: ['(A)', '(B)', '(C)'] },
-        { id: 8, type: 'audio_only', options: ['(A)', '(B)', '(C)'] },
-        { id: 9, type: 'audio_only', options: ['(A)', '(B)', '(C)'] }
+        { id: 7, type: 'audio_only', options: ['(A)', '(B)', '(C)'], correctAnswer: '(A)', explanation: 'Response (A) is the most natural answer to the question.' },
+        { id: 8, type: 'audio_only', options: ['(A)', '(B)', '(C)'], correctAnswer: '(B)', explanation: 'Response (B) directly answers the speaker.' },
+        { id: 9, type: 'audio_only', options: ['(A)', '(B)', '(C)'], correctAnswer: '(C)', explanation: 'Response (C) fits the context of the prompt.' }
       ]
     },
     {
@@ -53,9 +57,9 @@ const mockExamDetail: ExamDetail = {
           id: 32,
           type: 'audio_group',
           subQuestions: [
-            { id: 32, text: 'Where most likely are the speakers?', options: ['(A) In a bank', '(B) In a restaurant', '(C) In a hotel', '(D) In a retail store'] },
-            { id: 33, text: 'What does the woman want to do?', options: ['(A) Open an account', '(B) Book a room', '(C) Return an item', '(D) Order some food'] },
-            { id: 34, text: 'What will the man do next?', options: ['(A) Check a computer', '(B) Call a manager', '(C) Provide a discount', '(D) Give a refund'] }
+            { id: 32, text: 'Where most likely are the speakers?', options: ['(A) In a bank', '(B) In a restaurant', '(C) In a hotel', '(D) In a retail store'], correctAnswer: '(D) In a retail store', explanation: 'The conversation context points to a customer service situation in a store.' },
+            { id: 33, text: 'What does the woman want to do?', options: ['(A) Open an account', '(B) Book a room', '(C) Return an item', '(D) Order some food'], correctAnswer: '(C) Return an item', explanation: 'The woman is asking for help with an item she purchased.' },
+            { id: 34, text: 'What will the man do next?', options: ['(A) Check a computer', '(B) Call a manager', '(C) Provide a discount', '(D) Give a refund'], correctAnswer: '(A) Check a computer', explanation: 'The man needs to verify the purchase information first.' }
           ]
         }
       ]
@@ -69,9 +73,9 @@ const mockExamDetail: ExamDetail = {
           id: 71,
           type: 'audio_group',
           subQuestions: [
-            { id: 71, text: 'Who is the speaker most likely?', options: ['(A) A tour guide', '(B) A pilot', '(C) A flight attendant', '(D) A hotel manager'] },
-            { id: 72, text: 'What is the purpose of the talk?', options: ['(A) To give safety instructions', '(B) To announce a delay', '(C) To describe a tourist site', '(D) To welcome new employees'] },
-            { id: 73, text: 'According to the speaker, what will happen at 2:00 P.M.?', options: ['(A) The plane will land', '(B) The bus will depart', '(C) The meeting will start', '(D) The museum will open'] }
+            { id: 71, text: 'Who is the speaker most likely?', options: ['(A) A tour guide', '(B) A pilot', '(C) A flight attendant', '(D) A hotel manager'], correctAnswer: '(A) A tour guide', explanation: 'The speaker is likely giving information to visitors.' },
+            { id: 72, text: 'What is the purpose of the talk?', options: ['(A) To give safety instructions', '(B) To announce a delay', '(C) To describe a tourist site', '(D) To welcome new employees'], correctAnswer: '(C) To describe a tourist site', explanation: 'The talk focuses on describing a place or visit.' },
+            { id: 73, text: 'According to the speaker, what will happen at 2:00 P.M.?', options: ['(A) The plane will land', '(B) The bus will depart', '(C) The meeting will start', '(D) The museum will open'], correctAnswer: '(B) The bus will depart', explanation: 'The time reference is connected with a scheduled departure.' }
           ]
         }
       ]
@@ -85,13 +89,17 @@ const mockExamDetail: ExamDetail = {
           id: 101,
           type: 'text_only',
           text: 'The new software update is expected to improve the system\'s _______ significantly.',
-          options: ['(A) perform', '(B) performance', '(C) performed', '(D) performing']
+          options: ['(A) perform', '(B) performance', '(C) performed', '(D) performing'],
+          correctAnswer: '(B) performance',
+          explanation: 'A noun is needed after the possessive "system\'s", so "performance" is correct.'
         },
         {
           id: 102,
           type: 'text_only',
           text: 'Ms. Sato was _______ to hear that the project had been approved ahead of schedule.',
-          options: ['(A) delight', '(B) delightful', '(C) delighted', '(D) delighting']
+          options: ['(A) delight', '(B) delightful', '(C) delighted', '(D) delighting'],
+          correctAnswer: '(C) delighted',
+          explanation: '"Delighted" is the adjective used to describe how Ms. Sato felt.'
         }
       ]
     },
@@ -113,9 +121,9 @@ const mockExamDetail: ExamDetail = {
             ]
           },
           subQuestions: [
-            { id: 131, text: 'Question 131', options: ['(A) However', '(B) Furthermore', '(C) Therefore', '(D) Instead'] },
-            { id: 132, text: 'Question 132', options: ['(A) inconvenient', '(B) inconvenience', '(C) inconvenienced', '(D) inconveniently'] },
-            { id: 133, text: 'Question 133', options: ['(A) reliable', '(B) reliability', '(C) reliably', '(D) relied'] }
+            { id: 131, text: 'Question 131', options: ['(A) However', '(B) Furthermore', '(C) Therefore', '(D) Instead'], correctAnswer: '(C) Therefore', explanation: 'The sentence gives a result of the elevators being out of service.' },
+            { id: 132, text: 'Question 132', options: ['(A) inconvenient', '(B) inconvenience', '(C) inconvenienced', '(D) inconveniently'], correctAnswer: '(B) inconvenience', explanation: 'A noun is needed after "some".' },
+            { id: 133, text: 'Question 133', options: ['(A) reliable', '(B) reliability', '(C) reliably', '(D) relied'], correctAnswer: '(B) reliability', explanation: 'The noun "reliability" fits after "ensure the".' }
           ]
         }
       ]
@@ -138,8 +146,8 @@ const mockExamDetail: ExamDetail = {
             ]
           },
           subQuestions: [
-            { id: 147, text: 'What is being advertised?', options: ['(A) A new mobile app', '(B) A job opening', '(C) A tech conference', '(D) A software update'] },
-            { id: 148, text: 'How can candidates apply?', options: ['(A) By calling the office', '(B) By visiting a website', '(C) By sending a resume via mail', '(D) By attending an open house'] }
+            { id: 147, text: 'What is being advertised?', options: ['(A) A new mobile app', '(B) A job opening', '(C) A tech conference', '(D) A software update'], correctAnswer: '(B) A job opening', explanation: 'The advertisement says Green Valley Tech is seeking a Senior Developer.' },
+            { id: 148, text: 'How can candidates apply?', options: ['(A) By calling the office', '(B) By visiting a website', '(C) By sending a resume via mail', '(D) By attending an open house'], correctAnswer: '(B) By visiting a website', explanation: 'The passage tells candidates to apply online at the careers website.' }
           ]
         },
         {
@@ -165,9 +173,9 @@ const mockExamDetail: ExamDetail = {
             ]
           },
           subQuestions: [
-            { id: 176, text: 'What is the purpose of the notice?', options: ['(A) To announce a new store opening', '(B) To inform customers about a sale', '(C) To recruit new staff', '(D) To apologize for a service delay'] },
-            { id: 177, text: 'When did Sarah Jenkins write the email?', options: ['(A) Monday', '(B) Tuesday', '(C) Wednesday', '(D) Friday'] },
-            { id: 178, text: 'According to the stimuli, what is true about the sale?', options: ['(A) It applies to all items', '(B) It starts on Tuesday', '(C) It can be used with other coupons', '(D) It lasts for one month'] }
+            { id: 176, text: 'What is the purpose of the notice?', options: ['(A) To announce a new store opening', '(B) To inform customers about a sale', '(C) To recruit new staff', '(D) To apologize for a service delay'], correctAnswer: '(B) To inform customers about a sale', explanation: 'The notice announces an upcoming seasonal sale.' },
+            { id: 177, text: 'When did Sarah Jenkins write the email?', options: ['(A) Monday', '(B) Tuesday', '(C) Wednesday', '(D) Friday'], correctAnswer: '(B) Tuesday', explanation: 'The email header shows the date as Tuesday.' },
+            { id: 178, text: 'According to the stimuli, what is true about the sale?', options: ['(A) It applies to all items', '(B) It starts on Tuesday', '(C) It can be used with other coupons', '(D) It lasts for one month'], correctAnswer: '(A) It applies to all items', explanation: 'The notice says all items in the store will be discounted by 20%.' }
           ]
         }
       ]

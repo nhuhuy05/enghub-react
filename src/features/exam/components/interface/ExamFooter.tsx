@@ -47,7 +47,7 @@ export const ExamFooter: React.FC<ExamFooterProps> = ({
         <div className="flex items-center gap-2 bg-[#f0f2f5] p-1 rounded-xl">
           <button 
             onClick={onPrev}
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-gray-500 border border-gray-200 shadow-sm transition-all hover:bg-gray-50 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#004ac6] text-white shadow-lg shadow-blue-200 transition-all hover:bg-[#003896] active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
             disabled={isFirst}
           >
             <ChevronLeft className="h-5 w-5" />

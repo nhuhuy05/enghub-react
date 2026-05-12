@@ -1,6 +1,6 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import { useExamSession } from '../hooks/useExamSession';
 import { ExamHeader } from './interface/ExamHeader';
 import { ExamFooter } from './interface/ExamFooter';
@@ -11,6 +11,8 @@ import { QuestionPalette } from './interface/QuestionPalette';
 export const ExamInterface: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode') === 'practice' ? 'practice' : 'exam';
   const {
     exam,
     isLoading,
@@ -21,14 +23,18 @@ export const ExamInterface: React.FC = () => {
     timeLeft,
     selectedAnswers,
     markedForReview,
+    totalQuestionsCount,
     answeredCount,
+    correctCount,
     isPaletteOpen,
+    isSubmitted,
     handleNext,
     handlePrev,
     jumpToQuestion,
     setAnswer,
     toggleReview,
     togglePalette,
+    submitExam,
     isFirst,
     isLast
   } = useExamSession(id || '1');
@@ -47,13 +53,22 @@ export const ExamInterface: React.FC = () => {
       <ExamHeader 
         partName={currentPart.name}
         currentQuestionId={currentQuestion.id}
-        totalQuestions={200}
+        totalQuestions={totalQuestionsCount}
         answeredCount={answeredCount}
         timeLeft={timeLeft}
         onBack={() => navigate('/exam')}
+        onSubmit={submitExam}
+        isSubmitted={isSubmitted}
+        showSubmit={mode === 'exam'}
       />
 
       <main className="flex flex-1 overflow-hidden p-4 gap-4">
+        {mode === 'exam' && isSubmitted && (
+          <div className="absolute left-1/2 top-20 z-20 flex -translate-x-1/2 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 shadow-sm">
+            <CheckCircle2 className="h-4 w-4" />
+            Đúng {correctCount}/{totalQuestionsCount} câu
+          </div>
+        )}
         <LeftPanel 
           instruction={currentPart.instruction}
           question={currentQuestion}
@@ -62,6 +77,7 @@ export const ExamInterface: React.FC = () => {
           question={currentQuestion}
           selectedAnswers={selectedAnswers}
           onSelectAnswer={setAnswer}
+          shouldShowFeedback={mode === 'practice'}
         />
       </main>
 

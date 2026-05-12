@@ -21,9 +21,10 @@ export const TopMenu = () => {
 
   return (
     <header className="fixed left-0 top-0 z-50 w-full border-b border-[#d8dced] bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/dashboard" className="text-3xl font-extrabold tracking-tight text-[#004ac6]">
-          EngHub
+      <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link to="/dashboard" className="text-3xl font-extrabold tracking-tight" aria-label="EngHub dashboard">
+          <span className="text-[#004ac6]">Eng</span>
+          <span className="text-[#18bd84]">Hub</span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

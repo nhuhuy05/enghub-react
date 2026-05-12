@@ -56,7 +56,7 @@ export const ReadingPracticePage = () => {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-20 flex flex-col overflow-hidden bg-[#f6f8fb] text-[#0f172a]">
+    <div className="fixed inset-x-0 bottom-0 top-16 flex flex-col overflow-hidden bg-[#f6f8fb] text-[#0f172a]">
       <header className="flex h-12 shrink-0 items-center border-b border-[#dbe3ef] bg-white/95 px-4 lg:px-6">
         <button
           type="button"

@@ -20,10 +20,12 @@ export const ExamInterface: React.FC = () => {
     markedForReview,
     totalQuestionsCount,
     answeredCount,
+    isSubmitted,
     handleNext,
     handlePrev,
     setAnswer,
     toggleReview,
+    submitExam,
     isFirst,
     isLast
   } = useExamSession(id || '1');
@@ -42,9 +44,12 @@ export const ExamInterface: React.FC = () => {
       <ExamHeader 
         partName={currentPart.name}
         currentQuestionId={currentQuestion.id}
-        totalQuestions={200}
+        totalQuestions={totalQuestionsCount}
         answeredCount={answeredCount}
         timeLeft={timeLeft}
+        onBack={() => navigate('/exam')}
+        onSubmit={submitExam}
+        isSubmitted={isSubmitted}
       />
 
       <main className="flex flex-1 overflow-hidden p-4 gap-4">
@@ -56,6 +61,7 @@ export const ExamInterface: React.FC = () => {
           question={currentQuestion}
           selectedAnswers={selectedAnswers}
           onSelectAnswer={setAnswer}
+          shouldShowFeedback={false}
         />
       </main>
 
@@ -66,6 +72,7 @@ export const ExamInterface: React.FC = () => {
         onNext={handleNext}
         isFirst={isFirst}
         isLast={isLast}
+        onTogglePalette={() => undefined}
       />
     </div>
   );

@@ -33,6 +33,10 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, examTitle
     }
   };
 
+  const startExam = () => {
+    navigate(`/exam/take?mode=${activeMode}`);
+  };
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm transition-all duration-300">
       <div className="w-full max-w-[500px] max-h-[90vh] overflow-hidden flex flex-col rounded-3xl bg-white shadow-2xl transition-all duration-300 transform scale-100">
@@ -113,7 +117,7 @@ export const ExamModal: React.FC<ExamModalProps> = ({ isOpen, onClose, examTitle
                 </h3>
               </div>
               <button 
-                onClick={() => navigate('/exam/take')}
+                onClick={startExam}
                 className="rounded-lg bg-[#004ac6] px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-[#003896] active:scale-95"
               >
                 Bắt đầu
