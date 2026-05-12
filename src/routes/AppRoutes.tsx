@@ -16,6 +16,7 @@ import { ListeningPage } from '../features/listening/components/ListeningPage';
 import { ListeningPracticePage } from '../features/listening/components/ListeningPracticePage';
 import { ReadingPage } from '../features/reading/components/ReadingPage';
 import { ReadingPracticePage } from '../features/reading/components/ReadingPracticePage';
+import { ProfilePage } from '../features/profile/components/ProfilePage';
 
 export const AppRoutes = () => {
   return (
@@ -32,6 +33,7 @@ export const AppRoutes = () => {
         <Route path="/listening/:testId/:partId" element={<ListeningPracticePage />} />
         <Route path="/reading" element={<ReadingPage />} />
         <Route path="/reading/:passageId" element={<ReadingPracticePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
       <Route path="/exam/take" element={<ExamInterface />} />
