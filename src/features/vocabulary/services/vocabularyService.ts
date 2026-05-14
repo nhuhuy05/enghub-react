@@ -1,79 +1,262 @@
-import apiClient from '@/api/apiClient';
-import type { VocabularyTopic, VocabularyDetailData } from '../types';
+import type { VocabularyDetailData, VocabularyTopic, Word } from '../types';
+
+const businessWords: Word[] = [
+  {
+    id: 'business-1',
+    term: 'Agile',
+    phonetic: '/ˈædʒ.aɪl/',
+    definition: 'Nhanh nhẹn, linh hoạt.',
+    example: 'The company is moving towards a more agile way of working.',
+    exampleTranslation: 'Công ty đang hướng tới cách làm việc linh hoạt hơn.',
+    partOfSpeech: 'adj',
+    collocations: ['agile team', 'agile approach'],
+    synonyms: ['flexible', 'adaptable'],
+  },
+  {
+    id: 'business-2',
+    term: 'Backlog',
+    phonetic: '/ˈbæk.lɑːɡ/',
+    definition: 'Lượng công việc tồn đọng.',
+    example: 'We have a huge backlog of orders to process.',
+    exampleTranslation: 'Chúng tôi có lượng đơn hàng tồn đọng lớn cần xử lý.',
+    partOfSpeech: 'n',
+    collocations: ['clear a backlog', 'order backlog'],
+  },
+  {
+    id: 'business-3',
+    term: 'Allocate',
+    phonetic: '/ˈæl.ə.keɪt/',
+    definition: 'Phân bổ, cấp phát nguồn lực.',
+    example: 'The manager allocated more staff to the project.',
+    exampleTranslation: 'Quản lý đã phân bổ thêm nhân sự cho dự án.',
+    partOfSpeech: 'v',
+    collocations: ['allocate resources', 'allocate budget'],
+  },
+  {
+    id: 'business-4',
+    term: 'Revenue',
+    phonetic: '/ˈrev.ən.juː/',
+    definition: 'Doanh thu.',
+    example: 'The new product increased annual revenue significantly.',
+    exampleTranslation: 'Sản phẩm mới đã tăng doanh thu hằng năm đáng kể.',
+    partOfSpeech: 'n',
+    collocations: ['annual revenue', 'revenue growth'],
+  },
+  {
+    id: 'business-5',
+    term: 'Procurement',
+    phonetic: '/prəˈkjʊr.mənt/',
+    definition: 'Hoạt động mua sắm, thu mua.',
+    example: 'The procurement team negotiated a better price.',
+    exampleTranslation: 'Đội thu mua đã thương lượng được mức giá tốt hơn.',
+    partOfSpeech: 'n',
+    collocations: ['procurement process', 'procurement team'],
+  },
+  {
+    id: 'business-6',
+    term: 'Forecast',
+    phonetic: '/ˈfɔːr.kæst/',
+    definition: 'Dự báo.',
+    example: 'Sales are forecast to rise next quarter.',
+    exampleTranslation: 'Doanh số được dự báo sẽ tăng vào quý tới.',
+    partOfSpeech: 'n/v',
+    collocations: ['sales forecast', 'forecast demand'],
+  },
+];
+
+const travelWords: Word[] = [
+  {
+    id: 'travel-1',
+    term: 'Itinerary',
+    phonetic: '/aɪˈtɪn.ə.rer.i/',
+    definition: 'Lịch trình chuyến đi.',
+    example: 'The itinerary includes a city tour and a client visit.',
+    exampleTranslation: 'Lịch trình gồm một chuyến tham quan thành phố và một buổi thăm khách hàng.',
+    partOfSpeech: 'n',
+    collocations: ['travel itinerary', 'detailed itinerary'],
+  },
+  {
+    id: 'travel-2',
+    term: 'Reservation',
+    phonetic: '/ˌrez.ɚˈveɪ.ʃən/',
+    definition: 'Việc đặt chỗ.',
+    example: 'Please confirm your hotel reservation by Friday.',
+    exampleTranslation: 'Vui lòng xác nhận đặt phòng khách sạn trước thứ Sáu.',
+    partOfSpeech: 'n',
+    collocations: ['make a reservation', 'confirm a reservation'],
+  },
+  {
+    id: 'travel-3',
+    term: 'Departure',
+    phonetic: '/dɪˈpɑːr.tʃɚ/',
+    definition: 'Sự khởi hành.',
+    example: 'The departure time has been changed to 8:30.',
+    exampleTranslation: 'Giờ khởi hành đã được đổi sang 8:30.',
+    partOfSpeech: 'n',
+    collocations: ['departure time', 'departure gate'],
+  },
+  {
+    id: 'travel-4',
+    term: 'Accommodation',
+    phonetic: '/əˌkɑː.məˈdeɪ.ʃən/',
+    definition: 'Nơi ở, chỗ lưu trú.',
+    example: 'Accommodation will be provided near the conference venue.',
+    exampleTranslation: 'Chỗ lưu trú sẽ được bố trí gần địa điểm hội nghị.',
+    partOfSpeech: 'n',
+    collocations: ['book accommodation', 'provide accommodation'],
+  },
+  {
+    id: 'travel-5',
+    term: 'Reimburse',
+    phonetic: '/ˌriː.ɪmˈbɝːs/',
+    definition: 'Hoàn trả chi phí.',
+    example: 'The company will reimburse all travel expenses.',
+    exampleTranslation: 'Công ty sẽ hoàn trả toàn bộ chi phí đi lại.',
+    partOfSpeech: 'v',
+    collocations: ['reimburse expenses', 'fully reimburse'],
+  },
+];
+
+const etsWords: Word[] = [
+  {
+    id: 'ets-1',
+    term: 'Renovation',
+    phonetic: '/ˌren.əˈveɪ.ʃən/',
+    definition: 'Sự cải tạo, nâng cấp.',
+    example: 'The lobby will be closed during the renovation.',
+    exampleTranslation: 'Sảnh sẽ đóng cửa trong thời gian cải tạo.',
+    partOfSpeech: 'n',
+    collocations: ['office renovation', 'renovation work'],
+  },
+  {
+    id: 'ets-2',
+    term: 'Complimentary',
+    phonetic: '/ˌkɑːm.pləˈmen.t̬ɚ.i/',
+    definition: 'Miễn phí, được tặng kèm.',
+    example: 'Guests receive a complimentary breakfast.',
+    exampleTranslation: 'Khách được nhận bữa sáng miễn phí.',
+    partOfSpeech: 'adj',
+    collocations: ['complimentary breakfast', 'complimentary ticket'],
+  },
+  {
+    id: 'ets-3',
+    term: 'Inventory',
+    phonetic: '/ˈɪn.vən.tɔːr.i/',
+    definition: 'Hàng tồn kho, bản kiểm kê.',
+    example: 'The store will conduct an inventory check this weekend.',
+    exampleTranslation: 'Cửa hàng sẽ kiểm kê hàng tồn kho vào cuối tuần này.',
+    partOfSpeech: 'n',
+    collocations: ['inventory check', 'inventory control'],
+  },
+  {
+    id: 'ets-4',
+    term: 'Mandatory',
+    phonetic: '/ˈmæn.də.tɔːr.i/',
+    definition: 'Bắt buộc.',
+    example: 'Attendance at the safety training is mandatory.',
+    exampleTranslation: 'Việc tham dự khóa đào tạo an toàn là bắt buộc.',
+    partOfSpeech: 'adj',
+    collocations: ['mandatory training', 'mandatory meeting'],
+  },
+  {
+    id: 'ets-5',
+    term: 'Venue',
+    phonetic: '/ˈven.juː/',
+    definition: 'Địa điểm tổ chức.',
+    example: 'The conference venue is close to the station.',
+    exampleTranslation: 'Địa điểm hội nghị gần nhà ga.',
+    partOfSpeech: 'n',
+    collocations: ['conference venue', 'event venue'],
+  },
+  {
+    id: 'ets-6',
+    term: 'Enclosed',
+    phonetic: '/ɪnˈkloʊzd/',
+    definition: 'Được đính kèm, được gửi kèm.',
+    example: 'Please review the enclosed invoice.',
+    exampleTranslation: 'Vui lòng xem hóa đơn được đính kèm.',
+    partOfSpeech: 'adj',
+    collocations: ['enclosed document', 'enclosed invoice'],
+  },
+  {
+    id: 'ets-7',
+    term: 'Postpone',
+    phonetic: '/poʊstˈpoʊn/',
+    definition: 'Hoãn lại.',
+    example: 'The meeting was postponed until next Monday.',
+    exampleTranslation: 'Cuộc họp đã được hoãn đến thứ Hai tuần sau.',
+    partOfSpeech: 'v',
+    collocations: ['postpone a meeting', 'postpone an event'],
+  },
+];
+
+const collections: VocabularyDetailData[] = [
+  {
+    id: 'business',
+    title: 'Business',
+    category: 'Chủ đề phổ biến',
+    collectionType: 'topic',
+    description: 'Từ vựng thường gặp trong email, cuộc họp, dự án và vận hành doanh nghiệp.',
+    progress: 65,
+    wordCount: businessWords.length,
+    badge: 'Mới',
+    isNew: true,
+    level: 'Intermediate',
+    words: businessWords,
+  },
+  {
+    id: 'travel',
+    title: 'Travel',
+    category: 'Chủ đề phổ biến',
+    collectionType: 'topic',
+    description: 'Từ vựng du lịch công tác, đặt phòng, lịch trình và hoàn phí.',
+    progress: 40,
+    wordCount: travelWords.length,
+    level: 'Core',
+    words: travelWords,
+  },
+  {
+    id: 'ets-2024-series',
+    title: 'ETS 2024 Series',
+    category: 'Theo bộ đề ETS',
+    collectionType: 'exam_set',
+    description: 'Nhóm từ xuất hiện nhiều trong các đề ETS: thông báo, email, lịch trình, hóa đơn.',
+    progress: 18,
+    wordCount: etsWords.length,
+    featured: true,
+    sets: '10',
+    level: 'Advanced',
+    words: etsWords,
+  },
+];
+
+const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 export const vocabularyService = {
   getTopics: async (): Promise<VocabularyTopic[]> => {
-    // Mocking API call for now to keep the interface consistent
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            id: '1',
-            title: 'Business',
-            category: 'Chủ đề phổ biến',
-            description: '500 từ vựng chuyên ngành tài chính, kinh doanh.',
-            progress: 65,
-            wordCount: 500,
-            badge: 'Mới',
-            isNew: true,
-          },
-          {
-            id: '2',
-            title: 'Travel',
-            category: 'Chủ đề phổ biến',
-            description: '320 từ vựng du lịch, đặt phòng, di chuyển.',
-            progress: 40,
-            wordCount: 320,
-          },
-          {
-            id: '3',
-            title: 'ETS 2024 Series',
-            category: 'Theo bộ đề ETS',
-            description: 'Trọn bộ từ vựng xuất hiện trong 10 đề thi thật mới nhất của ETS 2024.',
-            progress: 0,
-            wordCount: 850,
-            featured: true,
-            sets: '10',
-          },
-        ]);
-      }, 500);
-    });
+    await delay(350);
+    return collections.map((item) => ({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      collectionType: item.collectionType,
+      description: item.description,
+      progress: item.progress,
+      wordCount: item.wordCount,
+      badge: item.badge,
+      isNew: item.isNew,
+      featured: item.featured,
+      sets: item.sets,
+      level: item.level,
+    }));
   },
 
   getTopicDetail: async (id: string): Promise<VocabularyDetailData> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id,
-          title: 'Business',
-          category: 'Chủ đề phổ biến',
-          description: '500 từ vựng chuyên ngành tài chính, kinh doanh.',
-          progress: 65,
-          wordCount: 500,
-          words: [
-            {
-              id: 'w1',
-              term: 'Agile',
-              phonetic: '/ˈædʒ.aɪl/',
-              audio: '',
-              definition: 'Nhanh nhẹn, linh hoạt.',
-              example: 'The company is moving towards a more agile way of working.',
-              exampleTranslation: 'Công ty đang hướng tới cách làm việc linh hoạt hơn.',
-              partOfSpeech: 'adj',
-            },
-            {
-              id: 'w2',
-              term: 'Backlog',
-              phonetic: '/ˈbæk.lɒɡ/',
-              audio: '',
-              definition: 'Công việc tồn đọng.',
-              example: 'We have a huge backlog of work to catch up on.',
-              exampleTranslation: 'Chúng tôi có một khối lượng lớn công việc tồn đọng cần phải giải quyết.',
-              partOfSpeech: 'n',
-            }
-          ],
-        });
-      }, 500);
-    });
+    await delay(350);
+    const collection = collections.find((item) => item.id === id);
+    if (!collection) {
+      throw new Error('Vocabulary collection not found');
+    }
+    return collection;
   },
 };

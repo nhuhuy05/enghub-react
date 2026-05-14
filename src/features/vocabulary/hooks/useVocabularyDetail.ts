@@ -14,7 +14,7 @@ export const useVocabularyDetail = (id: string) => {
         setIsLoading(true);
         const detail = await vocabularyService.getTopicDetail(id);
         setData(detail);
-      } catch (err) {
+      } catch {
         setError('Không thể tải chi tiết bộ từ vựng.');
       } finally {
         setIsLoading(false);

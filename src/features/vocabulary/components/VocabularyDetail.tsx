@@ -1,216 +1,361 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
-  Volume2,
+  BookOpen,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  RotateCcw,
-  BookOpen,
-  LayoutGrid,
+  LayoutList,
   Loader2,
-  Sparkles
+  Search,
+  Sparkles,
+  Volume2,
 } from 'lucide-react';
 import { useVocabularyDetail } from '../hooks/useVocabularyDetail';
+import type { Word } from '../types';
 
-export const VocabularyDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+type ViewMode = 'all_words' | 'flashcard';
+
+const normalizeText = (value: string) => value.trim().toLowerCase();
+
+export const VocabularyDetail = () => {
+  const { id = 'business' } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data, isLoading, error } = useVocabularyDetail(id || '1');
-  const [viewMode, setViewMode] = useState<'list' | 'flashcard'>('flashcard');
+  const { data, isLoading, error } = useVocabularyDetail(id);
+  const [viewMode, setViewMode] = useState<ViewMode>('all_words');
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [learnedWordIds, setLearnedWordIds] = useState<string[]>([]);
+
+  const filteredWords = useMemo(() => {
+    if (!data) return [];
+    const query = normalizeText(searchQuery);
+    if (!query) return data.words;
+
+    return data.words.filter((word) => {
+      return (
+        word.term.toLowerCase().includes(query) ||
+        word.definition.toLowerCase().includes(query) ||
+        word.example.toLowerCase().includes(query) ||
+        word.partOfSpeech.toLowerCase().includes(query)
+      );
+    });
+  }, [data, searchQuery]);
+
+  const currentWord = data?.words[currentWordIndex];
+  const learnedCount = data?.words.filter((word) => learnedWordIds.includes(word.id)).length || 0;
+  const learnedPercent = data?.words.length ? Math.round((learnedCount / data.words.length) * 100) : 0;
+
+  const resetCard = () => setIsFlipped(false);
+
+  const goToWord = (nextIndex: number) => {
+    if (!data?.words.length) return;
+    const normalizedIndex = (nextIndex + data.words.length) % data.words.length;
+    setCurrentWordIndex(normalizedIndex);
+    resetCard();
+  };
+
+  const markCurrentWord = () => {
+    if (!currentWord) return;
+    setLearnedWordIds((prev) => (prev.includes(currentWord.id) ? prev : [...prev, currentWord.id]));
+    goToWord(currentWordIndex + 1);
+  };
+
+  const selectFlashcardWord = (word: Word) => {
+    if (!data) return;
+    const nextIndex = data.words.findIndex((item) => item.id === word.id);
+    if (nextIndex < 0) return;
+    setCurrentWordIndex(nextIndex);
+    setViewMode('flashcard');
+    resetCard();
+  };
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-white gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#004ac6]" />
-        <p className="font-bold text-gray-500">Đang tải từ vựng...</p>
+      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#F6F9FC]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#0057D9]" />
+        <p className="font-bold text-[#52657A]">Đang tải bộ từ vựng...</p>
       </div>
     );
   }
 
-  if (error || !data) {
+  if (error || !data || !currentWord) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center text-center p-6">
-        <h2 className="text-xl font-bold text-red-500 mb-4">{error || 'Không tìm thấy dữ liệu'}</h2>
-        <button onClick={() => navigate('/vocabulary')} className="rounded-xl bg-blue-600 px-6 py-2 text-white font-bold">Quay lại</button>
+      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#F6F9FC] px-4 text-center">
+        <h2 className="text-xl font-black text-[#EF4444]">{error || 'Không tìm thấy bộ từ vựng'}</h2>
+        <button onClick={() => navigate('/vocabulary')} className="rounded-xl bg-[#0057D9] px-5 py-2.5 text-sm font-black text-white">
+          Quay lại
+        </button>
       </div>
     );
   }
-
-  const currentWord = data.words[currentWordIndex];
-
-  const handleNext = () => {
-    setIsFlipped(false);
-    setCurrentWordIndex((prev) => (prev + 1) % data.words.length);
-  };
-
-  const handlePrev = () => {
-    setIsFlipped(false);
-    setCurrentWordIndex((prev) => (prev - 1 + data.words.length) % data.words.length);
-  };
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-[#f8fafc]">
-      {/* Header */}
-      <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b border-gray-100 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-[1200px] items-center px-4 sm:px-6 lg:px-8">
-          <button
-            onClick={() => navigate('/vocabulary')}
-            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-600" />
-          </button>
-          <div className="ml-4 h-6 w-px bg-gray-100" />
-          <div className="ml-4 flex flex-col">
-            <span className="text-[11px] font-black uppercase tracking-wider text-blue-500">
-              {data.category}
-            </span>
-            <span className="text-sm font-bold text-gray-900">{data.title}</span>
+    <div className="min-h-screen bg-[#F6F9FC] text-[#152033]">
+      <header className="sticky top-16 z-20 border-b border-[#D8E3EE] bg-white/95 backdrop-blur">
+        <div className="mx-auto flex min-h-[72px] w-full max-w-[1200px] flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/vocabulary')}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#D8E3EE] text-[#52657A] transition hover:border-[#0057D9] hover:text-[#0057D9]"
+              aria-label="Quay lại danh sách từ vựng"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0057D9]">{data.category}</p>
+              <h1 className="truncate text-xl font-black text-[#0F2747]">{data.title}</h1>
+            </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-2 rounded-2xl bg-gray-100 p-1">
+          <div className="flex rounded-xl bg-[#F1F7FB] p-1">
             <button
-              onClick={() => setViewMode('flashcard')}
-              className={`flex items-center gap-2 rounded-xl px-4 py-1.5 text-xs font-bold transition-all ${
-                viewMode === 'flashcard' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              type="button"
+              onClick={() => setViewMode('all_words')}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-black transition ${
+                viewMode === 'all_words' ? 'bg-white text-[#003A91] shadow-sm' : 'text-[#52657A] hover:text-[#003A91]'
               }`}
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              Flashcard
+              <LayoutList className="h-4 w-4" />
+              Toàn bộ từ
             </button>
             <button
-              onClick={() => setViewMode('list')}
-              className={`flex items-center gap-2 rounded-xl px-4 py-1.5 text-xs font-bold transition-all ${
-                viewMode === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              type="button"
+              onClick={() => setViewMode('flashcard')}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-black transition ${
+                viewMode === 'flashcard' ? 'bg-white text-[#003A91] shadow-sm' : 'text-[#52657A] hover:text-[#003A91]'
               }`}
             >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              Danh sách
+              <Sparkles className="h-4 w-4" />
+              Flashcard
             </button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[1000px] flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-        {viewMode === 'flashcard' ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-10 py-10">
-            {/* Progress Bar */}
-            <div className="w-full max-w-[600px] space-y-2">
-              <div className="flex justify-between text-xs font-bold text-gray-400">
-                <span>{currentWordIndex + 1} / {data.words.length} từ</span>
-                <span>{Math.round(((currentWordIndex + 1) / data.words.length) * 100)}%</span>
+      <main className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">
+        {viewMode === 'all_words' && (
+          <section className="mb-6 grid gap-4 md:grid-cols-3">
+            <article className="rounded-2xl border border-[#D8E3EE] bg-white p-5 shadow-sm md:col-span-2">
+              <p className="text-sm font-bold text-[#52657A]">Mô tả</p>
+              <h2 className="mt-1 text-2xl font-black text-[#0F2747]">{data.title}</h2>
+              <p className="mt-2 text-sm font-medium leading-6 text-[#52657A]">{data.description}</p>
+            </article>
+            <article className="rounded-2xl border border-[#D8E3EE] bg-white p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm font-bold text-[#52657A]">Đã học</p>
+                <span className="rounded-lg bg-[#EAF2FF] px-2.5 py-1 text-xs font-black text-[#003A91]">
+                  {learnedCount}/{data.words.length}
+                </span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                <div 
-                  className="h-full bg-blue-500 transition-all duration-300" 
-                  style={{ width: `${((currentWordIndex + 1) / data.words.length) * 100}%` }}
+              <p className="text-3xl font-black text-[#0F2747]">{learnedPercent}%</p>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#E8EEF6]">
+                <div className="h-full rounded-full bg-[#0057D9]" style={{ width: `${learnedPercent}%` }} />
+              </div>
+            </article>
+          </section>
+        )}
+
+        {viewMode === 'all_words' ? (
+          <section>
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 className="text-2xl font-black text-[#0F2747]">Toàn bộ từ vựng</h2>
+                <p className="mt-1 text-sm font-medium text-[#52657A]">
+                  {filteredWords.length}/{data.words.length} từ trong bộ này.
+                </p>
+              </div>
+              <div className="relative w-full lg:max-w-[360px]">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8EA1B5]" />
+                <input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Tìm từ, nghĩa, ví dụ..."
+                  className="h-11 w-full rounded-xl border border-[#D8E3EE] bg-white pl-10 pr-4 text-sm font-bold text-[#152033] outline-none transition placeholder:text-[#8EA1B5] focus:border-[#0057D9] focus:ring-2 focus:ring-[#EAF2FF]"
                 />
               </div>
             </div>
 
-            {/* Flashcard */}
-            <div 
-              className="perspective-1000 group relative h-[400px] w-full max-w-[600px] cursor-pointer"
-              onClick={() => setIsFlipped(!isFlipped)}
-            >
-              <div className={`relative h-full w-full transition-all duration-500 preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-                {/* Front */}
-                <div className="absolute inset-0 backface-hidden flex flex-col items-center justify-center rounded-[40px] border-2 border-gray-100 bg-white p-10 shadow-2xl shadow-blue-900/5">
-                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-50 text-blue-600">
-                    <BookOpen className="h-10 w-10" />
-                  </div>
-                  <h2 className="text-5xl font-black text-gray-900 mb-2">{currentWord.term}</h2>
-                  <div className="flex items-center gap-3 text-lg font-medium text-gray-400">
-                    <span>{currentWord.phonetic}</span>
-                    <button className="rounded-full p-2 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                      <Volume2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                  <p className="absolute bottom-10 text-sm font-bold text-gray-300 uppercase tracking-widest">Nhấn để xem nghĩa</p>
-                </div>
+            {filteredWords.length > 0 ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {filteredWords.map((word) => {
+                  const isLearned = learnedWordIds.includes(word.id);
+                  return (
+                    <article key={word.id} className="rounded-2xl border border-[#D8E3EE] bg-white p-5 shadow-sm">
+                      <div className="mb-4 flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-2xl font-black text-[#0F2747]">{word.term}</h3>
+                            <span className="rounded-lg bg-[#F1F7FB] px-2 py-0.5 text-xs font-black uppercase text-[#1E4E8C]">
+                              {word.partOfSpeech}
+                            </span>
+                            {isLearned && <CheckCircle2 className="h-5 w-5 text-[#10B981]" />}
+                          </div>
+                          <p className="mt-1 text-sm font-bold text-[#52657A]">{word.phonetic}</p>
+                        </div>
+                        <button
+                          type="button"
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#D8E3EE] text-[#52657A] transition hover:border-[#0057D9] hover:text-[#0057D9]"
+                          aria-label={`Nghe phát âm ${word.term}`}
+                        >
+                          <Volume2 className="h-4 w-4" />
+                        </button>
+                      </div>
 
-                {/* Back */}
-                <div className="absolute inset-0 backface-hidden rotate-y-180 flex flex-col items-center justify-center rounded-[40px] border-2 border-blue-100 bg-blue-50 p-10 shadow-2xl shadow-blue-900/5 text-center">
-                  <span className="mb-4 rounded-full bg-blue-100 px-4 py-1 text-xs font-black uppercase tracking-widest text-blue-600">
-                    {currentWord.partOfSpeech}
+                      <p className="text-sm font-black text-[#152033]">{word.definition}</p>
+                      <div className="mt-4 rounded-xl border border-[#E8EEF6] bg-[#FBFCFF] p-4">
+                        <p className="text-sm font-medium italic leading-6 text-[#52657A]">"{word.example}"</p>
+                        <p className="mt-1 text-sm font-bold leading-6 text-[#1E4E8C]">{word.exampleTranslation}</p>
+                      </div>
+
+                      {(word.collocations?.length || word.synonyms?.length) && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {word.collocations?.map((item) => (
+                            <span key={item} className="rounded-lg bg-[#EAF2FF] px-2.5 py-1 text-xs font-black text-[#003A91]">
+                              {item}
+                            </span>
+                          ))}
+                          {word.synonyms?.map((item) => (
+                            <span key={item} className="rounded-lg bg-[#ECFEFF] px-2.5 py-1 text-xs font-black text-[#0B7991]">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => selectFlashcardWord(word)}
+                        className="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-[#003A91] px-4 text-sm font-black text-white transition hover:bg-[#0F2747] active:scale-[0.98]"
+                      >
+                        Học bằng flashcard
+                        <ArrowLeft className="h-4 w-4 rotate-180" />
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex h-56 flex-col items-center justify-center rounded-2xl border border-[#D8E3EE] bg-white text-center shadow-sm">
+                <Search className="mb-3 h-9 w-9 text-[#8EA1B5]" />
+                <h3 className="text-lg font-black text-[#0F2747]">Không tìm thấy từ phù hợp</h3>
+                <p className="mt-1 text-sm font-medium text-[#52657A]">Thử tìm bằng từ khóa khác.</p>
+              </div>
+            )}
+          </section>
+        ) : (
+          <section className="mx-auto w-full max-w-[860px]">
+            <div>
+              <div className="mb-5">
+                <div className="mb-2 flex items-center justify-between text-xs font-black text-[#52657A]">
+                  <span>
+                    Thẻ {currentWordIndex + 1}/{data.words.length}
                   </span>
-                  <h3 className="mb-6 text-3xl font-bold text-gray-900">{currentWord.definition}</h3>
-                  <div className="max-w-md space-y-3">
-                    <p className="text-lg italic text-gray-600 leading-relaxed">"{currentWord.example}"</p>
-                    <p className="text-sm font-medium text-blue-500">{currentWord.exampleTranslation}</p>
-                  </div>
+                  <span>{Math.round(((currentWordIndex + 1) / data.words.length) * 100)}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-[#E8EEF6]">
+                  <div
+                    className="h-full rounded-full bg-[#0057D9]"
+                    style={{ width: `${((currentWordIndex + 1) / data.words.length) * 100}%` }}
+                  />
                 </div>
               </div>
-            </div>
 
-            {/* Controls */}
-            <div className="flex items-center gap-6">
-              <button 
-                onClick={handlePrev}
-                className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-gray-100 text-gray-600 shadow-lg hover:scale-110 active:scale-95 transition-all"
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setIsFlipped((value) => !value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setIsFlipped((value) => !value);
+                  }
+                }}
+                className="group flex min-h-[430px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border border-[#D8E3EE] bg-white p-8 text-center shadow-sm outline-none transition hover:border-[#0057D9] focus:ring-2 focus:ring-[#EAF2FF]"
+                aria-label="Lật flashcard"
               >
-                <ChevronLeft className="h-8 w-8" />
-              </button>
-              <button 
-                onClick={() => setIsFlipped(!isFlipped)}
-                className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-gray-100 text-blue-600 shadow-lg hover:scale-110 active:scale-95 transition-all"
-              >
-                <RotateCcw className="h-7 w-7" />
-              </button>
-              <button 
-                onClick={handleNext}
-                className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#004ac6] text-white shadow-xl shadow-blue-200 hover:scale-110 active:scale-95 transition-all"
-              >
-                <ChevronRight className="h-8 w-8" />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-            {data.words.map((word) => (
-              <div 
-                key={word.id}
-                className="group flex flex-col gap-4 rounded-3xl border border-gray-100 bg-white p-6 transition-all hover:border-blue-100 hover:shadow-xl sm:flex-row sm:items-center"
-              >
-                <div className="flex flex-1 flex-col">
-                  <div className="mb-2 flex items-center gap-4">
-                    <h3 className="text-2xl font-bold text-gray-900">{word.term}</h3>
-                    <span className="text-sm font-medium text-gray-400">{word.phonetic}</span>
-                    <button className="text-gray-300 hover:text-blue-500 transition-colors">
-                      <Volume2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase text-blue-600">
-                      {word.partOfSpeech}
-                    </span>
-                    <p className="text-[15px] font-bold text-gray-700">{word.definition}</p>
-                  </div>
-                  <div className="rounded-2xl bg-gray-50 p-4 border border-gray-100">
-                    <p className="text-sm italic text-gray-500 leading-relaxed mb-1">"{word.example}"</p>
-                    <p className="text-[13px] font-medium text-gray-400">{word.exampleTranslation}</p>
-                  </div>
-                </div>
-                {word.imageUrl && (
-                  <div className="h-32 w-full shrink-0 overflow-hidden rounded-2xl sm:h-24 sm:w-24">
-                    <img src={word.imageUrl} alt={word.term} className="h-full w-full object-cover" />
+                {!isFlipped ? (
+                  <>
+                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F1F7FB] text-[#1E4E8C] transition group-hover:bg-[#EAF2FF]">
+                      <BookOpen className="h-8 w-8" />
+                    </div>
+                    <p className="mb-3 rounded-lg bg-[#EAF2FF] px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-[#003A91]">
+                      {currentWord.partOfSpeech}
+                    </p>
+                    <h2 className="max-w-full break-words text-5xl font-black text-[#0F2747]">{currentWord.term}</h2>
+                    <p className="mt-4 text-lg font-bold text-[#52657A]">{currentWord.phonetic}</p>
+                    <p className="mt-12 text-xs font-black uppercase tracking-[0.16em] text-[#8EA1B5]">Nhấn để xem nghĩa</p>
+                  </>
+                ) : (
+                  <div className="flex max-w-2xl flex-col items-center">
+                    <p className="mb-4 rounded-lg bg-[#EAF2FF] px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-[#003A91]">
+                      Nghĩa và ví dụ
+                    </p>
+                    <h3 className="text-3xl font-black leading-tight text-[#0F2747]">{currentWord.definition}</h3>
+                    <div className="mt-6 rounded-2xl border border-[#D8E3EE] bg-[#FBFCFF] p-5">
+                      <p className="text-lg font-medium italic leading-8 text-[#152033]">"{currentWord.example}"</p>
+                      <p className="mt-2 text-sm font-bold leading-6 text-[#1E4E8C]">{currentWord.exampleTranslation}</p>
+                    </div>
+                    {(currentWord.collocations?.length || currentWord.synonyms?.length) && (
+                      <div className="mt-5 flex flex-wrap justify-center gap-2">
+                        {currentWord.collocations?.map((item) => (
+                          <span key={item} className="rounded-lg bg-[#EAF2FF] px-2.5 py-1 text-xs font-black text-[#003A91]">
+                            {item}
+                          </span>
+                        ))}
+                        {currentWord.synonyms?.map((item) => (
+                          <span key={item} className="rounded-lg bg-[#ECFEFF] px-2.5 py-1 text-xs font-black text-[#0B7991]">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            ))}
-          </div>
+
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => goToWord(currentWordIndex - 1)}
+                  className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#D8E3EE] bg-white text-[#52657A] transition hover:border-[#003A91] hover:text-[#003A91] active:scale-[0.98]"
+                  aria-label="Từ trước"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToWord(currentWordIndex + 1)}
+                  className="flex h-12 items-center gap-2 rounded-xl border border-[#D8E3EE] bg-white px-4 text-sm font-black text-[#003A91] transition hover:bg-[#EAF2FF] active:scale-[0.98]"
+                >
+                  Học tiếp
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={markCurrentWord}
+                  className="flex h-12 items-center gap-2 rounded-xl bg-[#003A91] px-4 text-sm font-black text-white transition hover:bg-[#0F2747] active:scale-[0.98]"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Đã thuộc
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToWord(currentWordIndex + 1)}
+                  className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#D8E3EE] bg-white text-[#52657A] transition hover:border-[#003A91] hover:text-[#003A91] active:scale-[0.98]"
+                  aria-label="Từ tiếp theo"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </section>
         )}
       </main>
 
-      {/* Style for flashcard animation */}
-      <style>{`
-        .perspective-1000 { perspective: 1000px; }
-        .preserve-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
-      `}</style>
     </div>
   );
 };

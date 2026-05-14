@@ -13,7 +13,7 @@ export const useVocabulary = () => {
         setIsLoading(true);
         const data = await vocabularyService.getTopics();
         setTopics(data);
-      } catch (err) {
+      } catch {
         setError('Không thể tải danh sách từ vựng.');
       } finally {
         setIsLoading(false);

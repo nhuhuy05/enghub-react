@@ -1,161 +1,182 @@
-import React from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Flame, 
-  GraduationCap, 
-  Headphones, 
-  NotebookPen, 
-  Sparkles, 
+import {
+  ArrowRight,
   BookOpenText,
-  Loader2
+  BookText,
+  ClipboardList,
+  GraduationCap,
+  Loader2,
+  Search,
+  Target,
 } from 'lucide-react';
 import { useVocabulary } from '../hooks/useVocabulary';
+import type { VocabularyCollectionType } from '../types';
+
+type CollectionFilter = VocabularyCollectionType | 'all';
+
+const filters: Array<{ id: CollectionFilter; label: string }> = [
+  { id: 'all', label: 'Tất cả' },
+  { id: 'topic', label: 'Chủ đề' },
+  { id: 'exam_set', label: 'Theo bộ đề' },
+];
 
 export const VocabularyPage = () => {
   const { topics, isLoading, error } = useVocabulary();
   const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<CollectionFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredTopics = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    return topics.filter((topic) => {
+      const matchesFilter = activeFilter === 'all' || topic.collectionType === activeFilter;
+      const matchesSearch =
+        !normalizedQuery ||
+        topic.title.toLowerCase().includes(normalizedQuery) ||
+        topic.description.toLowerCase().includes(normalizedQuery) ||
+        topic.category.toLowerCase().includes(normalizedQuery);
+      return matchesFilter && matchesSearch;
+    });
+  }, [activeFilter, searchQuery, topics]);
+
+  const totalWords = topics.reduce((total, topic) => total + topic.wordCount, 0);
+  const topicCount = topics.filter((topic) => topic.collectionType === 'topic').length;
+  const setCount = topics.filter((topic) => topic.collectionType === 'exam_set').length;
 
   if (isLoading) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#faf8ff]">
-        <Loader2 className="h-10 w-10 animate-spin text-[#004ac6]" />
-        <p className="font-bold text-[#505f76]">Đang tải từ vựng...</p>
+      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#F6F9FC]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#0057D9]" />
+        <p className="font-bold text-[#52657A]">Đang tải từ vựng...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center text-center gap-4 bg-[#faf8ff]">
-        <h2 className="text-xl font-bold text-red-500">Lỗi: {error}</h2>
-        <button onClick={() => window.location.reload()} className="rounded-lg bg-blue-600 px-4 py-2 text-white">Thử lại</button>
+      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#F6F9FC] px-4 text-center">
+        <h2 className="text-xl font-black text-[#EF4444]">Đã có lỗi xảy ra</h2>
+        <p className="text-sm font-medium text-[#52657A]">{error}</p>
+        <button onClick={() => window.location.reload()} className="rounded-xl bg-[#0057D9] px-5 py-2.5 text-sm font-black text-white">
+          Thử lại
+        </button>
       </div>
     );
   }
 
-  const topicCards = topics.filter(t => t.category === 'Chủ đề phổ biến');
-  const etsCards = topics.filter(t => t.category === 'Theo bộ đề ETS');
-
   return (
-    <div className="min-h-screen bg-[#faf8ff] text-[#191b23]">
-      <main className="mx-auto max-w-[1200px] px-4 pb-24 pt-8 sm:px-6 lg:px-8">
-        <section className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+    <main className="min-h-screen bg-[#F6F9FC] px-4 py-8 text-[#152033] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1200px]">
+        <section className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div>
-            <h1 className="mb-2 text-[36px] font-bold leading-[1.2] tracking-[-0.02em] text-[#191b23]">Học từ vựng</h1>
-            <p className="text-[18px] leading-[1.6] text-[#434655]">
-              Trau dồi vốn từ theo chủ đề và cấu trúc đề thi TOEIC mới nhất.
+            <div className="mb-3 inline-flex items-center gap-2 rounded-lg border border-[#C9D8E8] bg-[#EAF2FF] px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#003A91]">
+              <BookText className="h-4 w-4" />
+              TOEIC Vocabulary
+            </div>
+            <h1 className="text-[36px] font-black leading-tight tracking-tight text-[#0F2747]">Học từ vựng</h1>
+            <p className="mt-2 max-w-2xl text-[15px] font-medium leading-7 text-[#52657A]">
+              Xem toàn bộ từ theo chủ đề hoặc bộ đề, sau đó chuyển sang flashcard để học từng từ.
             </p>
           </div>
 
-          <div className="rounded-xl border border-[#c3c6d7] bg-white p-4 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="rounded-lg bg-[#ffdbcd] p-2 text-[#7d2d00]">
-                <Flame className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium uppercase tracking-[0.02em] text-[#505f76]">Mục tiêu hàng ngày</p>
-                <div className="mt-1 text-[15px] font-semibold leading-[1.3] text-[#191b23]">45 / 50 từ</div>
+          <div className="rounded-2xl border border-[#D8E3EE] bg-white p-5 shadow-sm">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#F1F7FB] text-[#1E4E8C]">
+              <Target className="h-5 w-5" />
             </div>
-            </div>
+            <p className="text-sm font-bold text-[#52657A]">Kho hiện có</p>
+            <p className="mt-1 text-3xl font-black text-[#0F2747]">{totalWords} từ</p>
+            <p className="mt-2 text-xs font-bold text-[#52657A]">
+              {topicCount} chủ đề • {setCount} bộ đề
+            </p>
           </div>
         </section>
 
-        <section className="mb-12">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-[24px] font-semibold leading-[1.4] text-[#191b23]">Chủ đề phổ biến</h2>
-            <button className="flex items-center gap-1 text-sm font-medium text-[#004ac6] hover:underline">
-              Xem tất cả <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="-mx-4 overflow-x-auto px-4 pb-2 scrollbar-hide">
-            <div className="flex w-max gap-4">
-              {topicCards.map((item) => {
-                const Icon = item.title === 'Business' ? GraduationCap : Sparkles;
-                return (
-                  <article 
-                    key={item.id} 
-                    onClick={() => navigate(`/vocabulary/${item.id}`)}
-                    className="group w-[224px] shrink-0 cursor-pointer rounded-2xl border border-[#c3c6d7] bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[#004ac6] hover:shadow-md"
-                  >
-                    <div className="mb-3 flex items-start justify-between">
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${item.iconBg || 'bg-[#dbe1ff]'}`}>
-                        <Icon className={`h-3.5 w-3.5 ${item.iconColor || 'text-[#003ea8]'}`} />
-                      </div>
-                      {item.badge && (
-                        <span className="rounded-md bg-[#e7e7f3] px-2 py-1 text-[10px] font-medium text-[#505f76]">{item.badge}</span>
-                      )}
-                    </div>
-                    <h3 className="mb-1 text-[16px] font-semibold leading-[1.35] text-[#191b23]">{item.title}</h3>
-                    <p className="mb-3 text-xs text-[#505f76] line-clamp-2">{item.description}</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-medium text-[#505f76]">
-                        <span>Tiến độ</span>
-                        <span className="font-semibold text-[#004ac6]">{item.progress}%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-[#e7e7f3]">
-                        <div className="h-full rounded-full bg-[#004ac6]" style={{ width: `${item.progress}%` }} />
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <h2 className="mb-6 text-[24px] font-semibold leading-[1.4] text-[#191b23]">Theo bộ đề ETS</h2>
-          <div className="grid gap-6 lg:grid-cols-3">
-            {etsCards.map((item) => (
-              <article
-                key={item.id}
-                onClick={() => navigate(`/vocabulary/${item.id}`)}
-                className={`group relative cursor-pointer overflow-hidden rounded-2xl p-4 shadow-sm transition-all hover:shadow-lg ${item.featured ? 'bg-[#004ac6] text-white' : 'border border-[#c3c6d7] bg-[#ededf9] text-[#191b23]'}`}
+        <section className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <nav className="flex gap-2 overflow-x-auto pb-1">
+            {filters.map((filter) => (
+              <button
+                key={filter.id}
+                type="button"
+                onClick={() => setActiveFilter(filter.id)}
+                className={`whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-black transition ${
+                  activeFilter === filter.id
+                    ? 'bg-[#003A91] text-white shadow-[0_8px_18px_rgba(15,39,71,0.16)]'
+                    : 'border border-[#D8E3EE] bg-white text-[#52657A] hover:border-[#003A91] hover:text-[#003A91]'
+                }`}
               >
-                <div className="relative z-10 min-h-[216px]">
-                  <h3 className={`mb-2 text-[20px] font-semibold leading-[1.35] ${item.featured ? 'text-white' : 'text-[#191b23]'}`}>{item.title}</h3>
-                  <p className={`mb-5 text-[14px] leading-[1.5] ${item.featured ? 'text-white/90' : 'text-[#434655]'}`}>{item.description}</p>
+                {filter.label}
+              </button>
+            ))}
+          </nav>
 
-                  <div className="mb-6 flex items-center gap-5">
-                    <div>
-                      <p className="text-[20px] font-semibold leading-[1.3]">{item.wordCount}+</p>
-                      <p className={`text-[10px] uppercase tracking-[0.02em] ${item.featured ? 'text-white/80' : 'text-[#505f76]'}`}>Từ vựng</p>
+          <div className="relative w-full lg:max-w-[360px]">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8EA1B5]" />
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Tìm chủ đề, bộ đề..."
+              className="h-11 w-full rounded-xl border border-[#D8E3EE] bg-white pl-10 pr-4 text-sm font-bold text-[#152033] outline-none transition placeholder:text-[#8EA1B5] focus:border-[#0057D9] focus:ring-2 focus:ring-[#EAF2FF]"
+            />
+          </div>
+        </section>
+
+        {filteredTopics.length > 0 ? (
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filteredTopics.map((topic) => {
+              const Icon = topic.collectionType === 'exam_set' ? ClipboardList : topic.title === 'Business' ? GraduationCap : BookOpenText;
+              return (
+                <button
+                  key={topic.id}
+                  type="button"
+                  onClick={() => navigate(`/vocabulary/${topic.id}`)}
+                  className="group flex min-h-[260px] flex-col rounded-2xl border border-[#D8E3EE] bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#1E4E8C] hover:shadow-md"
+                >
+                  <div className="mb-5 flex items-start justify-between gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F1F7FB] text-[#1E4E8C]">
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <div className={`h-8 w-px ${item.featured ? 'bg-white/20' : 'bg-[#c3c6d7]'}`} />
-                    <div>
-                      <p className="text-[20px] font-semibold leading-[1.3]">{item.sets || '0'}</p>
-                      <p className={`text-[10px] uppercase tracking-[0.02em] ${item.featured ? 'text-white/80' : 'text-[#505f76]'}`}>Bộ đề</p>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <span className="rounded-lg bg-[#EAF2FF] px-2.5 py-1 text-[11px] font-black text-[#003A91]">
+                        {topic.collectionType === 'exam_set' ? 'Bộ đề' : 'Chủ đề'}
+                      </span>
+                      {topic.badge && (
+                        <span className="rounded-lg bg-[#ECFEFF] px-2.5 py-1 text-[11px] font-black text-[#0B7991]">{topic.badge}</span>
+                      )}
                     </div>
                   </div>
 
-                  {item.featured ? (
-                    <button className="rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-[#004ac6] transition group-hover:bg-[#dbe1ff]">
-                      Bắt đầu học ngay
-                    </button>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs text-[#505f76]">
-                        <span>Đã hoàn thành {item.progress}%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/60">
-                        <div className="h-full rounded-full bg-[#004ac6]" style={{ width: `${item.progress}%` }} />
-                      </div>
-                      <button className="text-sm font-bold text-[#004ac6] hover:underline">Tiếp tục học</button>
-                    </div>
-                  )}
-                </div>
+                  <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#52657A]">{topic.category}</p>
+                  <h2 className="text-xl font-black text-[#0F2747]">{topic.title}</h2>
+                  <p className="mt-2 line-clamp-3 text-sm font-medium leading-6 text-[#52657A]">{topic.description}</p>
 
-                <div className="absolute right-3 top-1/2 hidden -translate-y-1/2 sm:block">
-                  <BookOpenText className={`h-[112px] w-[112px] transition-transform group-hover:scale-110 ${item.featured ? 'text-white/20' : 'text-[#004ac6]/10'}`} />
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-        
-      </main>
-    </div>
+                  <div className="mt-auto pt-5">
+                    <div className="mb-2 flex items-center justify-between text-xs font-black text-[#52657A]">
+                      <span>
+                        {topic.wordCount} từ • {topic.level}
+                      </span>
+                      <span>{topic.progress}%</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-[#E8EEF6]">
+                      <div className="h-full rounded-full bg-[#0057D9]" style={{ width: `${topic.progress}%` }} />
+                    </div>
+                    <div className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[#003A91]">
+                      Xem từ vựng
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </section>
+        ) : (
+          <section className="flex h-64 flex-col items-center justify-center rounded-2xl border border-[#D8E3EE] bg-white text-center shadow-sm">
+            <Search className="mb-3 h-9 w-9 text-[#8EA1B5]" />
+            <h2 className="text-lg font-black text-[#0F2747]">Không tìm thấy bộ từ phù hợp</h2>
+            <p className="mt-1 text-sm font-medium text-[#52657A]">Thử đổi từ khóa hoặc bộ lọc.</p>
+          </section>
+        )}
+      </div>
+    </main>
   );
 };

@@ -11,55 +11,62 @@ const mockExams: Exam[] = [
   { id: '8', tab: 'Hacker TOEIC', title: 'Hacker TOEIC Test 1', status: 'Chưa luyện tập', progress: 0, doneQuestions: 0, totalQuestions: 200, learnersCount: '4.1k' },
 ];
 
-const mockExamDetail: ExamDetail = {
+export const mockExamDetail = {
   id: '1',
-  title: 'ETS 2024 Test 1',
+  title: 'ETS 2024 Test 1 - Realistic Short Mock',
   parts: [
     {
       id: 1,
       name: 'Part 1',
-      instruction: 'Select the one statement that best describes what you see in the picture.',
+      instruction: 'Directions: For each question in this part, you will hear four statements about a picture in your test book. When you hear the statements, you must select the one statement that best describes what you see in the picture.',
       questions: [
         {
           id: 1,
           type: 'picture',
-          image: 'https://images.unsplash.com/photo-1600880212319-78443973dd11?q=80&w=2070&auto=format&fit=crop',
-          options: ['(A)', '(B)', '(C)', '(D)'],
-          correctAnswer: '(B)',
-          explanation: 'Option (B) best describes the main action shown in the picture.',
-        },
-        {
-          id: 2,
-          type: 'picture',
           image: 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=2069&auto=format&fit=crop',
           options: ['(A)', '(B)', '(C)', '(D)'],
           correctAnswer: '(C)',
-          explanation: 'Option (C) matches the visible workplace situation most closely.',
+          explanation: 'Bức ảnh chụp một người phụ nữ đang làm việc trên máy tính xách tay. Giả định Audio: (A) Cô ấy đang rót một tách cà phê. (B) Cô ấy đang cởi áo khoác. (C) Cô ấy đang gõ phím trên máy tính. (D) Cô ấy đang điều chỉnh màn hình. -> Đáp án (C) mô tả chính xác nhất hành động đang diễn ra trong hình.',
         }
       ]
     },
     {
       id: 2,
       name: 'Part 2',
-      instruction: 'Select the best response to the question.',
+      instruction: 'Directions: You will hear a question or statement and three responses spoken in English. They will not be printed in your test book and will be spoken only one time. Select the best response to the question or statement.',
       questions: [
-        { id: 7, type: 'audio_only', options: ['(A)', '(B)', '(C)'], correctAnswer: '(A)', explanation: 'Response (A) is the most natural answer to the question.' },
-        { id: 8, type: 'audio_only', options: ['(A)', '(B)', '(C)'], correctAnswer: '(B)', explanation: 'Response (B) directly answers the speaker.' },
-        { id: 9, type: 'audio_only', options: ['(A)', '(B)', '(C)'], correctAnswer: '(C)', explanation: 'Response (C) fits the context of the prompt.' }
+        { 
+          id: 7, 
+          type: 'audio_only', 
+          options: ['(A)', '(B)', '(C)'], 
+          correctAnswer: '(B)', 
+          explanation: 'Giả định Audio câu hỏi: "Where is the new printer located?" (Máy in mới được đặt ở đâu?). Giả định Audio trả lời: (A) Khoảng 50 đô la. (B) Trong phòng nghỉ của nhân viên. (C) Không, nó chưa được in. -> Câu hỏi bắt đầu bằng từ để hỏi "Where" (Ở đâu). Đáp án (B) chỉ định một địa điểm nên là phản hồi tự nhiên và chính xác nhất.' 
+        }
       ]
     },
     {
       id: 3,
       name: 'Part 3',
-      instruction: 'Listen to a conversation and answer the questions.',
+      instruction: 'Directions: You will hear some conversations between two or more people. You will be asked to answer three questions about what the speakers say in each conversation.',
       questions: [
         {
           id: 32,
           type: 'audio_group',
           subQuestions: [
-            { id: 32, text: 'Where most likely are the speakers?', options: ['(A) In a bank', '(B) In a restaurant', '(C) In a hotel', '(D) In a retail store'], correctAnswer: '(D) In a retail store', explanation: 'The conversation context points to a customer service situation in a store.' },
-            { id: 33, text: 'What does the woman want to do?', options: ['(A) Open an account', '(B) Book a room', '(C) Return an item', '(D) Order some food'], correctAnswer: '(C) Return an item', explanation: 'The woman is asking for help with an item she purchased.' },
-            { id: 34, text: 'What will the man do next?', options: ['(A) Check a computer', '(B) Call a manager', '(C) Provide a discount', '(D) Give a refund'], correctAnswer: '(A) Check a computer', explanation: 'The man needs to verify the purchase information first.' }
+            { 
+              id: 32, 
+              text: 'Why is the woman calling?', 
+              options: ['(A) To cancel a flight', '(B) To make a hotel reservation', '(C) To inquire about a job', '(D) To request a refund'], 
+              correctAnswer: '(B) To make a hotel reservation', 
+              explanation: 'Dựa vào ngữ cảnh đoạn hội thoại (người phụ nữ hỏi về phòng trống cho ngày cuối tuần và các tiện ích đi kèm), mục đích chính của cuộc gọi là để đặt phòng khách sạn.' 
+            },
+            { 
+              id: 33, 
+              text: 'What does the man offer to send?', 
+              options: ['(A) A confirmation email', '(B) A discount code', '(C) A travel brochure', '(D) A map of the city'], 
+              correctAnswer: '(A) A confirmation email', 
+              explanation: 'Ở cuối đoạn hội thoại, người đàn ông nói: "I will send a confirmation email right away." (Tôi sẽ gửi email xác nhận ngay lập tức). Do đó, đáp án (A) là chính xác.' 
+            }
           ]
         }
       ]
@@ -67,15 +74,19 @@ const mockExamDetail: ExamDetail = {
     {
       id: 4,
       name: 'Part 4',
-      instruction: 'Listen to a short talk and answer the questions.',
+      instruction: 'Directions: You will hear some talks given by a single speaker. You will be asked to answer three questions about what the speaker says in each talk.',
       questions: [
         {
           id: 71,
           type: 'audio_group',
           subQuestions: [
-            { id: 71, text: 'Who is the speaker most likely?', options: ['(A) A tour guide', '(B) A pilot', '(C) A flight attendant', '(D) A hotel manager'], correctAnswer: '(A) A tour guide', explanation: 'The speaker is likely giving information to visitors.' },
-            { id: 72, text: 'What is the purpose of the talk?', options: ['(A) To give safety instructions', '(B) To announce a delay', '(C) To describe a tourist site', '(D) To welcome new employees'], correctAnswer: '(C) To describe a tourist site', explanation: 'The talk focuses on describing a place or visit.' },
-            { id: 73, text: 'According to the speaker, what will happen at 2:00 P.M.?', options: ['(A) The plane will land', '(B) The bus will depart', '(C) The meeting will start', '(D) The museum will open'], correctAnswer: '(B) The bus will depart', explanation: 'The time reference is connected with a scheduled departure.' }
+            { 
+              id: 71, 
+              text: 'Where is the announcement being made?', 
+              options: ['(A) At an airport', '(B) At a train station', '(C) In a movie theater', '(D) In a shopping mall'], 
+              correctAnswer: '(A) At an airport', 
+              explanation: 'Bài thông báo sử dụng các từ vựng đặc trưng như "flight 804" (chuyến bay 804), "boarding gate" (cổng lên máy bay), "passengers" (hành khách). Điều này chứng tỏ thông báo được phát tại một sân bay.' 
+            }
           ]
         }
       ]
@@ -83,30 +94,30 @@ const mockExamDetail: ExamDetail = {
     {
       id: 5,
       name: 'Part 5',
-      instruction: 'Select the best word or phrase to complete the sentence.',
+      instruction: 'Directions: A word or phrase is missing in each of the sentences below. Four answer choices are given below each sentence. Select the best answer to complete the sentence.',
       questions: [
         {
           id: 101,
           type: 'text_only',
-          text: 'The new software update is expected to improve the system\'s _______ significantly.',
-          options: ['(A) perform', '(B) performance', '(C) performed', '(D) performing'],
-          correctAnswer: '(B) performance',
-          explanation: 'A noun is needed after the possessive "system\'s", so "performance" is correct.'
+          text: 'The management team requested that all monthly expense reports be submitted _______ by 5:00 P.M. on Friday.',
+          options: ['(A) prompt', '(B) prompts', '(C) promptly', '(D) promptness'],
+          correctAnswer: '(C) promptly',
+          explanation: 'Chỗ trống đứng sau động từ "submitted" nên cần một trạng từ để bổ nghĩa cho động từ đó. "Promptly" (một cách nhanh chóng, đúng giờ) là trạng từ duy nhất trong các đáp án. (A) là tính từ/động từ, (B) là động từ chia ngôi thứ 3 số ít, (D) là danh từ.'
         },
         {
           id: 102,
           type: 'text_only',
-          text: 'Ms. Sato was _______ to hear that the project had been approved ahead of schedule.',
-          options: ['(A) delight', '(B) delightful', '(C) delighted', '(D) delighting'],
-          correctAnswer: '(C) delighted',
-          explanation: '"Delighted" is the adjective used to describe how Ms. Sato felt.'
+          text: 'Due to the heavy snowstorm, the keynote speaker will arrive _______ later than originally scheduled.',
+          options: ['(A) slightly', '(B) closely', '(C) exactly', '(D) tightly'],
+          correctAnswer: '(A) slightly',
+          explanation: 'Đây là câu hỏi về từ vựng. "Slightly" mang nghĩa là "một chút", đi với "later" tạo thành cụm "slightly later" (trễ hơn một chút). Các đáp án khác không phù hợp về mặt ngữ nghĩa trong ngữ cảnh này.'
         }
       ]
     },
     {
       id: 6,
       name: 'Part 6',
-      instruction: 'Read the text and select the best word or phrase for each blank.',
+      instruction: 'Directions: Read the texts that follow. A word, phrase, or sentence is missing in parts of each text. Four answer choices for each question are given below the text. Select the best answer to complete the text.',
       questions: [
         {
           id: 131,
@@ -115,15 +126,26 @@ const mockExamDetail: ExamDetail = {
             stimuli: [
               {
                 type: 'text',
-                title: 'Internal Memorandum',
-                content: 'To: All Staff\nFrom: Facilities Management\nSubject: Elevator Maintenance\n\nStarting tomorrow, the main elevators will be out of service for regular maintenance. This work is scheduled to last for three days. [131] during this period, please use the service elevators located at the back of the building. We understand that this may cause some _______ [132] and thank you for your patience. Our goal is to ensure the _______ [133] of all building systems.'
+                title: 'Email',
+                content: 'To: All Employees\nFrom: IT Department\nSubject: Network Maintenance\n\nPlease be advised that the company network will undergo routine maintenance this weekend. The system will be taken offline starting at 10:00 P.M. on Saturday and will remain unavailable _______ [131] 6:00 A.M. on Sunday. Please save all your work before the downtime. We apologize for any _______ [132] this may cause.'
               }
             ]
           },
           subQuestions: [
-            { id: 131, text: 'Question 131', options: ['(A) However', '(B) Furthermore', '(C) Therefore', '(D) Instead'], correctAnswer: '(C) Therefore', explanation: 'The sentence gives a result of the elevators being out of service.' },
-            { id: 132, text: 'Question 132', options: ['(A) inconvenient', '(B) inconvenience', '(C) inconvenienced', '(D) inconveniently'], correctAnswer: '(B) inconvenience', explanation: 'A noun is needed after "some".' },
-            { id: 133, text: 'Question 133', options: ['(A) reliable', '(B) reliability', '(C) reliably', '(D) relied'], correctAnswer: '(B) reliability', explanation: 'The noun "reliability" fits after "ensure the".' }
+            { 
+              id: 131, 
+              text: 'Question 131', 
+              options: ['(A) until', '(B) since', '(C) during', '(D) over'], 
+              correctAnswer: '(A) until', 
+              explanation: 'Cấu trúc "remain + adj + until + thời điểm" (duy trì tình trạng... cho đến khi). Hệ thống sẽ không khả dụng CHO ĐẾN (until) 6 giờ sáng Chủ Nhật.' 
+            },
+            { 
+              id: 132, 
+              text: 'Question 132', 
+              options: ['(A) convenience', '(B) inconvenient', '(C) inconvenience', '(D) inconvenienced'], 
+              correctAnswer: '(C) inconvenience', 
+              explanation: 'Sau lượng từ "any" cần một danh từ. Cụm từ cố định thường gặp trong thư tín thương mại: "apologize for any inconvenience" (xin lỗi vì bất kỳ sự bất tiện nào).' 
+            }
           ]
         }
       ]
@@ -131,7 +153,7 @@ const mockExamDetail: ExamDetail = {
     {
       id: 7,
       name: 'Part 7',
-      instruction: 'Select the best response to each question.',
+      instruction: 'Directions: In this part you will read a selection of texts, such as magazine and newspaper articles, e-mails, and instant messages. Each text or set of texts is followed by several questions. Select the best answer for each question.',
       questions: [
         {
           id: 147,
@@ -140,42 +162,26 @@ const mockExamDetail: ExamDetail = {
             stimuli: [
               {
                 type: 'text',
-                title: 'Advertisement',
-                content: 'Looking for a new challenge? Green Valley Tech is seeking a Senior Developer to lead our mobile app team. Candidates should have at least 5 years of experience and a passion for innovation. Apply online today at www.gvtech.com/careers.'
+                title: 'Memorandum',
+                content: 'To: Sales Team\nFrom: Marcus Reed, Director of Sales\nDate: October 12\nSubject: Quarterly Meeting\n\nOur next quarterly sales meeting will take place on October 20 at 9:00 A.M. in the main conference room. We will be discussing the Q3 financial results and introducing the new product line launching in November. Breakfast will be catered by Sunrise Cafe. Please review the attached agenda beforehand.'
               }
             ]
           },
           subQuestions: [
-            { id: 147, text: 'What is being advertised?', options: ['(A) A new mobile app', '(B) A job opening', '(C) A tech conference', '(D) A software update'], correctAnswer: '(B) A job opening', explanation: 'The advertisement says Green Valley Tech is seeking a Senior Developer.' },
-            { id: 148, text: 'How can candidates apply?', options: ['(A) By calling the office', '(B) By visiting a website', '(C) By sending a resume via mail', '(D) By attending an open house'], correctAnswer: '(B) By visiting a website', explanation: 'The passage tells candidates to apply online at the careers website.' }
-          ]
-        },
-        {
-          id: 176,
-          type: 'passage_group',
-          content: {
-            stimuli: [
-              {
-                type: 'text',
-                title: 'Notice',
-                content: 'Dear Customers,\n\nWe are excited to announce our upcoming seasonal sale! Starting next Monday, all items in the store will be discounted by 20%. Please note that this offer cannot be combined with other coupons.\n\nManagement'
-              },
-              {
-                type: 'image',
-                title: 'Market Share Chart',
-                url: 'https://images.unsplash.com/photo-1551288049-bbdac8a28a1e?q=80&w=2070&auto=format&fit=crop'
-              },
-              {
-                type: 'text',
-                title: 'Email',
-                content: 'From: Sarah Jenkins\nTo: Customer Service\nDate: Tuesday\n\nI saw the notice about the sale. I am interested in buying a new laptop. Does the 20% discount apply to electronics as well? Also, the chart you shared shows your market share growing. Congratulations!'
-              }
-            ]
-          },
-          subQuestions: [
-            { id: 176, text: 'What is the purpose of the notice?', options: ['(A) To announce a new store opening', '(B) To inform customers about a sale', '(C) To recruit new staff', '(D) To apologize for a service delay'], correctAnswer: '(B) To inform customers about a sale', explanation: 'The notice announces an upcoming seasonal sale.' },
-            { id: 177, text: 'When did Sarah Jenkins write the email?', options: ['(A) Monday', '(B) Tuesday', '(C) Wednesday', '(D) Friday'], correctAnswer: '(B) Tuesday', explanation: 'The email header shows the date as Tuesday.' },
-            { id: 178, text: 'According to the stimuli, what is true about the sale?', options: ['(A) It applies to all items', '(B) It starts on Tuesday', '(C) It can be used with other coupons', '(D) It lasts for one month'], correctAnswer: '(A) It applies to all items', explanation: 'The notice says all items in the store will be discounted by 20%.' }
+            { 
+              id: 147, 
+              text: 'What is the main topic of the meeting?', 
+              options: ['(A) Organizing a company retreat', '(B) Reviewing financial results and new products', '(C) Hiring new sales representatives', '(D) Upgrading the office software'], 
+              correctAnswer: '(B) Reviewing financial results and new products', 
+              explanation: 'Trong đoạn văn có đề cập rõ ràng mục đích của cuộc họp: "We will be discussing the Q3 financial results and introducing the new product line" (Chúng ta sẽ thảo luận về kết quả tài chính quý 3 và giới thiệu dòng sản phẩm mới). Do đó chọn (B).' 
+            },
+            { 
+              id: 148, 
+              text: 'What are attendees asked to do before the meeting?', 
+              options: ['(A) Submit an expense report', '(B) Contact Sunrise Cafe', '(C) Read an agenda', '(D) Prepare a presentation'], 
+              correctAnswer: '(C) Read an agenda', 
+              explanation: 'Câu cuối cùng của đoạn ghi chú viết: "Please review the attached agenda beforehand." (Vui lòng xem trước chương trình làm việc được đính kèm). "Review" đồng nghĩa với "Read".' 
+            }
           ]
         }
       ]
