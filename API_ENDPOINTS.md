@@ -16,14 +16,13 @@ All responses are wrapped by:
 
 ## Authentication (for FE)
 
-### FE flow đề xuất
+### FE flow de xuat
 
-1. User login bằng email/password qua `POST /auth/token`.
-2. Lấy `accessToken` từ `result` và lưu (ưu tiên memory hoặc secure storage).
-3. Gọi API protected với header:
-   - `Authorization: Bearer <accessToken>`
-4. Khi app reload hoặc trước action quan trọng, có thể validate token bằng `POST /auth/introspect`.
-5. Nếu API trả lỗi unauthorized/forbidden, FE clear session và điều hướng về màn login.
+1. User login bang email/password qua `POST /auth/token`.
+2. Lay `token` tu `result` va luu (uu tien memory hoac secure storage).
+3. Goi API protected voi header `Authorization: Bearer <token>`.
+4. Khi app reload hoac truoc action quan trong, co the validate token bang `POST /auth/introspect`.
+5. Neu API tra unauthorized/forbidden, FE clear session va dieu huong ve man login.
 
 ### 1) Login
 
@@ -48,7 +47,7 @@ Response (example):
   "code": 1000,
   "message": "success",
   "result": {
-    "accessToken": "<jwt-token>",
+    "token": "<jwt-token>",
     "authenticated": true
   }
 }
@@ -81,22 +80,49 @@ Response (example):
 }
 ```
 
-## Users (for FE)
+### 3) Logout
 
-### User object FE thường dùng
+- Method: `POST`
+- Path: `/auth/logout`
+- Auth: Bearer JWT
+- Content-Type: `application/json`
+
+Headers:
+
+```http
+Authorization: Bearer <jwt-token>
+```
+
+Request body:
 
 ```json
 {
-  "id": "uuid",
+  "token": "<jwt-token>"
+}
+```
+
+## Users (for FE)
+
+### User object FE thuong dung
+
+```json
+{
+  "id": 1,
   "email": "student1@gmail.com",
   "fullName": "Student 1",
   "phone": "0900000000",
   "avatarUrl": "https://example.com/avatar.png",
-  "roles": ["STUDENT"]
+  "roles": [
+    {
+      "name": "STUDENT",
+      "description": "STUDENT",
+      "permissions": []
+    }
+  ]
 }
 ```
 
-### 3) Create user (register)
+### 4) Create user (register)
 
 - Method: `POST`
 - Path: `/users`
@@ -115,7 +141,7 @@ Request body:
 }
 ```
 
-### 4) Get all users (admin)
+### 5) Get all users (admin)
 
 - Method: `GET`
 - Path: `/users`
@@ -128,12 +154,12 @@ Headers:
 Authorization: Bearer <jwt-token>
 ```
 
-### 5) Get user by ID
+### 6) Get user by ID (admin)
 
 - Method: `GET`
 - Path: `/users/{userId}`
 - Auth: Bearer JWT
-- Authorization: chỉ user sở hữu data đó (email của user trả về phải trùng với `authentication.name`)
+- Authorization: `hasRole('ADMIN')`
 
 Headers:
 
@@ -141,7 +167,7 @@ Headers:
 Authorization: Bearer <jwt-token>
 ```
 
-### 6) Get my info
+### 7) Get my info
 
 - Method: `GET`
 - Path: `/users/myInfo`
@@ -153,11 +179,12 @@ Headers:
 Authorization: Bearer <jwt-token>
 ```
 
-### 7) Update user
+### 8) Update user
 
 - Method: `PUT`
 - Path: `/users/{userId}`
 - Auth: Bearer JWT
+- Authorization: `ADMIN` hoac chinh user do (owner)
 - Content-Type: `application/json`
 
 Headers:
@@ -178,7 +205,7 @@ Request body:
 }
 ```
 
-### 8) Delete user
+### 9) Delete user
 
 - Method: `DELETE`
 - Path: `/users/{userId}`
@@ -192,7 +219,7 @@ Authorization: Bearer <jwt-token>
 
 ## Roles
 
-### 9) Create role
+### 10) Create role
 
 - Method: `POST`
 - Path: `/roles`
@@ -208,13 +235,13 @@ Request body:
 }
 ```
 
-### 10) Get all roles
+### 11) Get all roles
 
 - Method: `GET`
 - Path: `/roles`
 - Auth: Bearer JWT
 
-### 11) Delete role
+### 12) Delete role
 
 - Method: `DELETE`
 - Path: `/roles/{role}`
@@ -223,7 +250,7 @@ Request body:
 
 ## Permissions
 
-### 12) Create permission
+### 13) Create permission
 
 - Method: `POST`
 - Path: `/permissions`
@@ -238,13 +265,13 @@ Request body:
 }
 ```
 
-### 13) Get all permissions
+### 14) Get all permissions
 
 - Method: `GET`
 - Path: `/permissions`
 - Auth: Bearer JWT
 
-### 14) Delete permission
+### 15) Delete permission
 
 - Method: `DELETE`
 - Path: `/permissions/{permission}`
@@ -258,6 +285,5 @@ Public endpoints (`POST` only):
 - `/users`
 - `/auth/token`
 - `/auth/introspect`
-- `/auth/logout` (present in security config)
 
 All other endpoints require Bearer JWT.

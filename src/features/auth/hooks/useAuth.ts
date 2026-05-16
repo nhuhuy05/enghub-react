@@ -36,7 +36,7 @@ export const useAuth = () => {
     setError(null);
     try {
       const response = await authService.login(data);
-      if (response.code === 1000 && response.result.authenticated) {
+      if (response.code === 1000 && response.result.authenticated && response.result.token) {
         setToken(response.result.token);
         const userResponse = await authService.getMyInfo();
         setAuth(userResponse.result, response.result.token);

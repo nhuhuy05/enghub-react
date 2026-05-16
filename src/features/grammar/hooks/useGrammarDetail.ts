@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { GrammarDetailData, Lesson } from '../types';
+import type { GrammarDetailData } from '../types';
 import { grammarService } from '../services/grammarService';
 
 export const useGrammarDetail = (topicId: string) => {

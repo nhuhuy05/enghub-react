@@ -8,7 +8,7 @@ export const profileService = {
     return response.data;
   },
 
-  updateProfile: async (userId: string, data: UpdateProfileRequest): Promise<ApiResponse<User>> => {
+  updateProfile: async (userId: string | number, data: UpdateProfileRequest): Promise<ApiResponse<User>> => {
     const response = await apiClient.put<ApiResponse<User>>(`/users/${userId}`, data);
     return response.data;
   },
