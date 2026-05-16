@@ -73,7 +73,7 @@ export const ExamInterface: React.FC = () => {
           instruction={currentPart.instruction}
           question={currentQuestion}
         />
-        <RightPanel 
+        <RightPanel
           question={currentQuestion}
           selectedAnswers={selectedAnswers}
           onSelectAnswer={setAnswer}

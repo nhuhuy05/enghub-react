@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, Link } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { MainLayout } from '../components/layout/MainLayout';
 import { LoginForm } from '../features/auth/components/LoginForm';
@@ -43,11 +43,6 @@ export const AppRoutes = () => {
         element={
           <AuthLayout visualContent={<LoginVisual />}>
             <LoginForm />
-            <div className="mt-8 text-center lg:hidden">
-              <Link to="/register" className="text-sm font-bold text-primary hover:underline">
-                Don't have an account? Sign Up
-              </Link>
-            </div>
           </AuthLayout>
         }
       />
@@ -57,11 +52,6 @@ export const AppRoutes = () => {
         element={
           <AuthLayout reverse visualContent={<RegisterVisual />}>
             <RegisterForm />
-            <div className="mt-8 text-center lg:hidden">
-              <Link to="/login" className="text-sm font-bold text-primary hover:underline">
-                Already have an account? Sign In
-              </Link>
-            </div>
           </AuthLayout>
         }
       />

@@ -7,6 +7,7 @@ interface RightPanelProps {
   selectedAnswers: Record<number, string>;
   onSelectAnswer: (questionId: number, answer: string) => void;
   shouldShowFeedback: boolean;
+  className?: string;
 }
 
 export const RightPanel: React.FC<RightPanelProps> = ({ 
@@ -14,6 +15,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   selectedAnswers, 
   onSelectAnswer,
   shouldShowFeedback,
+  className = 'w-1/2',
 }) => {
   const renderFeedback = (qId: number, correctAnswer?: string, explanation?: string) => {
     const selectedAnswer = selectedAnswers[qId];
@@ -76,7 +78,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   };
 
   return (
-    <div className="flex w-1/2 flex-col overflow-hidden rounded-xl border border-[#d1d5db] bg-white shadow-sm">
+    <div className={`flex flex-col overflow-hidden rounded-xl border border-[#d1d5db] bg-white shadow-sm ${className}`}>
       <div className="border-b border-[#f0f0f0] bg-[#fafafa] px-6 py-3">
         <h3 className="text-base font-bold text-gray-700">Question</h3>
       </div>

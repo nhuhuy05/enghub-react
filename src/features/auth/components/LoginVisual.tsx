@@ -4,7 +4,7 @@ import { Users } from 'lucide-react';
 
 export const LoginVisual: React.FC = () => {
   return (
-    <>
+    <div className="relative flex h-full w-full items-center justify-center p-10 xl:p-12">
       <div className="pointer-events-none absolute inset-0 opacity-15">
         <svg height="100%" width="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -20,17 +20,17 @@ export const LoginVisual: React.FC = () => {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 max-w-xl text-white"
+        className="relative z-10 w-full max-w-[360px] text-white"
       >
-        <div className="mb-6">
-          <span className="mb-1 block text-[30px] font-semibold text-[#dbe1ff]">EngHub</span>
-          <h1 className="mb-4 text-[30px] font-bold leading-tight">Elevate your English, master your future.</h1>
-          <p className="max-w-md text-base leading-relaxed text-[#b4c5ff] opacity-90">
-            Join thousands of students achieving elite scores through personalized practice.
+        <div className="mb-5">
+          <span className="mb-1 block text-[28px] font-semibold text-[#dbe1ff]">EngHub</span>
+          <h1 className="mb-3 text-[28px] font-bold leading-tight">Luyện TOEIC có lộ trình</h1>
+          <p className="text-sm leading-relaxed text-[#b4c5ff] opacity-90">
+            Học theo mục tiêu cá nhân với bộ đề, phân tích lỗi và nhắc ôn thông minh.
           </p>
         </div>
 
-        <div className="w-full max-w-md overflow-hidden rounded-xl bg-white p-3 shadow-2xl">
+        <div className="w-full overflow-hidden rounded-xl bg-white p-2.5 shadow-2xl">
           <img 
             alt="Student studying" 
             className="aspect-video w-full rounded-lg object-cover shadow-inner"
@@ -38,7 +38,7 @@ export const LoginVisual: React.FC = () => {
           />
         </div>
 
-        <div className="mt-8 flex items-center gap-4">
+        <div className="mt-6 flex items-center gap-3">
           <div className="flex -space-x-3">
             {[1, 2, 3].map((i) => (
               <img 
@@ -51,12 +51,12 @@ export const LoginVisual: React.FC = () => {
           </div>
           <div className="flex items-center gap-2 text-[#eeefff] opacity-90">
             <Users className="h-4 w-4" />
-            <p className="text-sm font-medium uppercase tracking-wide">
-              +5,000 students active today
+            <p className="text-xs font-medium uppercase tracking-wide">
+            Nhiều học viên đang luyện tập  
             </p>
           </div>
         </div>
       </motion.div>
-    </>
+    </div>
   );
 };

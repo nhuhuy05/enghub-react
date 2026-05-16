@@ -11,7 +11,7 @@ const mockExams: Exam[] = [
   { id: '8', tab: 'Hacker TOEIC', title: 'Hacker TOEIC Test 1', status: 'Chưa luyện tập', progress: 0, doneQuestions: 0, totalQuestions: 200, learnersCount: '4.1k' },
 ];
 
-export const mockExamDetail = {
+export const mockExamDetail: ExamDetail = {
   id: '1',
   title: 'ETS 2024 Test 1 - Realistic Short Mock',
   parts: [
