@@ -33,7 +33,7 @@ const quickCards = [
   { title: 'Mock Exam', icon: TimerReset },
 ];
 
-export const DashboardPage = () => {
+export const StudentDashboardPage = () => {
   return (
     <main className="min-h-screen bg-[#f6f7fc] px-4 py-8 pt-28 text-[#191b23] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1280px]">

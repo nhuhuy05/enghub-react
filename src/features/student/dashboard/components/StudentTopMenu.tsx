@@ -1,7 +1,7 @@
 import { Bell, SunMedium } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
-import { useAuth } from '../../auth/hooks/useAuth';
-import { EngHubLogo } from '../../../components/brand/EngHubLogo';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { EngHubLogo } from '@/components/brand/EngHubLogo';
 
 const navItems = [
   { label: 'Ngữ pháp', href: '/grammar' },
@@ -11,7 +11,7 @@ const navItems = [
   { label: 'Đề thi', href: '/exam' },
 ];
 
-export const TopMenu = () => {
+export const StudentTopMenu = () => {
   const { user, isAuthenticated } = useAuth();
 
   return (
