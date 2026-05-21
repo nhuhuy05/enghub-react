@@ -13,7 +13,7 @@ export const useGrammar = () => {
         setIsLoading(true);
         const data = await grammarService.getTopics();
         setTopics(data);
-      } catch (err) {
+      } catch {
         setError('Không thể tải danh sách chủ điểm ngữ pháp.');
       } finally {
         setIsLoading(false);

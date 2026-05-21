@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   AlertCircle,
@@ -53,13 +53,16 @@ export const ProfilePage = () => {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    if (!profile) return;
+  const [prevProfile, setPrevProfile] = useState<typeof profile>(null);
 
-    setFullName(profile.fullName || '');
-    setPhone(profile.phone || '');
-    setAvatarUrl(profile.avatarUrl || '');
-  }, [profile]);
+  if (profile !== prevProfile) {
+    setPrevProfile(profile);
+    if (profile) {
+      setFullName(profile.fullName || '');
+      setPhone(profile.phone || '');
+      setAvatarUrl(profile.avatarUrl || '');
+    }
+  }
 
   const initials = useMemo(() => {
     const source = profile?.fullName || profile?.email || 'User';

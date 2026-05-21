@@ -18,7 +18,7 @@ export const useGrammarDetail = (topicId: string) => {
         if (detail.lessons.length > 0) {
           setActiveLessonId(detail.lessons[0].id);
         }
-      } catch (err) {
+      } catch {
         setError('Không thể tải chi tiết chủ điểm ngữ pháp.');
       } finally {
         setIsLoading(false);

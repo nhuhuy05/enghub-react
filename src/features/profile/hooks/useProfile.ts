@@ -40,14 +40,29 @@ export const useProfile = () => {
     }
   }, [updateUser]);
 
+  // Sync profile when storedUser changes
+  const [prevStoredUser, setPrevStoredUser] = useState<User | null>(storedUser);
+  if (storedUser !== prevStoredUser) {
+    setPrevStoredUser(storedUser);
+    setProfile(storedUser);
+  }
+
   useEffect(() => {
     if (!storedUser) {
-      void refreshProfile();
-      return;
+      const fetchProfile = async () => {
+        try {
+          const response = await profileService.getMyInfo();
+          setProfile(response.result);
+          updateUser(response.result);
+        } catch (err) {
+          setError(getErrorMessage(err, 'Không thể tải thông tin người dùng.'));
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      void fetchProfile();
     }
-
-    setProfile(storedUser);
-  }, [refreshProfile, storedUser]);
+  }, [storedUser, updateUser]);
 
   const saveProfile = async (data: UpdateProfileRequest) => {
     if (!profile?.id) {
