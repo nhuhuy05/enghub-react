@@ -1,4 +1,4 @@
-import { BookOpenCheck, ClipboardList, LayoutDashboard } from 'lucide-react';
+import { BookOpenCheck, ClipboardList, LayoutDashboard, FileSpreadsheet } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { EngHubLogo } from '@/components/brand/EngHubLogo';
 
@@ -6,6 +6,7 @@ const navItems = [
   { label: 'Dashboard', href: '/teacher/dashboard', icon: LayoutDashboard },
   { label: 'Classes', href: '/teacher/classes', icon: BookOpenCheck },
   { label: 'Assignments', href: '/teacher/assignments', icon: ClipboardList },
+  { label: 'Đề thi', href: '/teacher/tests', icon: FileSpreadsheet },
 ];
 
 export const TeacherLayout = () => {

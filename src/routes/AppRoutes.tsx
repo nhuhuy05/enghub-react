@@ -25,6 +25,8 @@ import { ProfilePage } from '../features/profile/components/ProfilePage';
 import { TeacherDashboardPage } from '../features/teacher/dashboard/components/TeacherDashboardPage';
 import { TeacherClassesPage } from '../features/teacher/classes/components/TeacherClassesPage';
 import { TeacherAssignmentsPage } from '../features/teacher/assignments/components/TeacherAssignmentsPage';
+import { TestListPage } from '../features/teacher/tests/components/TestListPage';
+import { CreateTestPage } from '../features/teacher/tests/components/CreateTestPage';
 import { AdminDashboardPage } from '../features/admin/dashboard/components/AdminDashboardPage';
 import { AdminUsersPage } from '../features/admin/users/components/AdminUsersPage';
 import { AdminRolesPage } from '../features/admin/roles/components/AdminRolesPage';
@@ -58,6 +60,8 @@ export const AppRoutes = () => {
             <Route path="/teacher/dashboard" element={<TeacherDashboardPage />} />
             <Route path="/teacher/classes" element={<TeacherClassesPage />} />
             <Route path="/teacher/assignments" element={<TeacherAssignmentsPage />} />
+            <Route path="/teacher/tests" element={<TestListPage />} />
+            <Route path="/teacher/tests/create" element={<CreateTestPage />} />
           </Route>
         </Route>
 
