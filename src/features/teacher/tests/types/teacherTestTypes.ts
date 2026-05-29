@@ -5,6 +5,16 @@ export interface TestCollection {
   created_at: string;
 }
 
+export type WorkflowStatus =
+  | 'draft'
+  | 'media_uploaded'
+  | 'imported'
+  | 'reviewing'
+  | 'preview_ready'
+  | 'published';
+
+export type ReviewStatus = 'needs_review' | 'reviewed';
+
 export interface Test {
   id: number;
   collection_id: number | null;
@@ -15,6 +25,7 @@ export interface Test {
   total_questions: number;
   duration_minutes: number;
   is_published: boolean;
+  workflow_status?: WorkflowStatus;
   created_at: string;
 }
 
@@ -38,6 +49,119 @@ export interface AudioRange {
   media_asset_id: number;
   start_ms: number;
   end_ms: number | null;
+}
+
+export interface QuestionGroupSummary {
+  id: number;
+  part_number: number;
+  group_order: number;
+  question_numbers: string;
+  review_status: ReviewStatus;
+  missing_flags: string[];
+}
+
+export interface GroupImage {
+  id?: number;
+  media_asset_id: number;
+  label?: string | null;
+  url?: string | null;
+  order_index: number;
+}
+
+export interface GroupAudio {
+  id?: number;
+  media_asset_id: number;
+  label?: string | null;
+  url?: string | null;
+  start_ms: number | null;
+  end_ms: number | null;
+  transcript_en: string | null;
+  transcript_vi: string | null;
+}
+
+export interface GroupPassage {
+  id?: number;
+  media_asset_id: number | null;
+  label?: string | null;
+  url?: string | null;
+  title: string | null;
+  passage_type: 'image' | 'text' | string;
+  content_format: 'image' | 'text' | string;
+  content_en: string | null;
+  content_vi: string | null;
+  vocab_hints: string | null;
+  order_index: number;
+}
+
+export interface GroupAnswer {
+  id: number;
+  label: 'A' | 'B' | 'C' | 'D' | string;
+  answer_text_en: string | null;
+  answer_text_vi: string | null;
+  is_correct: boolean;
+}
+
+export interface GroupQuestion {
+  id: number;
+  question_number: number;
+  question_text_en: string | null;
+  question_text_vi: string | null;
+  explanation_vi: string | null;
+  answers: GroupAnswer[];
+}
+
+export interface QuestionGroupDetail {
+  id: number;
+  part_number: number;
+  group_order: number;
+  question_numbers?: string;
+  review_status: ReviewStatus;
+  missing_flags?: string[];
+  images: GroupImage[];
+  audio: GroupAudio | null;
+  passages: GroupPassage[];
+  questions: GroupQuestion[];
+}
+
+export interface PatchGroupImageInput {
+  media_asset_id: number;
+  order_index: number;
+}
+
+export interface PatchGroupAudioInput {
+  media_asset_id: number | null;
+  start_ms: number | null;
+  end_ms: number | null;
+  transcript_en: string | null;
+  transcript_vi: string | null;
+}
+
+export interface PatchGroupTranscriptInput {
+  transcript_en: string | null;
+  transcript_vi: string | null;
+}
+
+export interface PatchGroupPassageInput {
+  media_asset_id: number | null;
+  title: string | null;
+  passage_type: 'image' | 'text' | string;
+  content_format: 'image' | 'text' | string;
+  content_en: string | null;
+  content_vi: string | null;
+  vocab_hints: string | null;
+  order_index: number;
+}
+
+export interface PatchQuestionInput {
+  question_text_en: string | null;
+  question_text_vi: string | null;
+  explanation_vi: string | null;
+}
+
+export interface PatchAnswerInput {
+  answer_text_en: string | null;
+  answer_text_vi: string | null;
+  is_correct: boolean;
 }
 
 export interface ImportSummary {
@@ -67,6 +191,20 @@ export interface PreviewResult {
   reading_missing_passage_count: number;
   publishable: boolean;
   errors: string[];
+}
+
+export interface PreviewPart {
+  part_number: number;
+  title: string;
+  groups: QuestionGroupDetail[];
+}
+
+export interface PreviewContent {
+  test_id: number;
+  title: string;
+  description: string;
+  duration_minutes: number;
+  parts: PreviewPart[];
 }
 
 export interface PublishResult {

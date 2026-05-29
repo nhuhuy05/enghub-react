@@ -1,42 +1,55 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Check } from 'lucide-react';
-
-// Steps imports
 import { StepCollectionTest } from './steps/StepCollectionTest';
 import { StepMediaUpload } from './steps/StepMediaUpload';
 import { StepQuestionImport } from './steps/StepQuestionImport';
-import { StepAudioRanges } from './steps/StepAudioRanges';
+import { StepReviewGroups } from './steps/StepReviewGroups';
 import { StepPreview } from './steps/StepPreview';
 import { StepPublish } from './steps/StepPublish';
+import { teacherTestService } from '../services/teacherTestService';
+import type { Test } from '../types/teacherTestTypes';
 
 const STEPS = [
-  { id: 1, label: 'Khởi tạo đề' },
-  { id: 2, label: 'Tải Media' },
-  { id: 3, label: 'Nhập câu hỏi' },
-  { id: 4, label: 'Mốc audio' },
-  { id: 5, label: 'Kiểm duyệt' },
-  { id: 6, label: 'Xuất bản' },
+  { id: 1, label: 'Khoi tao de' },
+  { id: 2, label: 'Tai media' },
+  { id: 3, label: 'Nhap Excel' },
+  { id: 4, label: 'Review groups' },
+  { id: 5, label: 'Preview' },
+  { id: 6, label: 'Xuat ban' },
 ];
 
 export const CreateTestPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  
-  // Read params
+
   const urlTestId = searchParams.get('testId');
   const urlCollectionId = searchParams.get('collectionId');
 
-  const [testId, setTestId] = useState<number | null>(
-    urlTestId ? parseInt(urlTestId, 10) : null
-  );
-  const [collectionId] = useState<number | null>(
-    urlCollectionId ? parseInt(urlCollectionId, 10) : null
-  );
-
+  const [testId, setTestId] = useState<number | null>(urlTestId ? parseInt(urlTestId, 10) : null);
+  const [collectionId] = useState<number | null>(urlCollectionId ? parseInt(urlCollectionId, 10) : null);
   const [activeStep, setActiveStep] = useState<number>(1);
+  const [test, setTest] = useState<Test | null>(null);
 
-  // If testId changes, update the URL search params so page refresh works correctly
+  useEffect(() => {
+    if (!testId) {
+      return;
+    }
+
+    const loadTest = async () => {
+      try {
+        const res = await teacherTestService.getTestById(testId);
+        if (res.code === 1000) {
+          setTest(res.result);
+        }
+      } catch (err) {
+        console.warn('Cannot load test title for wizard header:', err);
+      }
+    };
+
+    void loadTest();
+  }, [testId]);
+
   const handleSetTestId = (id: number) => {
     setTestId(id);
     setSearchParams((prev) => {
@@ -58,7 +71,6 @@ export const CreateTestPage = () => {
   };
 
   const goToStep = (stepId: number) => {
-    // Only allow navigation to subsequent steps if test has been created
     if (testId || stepId === 1) {
       setActiveStep(stepId);
     }
@@ -68,7 +80,6 @@ export const CreateTestPage = () => {
     navigate('/teacher/tests');
   };
 
-  // Render step component
   const renderStepComponent = () => {
     switch (activeStep) {
       case 1:
@@ -81,29 +92,16 @@ export const CreateTestPage = () => {
           />
         );
       case 2:
-        return testId ? (
-          <StepMediaUpload testId={testId} nextStep={nextStep} prevStep={prevStep} />
-        ) : null;
+        return testId ? <StepMediaUpload testId={testId} nextStep={nextStep} prevStep={prevStep} /> : null;
       case 3:
-        return testId ? (
-          <StepQuestionImport testId={testId} nextStep={nextStep} prevStep={prevStep} />
-        ) : null;
+        return testId ? <StepQuestionImport testId={testId} nextStep={nextStep} prevStep={prevStep} /> : null;
       case 4:
-        return testId ? (
-          <StepAudioRanges testId={testId} nextStep={nextStep} prevStep={prevStep} />
-        ) : null;
+        return testId ? <StepReviewGroups testId={testId} nextStep={nextStep} prevStep={prevStep} /> : null;
       case 5:
-        return testId ? (
-          <StepPreview testId={testId} nextStep={nextStep} prevStep={prevStep} />
-        ) : null;
+        return testId ? <StepPreview testId={testId} nextStep={nextStep} prevStep={prevStep} /> : null;
       case 6:
         return testId ? (
-          <StepPublish
-            testId={testId}
-            collectionId={collectionId}
-            prevStep={prevStep}
-            onComplete={handleComplete}
-          />
+          <StepPublish testId={testId} collectionId={collectionId} prevStep={prevStep} onComplete={handleComplete} />
         ) : null;
       default:
         return null;
@@ -111,32 +109,23 @@ export const CreateTestPage = () => {
   };
 
   return (
-    <main className="px-4 py-8 sm:px-6 lg:px-8 bg-[#f6f7fc] min-h-[calc(100vh-64px)]">
-      <div className="mx-auto max-w-[1120px]">
-        {/* Back Link */}
+    <main className="min-h-[calc(100vh-64px)] bg-[#f6f7fc] px-3 py-3 sm:px-4 lg:px-4">
+      <div className="mx-auto max-w-[1480px]">
         <button
           onClick={() => navigate('/teacher/tests')}
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#505f76] hover:text-[#004ac6] transition-colors"
+          className="mb-3 inline-flex max-w-full items-center gap-2 text-sm font-semibold text-[#505f76] transition-colors hover:text-[#004ac6]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại danh sách
+          <span className="truncate">
+            {testId && test ? test.title : 'Quay lai danh sach'}
+          </span>
         </button>
 
-        {/* Wizard Header Card */}
-        <div className="rounded-2xl border border-[#d8dced] bg-white p-6 sm:p-8 shadow-sm">
-          <div className="mb-6">
-            <h1 className="text-2xl font-extrabold text-[#111827]">Tạo đề thi TOEIC mới</h1>
-            <p className="mt-1 text-sm text-[#667085]">
-              {testId ? `Đang chỉnh sửa Đề thi ID: ${testId}` : 'Tạo mới, nhập thông tin, tải lên tài nguyên và xuất bản.'}
-            </p>
-          </div>
-
-          {/* Premium Stepper */}
-          <div className="relative flex items-center justify-between w-full mt-8 select-none">
-            {/* Stepper Progress Bar */}
-            <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-[#e4e7ec] -translate-y-1/2 z-0 hidden md:block" />
+        <div className="sticky top-0 z-30 rounded-2xl border border-[#d8dced] bg-white px-5 py-3 shadow-sm sm:px-6 lg:top-0">
+          <div className="relative flex w-full select-none items-center justify-between gap-2">
+            <div className="absolute left-0 right-0 top-1/2 z-0 h-0.5 -translate-y-1/2 bg-[#e4e7ec]" />
             <div
-              className="absolute left-0 top-1/2 h-0.5 bg-[#004ac6] -translate-y-1/2 z-0 transition-all duration-300 hidden md:block"
+              className="absolute left-0 top-1/2 z-0 h-0.5 -translate-y-1/2 bg-[#004ac6] transition-all duration-300"
               style={{
                 width: `${((activeStep - 1) / (STEPS.length - 1)) * 100}%`,
               }}
@@ -152,22 +141,24 @@ export const CreateTestPage = () => {
                   key={step.id}
                   onClick={() => goToStep(step.id)}
                   disabled={isDisabled}
-                  className="relative z-10 flex flex-col items-center group focus:outline-none"
+                  className={`group relative z-10 flex items-center bg-white focus:outline-none ${
+                    step.id === 1 ? 'pr-2' : step.id === STEPS.length ? 'pl-2' : 'px-2'
+                  }`}
                 >
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold text-sm transition-all duration-200 ${
+                    className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-200 ${
                       isCompleted
-                        ? 'bg-[#004ac6] border-[#004ac6] text-white'
+                        ? 'border-[#004ac6] bg-[#004ac6] text-white'
                         : isActive
-                        ? 'bg-white border-[#004ac6] text-[#004ac6] ring-4 ring-[#004ac6]/10'
-                        : 'bg-white border-[#d8dced] text-[#667085] hover:border-[#98a2b3]'
+                          ? 'border-[#004ac6] bg-white text-[#004ac6] ring-4 ring-[#004ac6]/10'
+                          : 'border-[#d8dced] bg-white text-[#667085] hover:border-[#98a2b3]'
                     } ${isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                   >
-                    {isCompleted ? <Check className="h-5 w-5" /> : step.id}
+                    {isCompleted ? <Check className="h-4 w-4" /> : step.id}
                   </div>
                   <span
-                    className={`mt-2 text-xs font-semibold whitespace-nowrap transition-all hidden md:block ${
-                      isActive ? 'text-[#004ac6] font-bold' : 'text-[#667085] group-hover:text-[#111827]'
+                    className={`ml-2 hidden whitespace-nowrap text-xs font-semibold transition-all md:block ${
+                      isActive ? 'font-bold text-[#004ac6]' : 'text-[#667085] group-hover:text-[#111827]'
                     } ${isDisabled ? 'opacity-50' : ''}`}
                   >
                     {step.label}
@@ -178,8 +169,7 @@ export const CreateTestPage = () => {
           </div>
         </div>
 
-        {/* Dynamic Step Component Container */}
-        <div className="mt-8 rounded-2xl border border-[#d8dced] bg-white p-6 sm:p-8 shadow-sm">
+        <div className="mt-4 rounded-2xl border border-[#d8dced] bg-white p-3 shadow-sm sm:p-4">
           {renderStepComponent()}
         </div>
       </div>

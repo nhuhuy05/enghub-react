@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { AlertCircle, ArrowRight, FolderPlus } from 'lucide-react';
+import { AlertCircle, ArrowRight } from 'lucide-react';
 import { teacherTestService } from '../../services/teacherTestService';
-import type { TestCollection, Test } from '../../types/teacherTestTypes';
+import type { TestCollection } from '../../types/teacherTestTypes';
 
 interface StepCollectionTestProps {
   testId: number | null;
@@ -28,6 +28,14 @@ export const StepCollectionTest = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [duration, setDuration] = useState<number>(120);
+
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+      const response = (err as { response?: { data?: { message?: string } } }).response;
+      return response?.data?.message || fallback;
+    }
+    return err instanceof Error ? err.message : fallback;
+  };
 
   // Fetch collections
   useEffect(() => {
@@ -61,7 +69,7 @@ export const StepCollectionTest = ({
       const loadTest = async () => {
         try {
           setLoading(true);
-          const res = await teacherTestService.getTestById(testId, collectionId);
+          const res = await teacherTestService.getTestById(testId);
           if (res.code === 1000 && res.result) {
             const t = res.result;
             setTitle(t.title);
@@ -128,8 +136,8 @@ export const StepCollectionTest = ({
       } else {
         setErrorMsg(res.message || 'Tạo đề thi thất bại');
       }
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || 'Có lỗi xảy ra khi tạo đề thi');
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, 'Có lỗi xảy ra khi tạo đề thi'));
     } finally {
       setSaving(false);
     }

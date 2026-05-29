@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Plus,
   BookOpen,
@@ -9,16 +9,12 @@ import {
   FolderPlus,
   ArrowRight,
   FolderOpen,
-  ListFilter,
   FileText,
-  Trash2,
-  ExternalLink
 } from 'lucide-react';
 import { teacherTestService } from '../services/teacherTestService';
 import type { TestCollection, Test } from '../types/teacherTestTypes';
 
 export const TestListPage = () => {
-  const navigate = useNavigate();
   const [collections, setCollections] = useState<TestCollection[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<TestCollection | null>(null);
   const [tests, setTests] = useState<Test[]>([]);
@@ -34,19 +30,13 @@ export const TestListPage = () => {
   const [newCollectionDesc, setNewCollectionDesc] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Fetch collections on mount
-  useEffect(() => {
-    fetchCollections();
-  }, []);
-
-  // Fetch tests when selected collection changes
-  useEffect(() => {
-    if (selectedCollection) {
-      fetchTests(selectedCollection.id);
-    } else {
-      setTests([]);
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+      const response = (err as { response?: { data?: { message?: string } } }).response;
+      return response?.data?.message || fallback;
     }
-  }, [selectedCollection]);
+    return err instanceof Error ? err.message : fallback;
+  };
 
   const fetchCollections = async () => {
     try {
@@ -109,12 +99,28 @@ export const TestListPage = () => {
       } else {
         setErrorMsg(res.message || 'Tạo bộ đề thất bại');
       }
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || 'Có lỗi xảy ra khi kết nối máy chủ');
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, 'Có lỗi xảy ra khi kết nối máy chủ'));
     } finally {
       setCreatingCollection(false);
     }
   };
+
+  // Fetch collections on mount
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchCollections();
+  }, []);
+
+  // Fetch tests when selected collection changes
+  useEffect(() => {
+    if (selectedCollection) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void fetchTests(selectedCollection.id);
+    } else {
+      setTests([]);
+    }
+  }, [selectedCollection]);
 
   return (
     <main className="px-4 py-8 sm:px-6 lg:px-8 bg-[#f6f7fc] min-h-[calc(100vh-64px)]">
