@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle,
+  ChevronDown,
   FileSpreadsheet,
   Info,
   Upload,
@@ -32,6 +33,7 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
   const [importing, setImporting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [showImportGuide, setShowImportGuide] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -44,7 +46,7 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
   const handleImport = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!selectedFile) {
-      setErrorMsg('Please choose an Excel file.');
+      setErrorMsg('Vui lòng chọn file Excel.');
       return;
     }
 
@@ -54,7 +56,7 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
       setImportResult(null);
       const res = await teacherTestService.importExcel(testId, selectedFile, replaceExisting);
       if (res.code !== 1000) {
-        setErrorMsg(res.message || 'Import failed.');
+        setErrorMsg(res.message || 'Import thất bại.');
         return;
       }
 
@@ -63,7 +65,7 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
         window.setTimeout(nextStep, 700);
       }
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Could not upload Excel file.'));
+      setErrorMsg(getErrorMessage(err, 'Không thể tải file Excel.'));
     } finally {
       setImporting(false);
     }
@@ -78,71 +80,83 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
         </div>
       )}
 
-      <div className="flex gap-3 rounded-2xl border border-[#004ac6]/10 bg-[#f0f4ff] p-5">
-        <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#004ac6]" />
-        <div className="space-y-2">
-          <h4 className="text-sm font-bold text-[#111827]">Excel import rules</h4>
-          <p className="text-xs leading-relaxed text-[#505f76]">
-            The workbook must contain a <strong className="text-[#111827]">questions</strong> sheet. For Part 1
-            and Part 2, question text and answer option text can be blank when the original TOEIC item does not show
-            printed text.
-          </p>
-          <div className="overflow-x-auto">
-            <table className="min-w-full overflow-hidden rounded-lg border border-[#d8dced] bg-white text-left text-[10px]">
-              <thead className="bg-[#f9fafb] font-bold text-[#344054]">
-                <tr>
-                  <th className="border-b border-[#e4e7ec] px-3 py-1.5">Column</th>
-                  <th className="border-b border-[#e4e7ec] px-3 py-1.5">Requirement</th>
-                  <th className="border-b border-[#e4e7ec] px-3 py-1.5">Note</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#e4e7ec] text-[#344054]">
-                <tr>
-                  <td className="px-3 py-1.5 font-semibold">part</td>
-                  <td className="px-3 py-1.5 text-[#027a48]">Required</td>
-                  <td className="px-3 py-1.5">Number from 1 to 7.</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-1.5 font-semibold">group_order</td>
-                  <td className="px-3 py-1.5 text-[#027a48]">Required</td>
-                  <td className="px-3 py-1.5">Groups rows into one question group inside each part.</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-1.5 font-semibold">q_number</td>
-                  <td className="px-3 py-1.5 text-[#027a48]">Required</td>
-                  <td className="px-3 py-1.5">Question number from 1 to 200, no duplicate.</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-1.5 font-semibold">question_text</td>
-                  <td className="px-3 py-1.5 text-[#b25e00]">Can be blank</td>
-                  <td className="px-3 py-1.5">Part 1-4 can leave blank if the original item has no printed question.</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-1.5 font-semibold">option_a, option_b, option_c</td>
-                  <td className="px-3 py-1.5 text-[#b25e00]">Part dependent</td>
-                  <td className="px-3 py-1.5">Part 1/2 can leave blank. Part 3-7 should include visible answer text when available.</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-1.5 font-semibold">option_d</td>
-                  <td className="px-3 py-1.5 text-[#b25e00]">Part dependent</td>
-                  <td className="px-3 py-1.5">Part 1/2 can leave blank. Part 2 usually has no D option.</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-1.5 font-semibold">correct</td>
-                  <td className="px-3 py-1.5 text-[#027a48]">Required</td>
-                  <td className="px-3 py-1.5">A/B/C/D. For Part 2, use A/B/C when there is no D option.</td>
-                </tr>
-              </tbody>
-            </table>
+      <div className="rounded-2xl border border-[#004ac6]/10 bg-[#f0f4ff]">
+        <button
+          type="button"
+          onClick={() => setShowImportGuide((value) => !value)}
+          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+        >
+          <span className="flex items-center gap-2 text-sm font-bold text-[#111827]">
+            <Info className="h-4.5 w-4.5 shrink-0 text-[#004ac6]" />
+            Hướng dẫn import Excel
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-[#505f76] transition-transform ${showImportGuide ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {showImportGuide && (
+          <div className="space-y-2 border-t border-[#d8dced] px-4 pb-4 pt-3">
+            <p className="text-xs leading-relaxed text-[#505f76]">
+              File Excel phải có sheet <strong className="text-[#111827]">questions</strong>. Với Part 1 và Part 2,
+              question text và answer option có thể để trống khi đề TOEIC gốc không hiển thị text in sẵn.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="min-w-full overflow-hidden rounded-lg border border-[#d8dced] bg-white text-left text-[10px]">
+                <thead className="bg-[#f9fafb] font-bold text-[#344054]">
+                  <tr>
+                    <th className="border-b border-[#e4e7ec] px-3 py-1.5">Cột</th>
+                    <th className="border-b border-[#e4e7ec] px-3 py-1.5">Yêu cầu</th>
+                    <th className="border-b border-[#e4e7ec] px-3 py-1.5">Ghi chú</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#e4e7ec] text-[#344054]">
+                  <tr>
+                    <td className="px-3 py-1.5 font-semibold">part</td>
+                    <td className="px-3 py-1.5 text-[#027a48]">Bắt buộc</td>
+                    <td className="px-3 py-1.5">Số từ 1 đến 7.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-semibold">group_order</td>
+                    <td className="px-3 py-1.5 text-[#027a48]">Bắt buộc</td>
+                    <td className="px-3 py-1.5">Gom các dòng vào cùng một question group trong từng Part.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-semibold">q_number</td>
+                    <td className="px-3 py-1.5 text-[#027a48]">Bắt buộc</td>
+                    <td className="px-3 py-1.5">Số câu từ 1 đến 200, không trùng.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-semibold">question_text</td>
+                    <td className="px-3 py-1.5 text-[#b25e00]">Có thể trống</td>
+                    <td className="px-3 py-1.5">Part 1/2/6 có thể để trống nếu đề gốc không có câu hỏi in sẵn.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-semibold">option_a, option_b, option_c</td>
+                    <td className="px-3 py-1.5 text-[#b25e00]">Tùy Part</td>
+                    <td className="px-3 py-1.5">Part 1/2 có thể để trống. Part 3-7 nên nhập answer text khi có.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-semibold">option_d</td>
+                    <td className="px-3 py-1.5 text-[#b25e00]">Tùy Part</td>
+                    <td className="px-3 py-1.5">Part 1/2 có thể để trống. Part 2 thường không có option D.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-semibold">correct</td>
+                    <td className="px-3 py-1.5 text-[#027a48]">Bắt buộc</td>
+                    <td className="px-3 py-1.5">A/B/C/D. Với Part 2, dùng A/B/C nếu không có option D.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <form onSubmit={handleImport} className="space-y-5 rounded-2xl border border-[#e4e7ec] bg-[#f9fafb] p-6 lg:col-span-5">
           <h3 className="flex items-center gap-2 text-sm font-bold text-[#111827]">
             <FileSpreadsheet className="h-4.5 w-4.5 text-[#004ac6]" />
-            Upload question Excel
+            Tải Excel câu hỏi
           </h3>
 
           <div className="relative cursor-pointer rounded-xl border-2 border-dashed border-[#d8dced] bg-white p-8 text-center transition-all hover:border-[#004ac6]">
@@ -161,8 +175,8 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
               </div>
             ) : (
               <div>
-                <p className="text-sm font-bold text-[#344054]">Choose Excel file</p>
-                <p className="mt-1 text-xs text-[#667085]">Accepts .xlsx or .xls</p>
+                <p className="text-sm font-bold text-[#344054]">Chọn file Excel</p>
+                <p className="mt-1 text-xs text-[#667085]">Hỗ trợ .xlsx hoặc .xls</p>
               </div>
             )}
           </div>
@@ -174,12 +188,12 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
               onChange={(event) => setReplaceExisting(event.target.checked)}
               className="h-4 w-4 rounded border-[#d8dced] text-[#004ac6] focus:ring-[#004ac6]"
             />
-            Replace previous imported data
+            Thay thế dữ liệu đã import trước đó
           </label>
 
           {replaceExisting && (
             <div className="rounded-xl border border-[#fecdca] bg-[#fff1f0] p-3 text-xs font-semibold text-[#b42318]">
-              Replace mode rebuilds imported questions, groups, and media mapping for this test.
+              Chế độ thay thế sẽ tạo lại questions, groups và media mapping đã import của đề này.
             </div>
           )}
 
@@ -188,25 +202,25 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
             disabled={importing}
             className="w-full rounded-lg bg-[#004ac6] py-2.5 text-sm font-bold text-white shadow-md transition-all hover:bg-[#003da3] disabled:opacity-40"
           >
-            {importing ? 'Importing...' : 'Import questions'}
+            {importing ? 'Đang import...' : 'Import câu hỏi'}
           </button>
         </form>
 
         <div className="flex flex-col justify-between rounded-2xl border border-[#d8dced] bg-white p-6 shadow-sm lg:col-span-7">
           <div>
-            <h3 className="mb-4 border-b border-[#f3f5fb] pb-3 text-sm font-bold text-[#111827]">Import result</h3>
+            <h3 className="mb-4 border-b border-[#f3f5fb] pb-3 text-sm font-bold text-[#111827]">Kết quả import</h3>
 
             {!importResult ? (
               <div className="py-16 text-center text-xs text-[#667085]">
-                No file has been imported yet.
+                Chưa import file nào.
               </div>
             ) : importResult.success ? (
               <div className="space-y-5">
                 <div className="flex items-center gap-3 rounded-xl border border-[#d3f5d5] bg-[#edfcf2] p-4">
                   <CheckCircle className="h-6 w-6 shrink-0 text-[#027a48]" />
                   <div>
-                    <h4 className="text-sm font-bold text-[#027a48]">Import successful</h4>
-                    <p className="mt-0.5 text-xs text-[#027a48]/90">Questions were imported. Moving to Review Groups...</p>
+                    <h4 className="text-sm font-bold text-[#027a48]">Import thành công</h4>
+                    <p className="mt-0.5 text-xs text-[#027a48]/90">Questions đã được import. Đang chuyển sang Review nhóm câu...</p>
                   </div>
                 </div>
                 <ImportSummary result={importResult} />
@@ -216,8 +230,8 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
                 <div className="flex items-center gap-3 rounded-xl border border-[#fee4e2] bg-[#fef3f2] p-4">
                   <AlertTriangle className="h-6 w-6 shrink-0 text-[#b42318]" />
                   <div>
-                    <h4 className="text-sm font-bold text-[#b42318]">Import failed</h4>
-                    <p className="mt-0.5 text-xs text-[#b42318]/90">Found {importResult.summary.error_count} errors.</p>
+                    <h4 className="text-sm font-bold text-[#b42318]">Import thất bại</h4>
+                    <p className="mt-0.5 text-xs text-[#b42318]/90">Có {importResult.summary.error_count} lỗi.</p>
                   </div>
                 </div>
                 <ImportSummary result={importResult} />
@@ -225,9 +239,9 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
                   <table className="min-w-full text-left text-xs">
                     <thead className="sticky top-0 border-b border-[#e4e7ec] bg-[#f9fafb] font-bold text-[#344054]">
                       <tr>
-                        <th className="px-4 py-2">Row</th>
+                        <th className="px-4 py-2">Dòng</th>
                         <th className="px-4 py-2">Field</th>
-                        <th className="px-4 py-2">Message</th>
+                        <th className="px-4 py-2">Thông báo</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#e4e7ec] text-[#344054]">
@@ -253,14 +267,14 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
           className="inline-flex items-center gap-2 rounded-lg border border-[#d8dced] bg-white px-4 py-2.5 text-sm font-semibold text-[#344054] transition-all hover:bg-[#f9fafb]"
         >
           <ArrowLeft className="h-4.5 w-4.5" />
-          Back
+          Quay lại
         </button>
         <button
           onClick={nextStep}
           disabled={!importResult?.success}
           className="inline-flex items-center gap-2 rounded-lg bg-[#004ac6] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#003da3] disabled:opacity-40"
         >
-          Continue
+          Tiếp tục
           <ArrowRight className="h-4.5 w-4.5" />
         </button>
       </div>
@@ -271,16 +285,16 @@ export const StepQuestionImport = ({ testId, nextStep, prevStep }: StepQuestionI
 const ImportSummary = ({ result }: { result: ImportResult }) => (
   <div className="grid grid-cols-3 gap-4 text-center">
     <div className="rounded-xl border border-[#e4e7ec] bg-[#f9fafb] p-3.5">
-      <span className="block text-[10px] font-semibold uppercase text-[#667085]">Total rows</span>
-      <span className="mt-1 block text-xl font-black text-[#111827]">{result.summary.total_rows}</span>
+      <span className="block text-[10px] font-semibold uppercase text-[#667085]">Tổng dòng</span>
+      <span className="mt-1 block text-xl font-bold text-[#111827]">{result.summary.total_rows}</span>
     </div>
     <div className="rounded-xl border border-[#d3f5d5] bg-[#edfcf2] p-3.5">
-      <span className="block text-[10px] font-semibold uppercase text-[#027a48]">Valid rows</span>
-      <span className="mt-1 block text-xl font-black text-[#027a48]">{result.summary.valid_rows}</span>
+      <span className="block text-[10px] font-semibold uppercase text-[#027a48]">Dòng hợp lệ</span>
+      <span className="mt-1 block text-xl font-bold text-[#027a48]">{result.summary.valid_rows}</span>
     </div>
     <div className="rounded-xl border border-[#fee4e2] bg-[#fef3f2] p-3.5">
-      <span className="block text-[10px] font-semibold uppercase text-[#b42318]">Errors</span>
-      <span className="mt-1 block text-xl font-black text-[#b42318]">{result.summary.error_count}</span>
+      <span className="block text-[10px] font-semibold uppercase text-[#b42318]">Lỗi</span>
+      <span className="mt-1 block text-xl font-bold text-[#b42318]">{result.summary.error_count}</span>
     </div>
   </div>
 );

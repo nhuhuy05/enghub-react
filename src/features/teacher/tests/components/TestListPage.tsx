@@ -7,7 +7,6 @@ import {
   CheckCircle,
   AlertCircle,
   FolderPlus,
-  ArrowRight,
   FolderOpen,
   FileText,
 } from 'lucide-react';
@@ -288,11 +287,13 @@ export const TestListPage = () => {
 
                           <div className="flex items-center gap-2 sm:self-center">
                             <Link
-                              to={`/teacher/tests/create?testId=${test.id}&collectionId=${selectedCollection?.id || test.collection_id}`}
-                              className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold border border-[#d8dced] text-[#344054] hover:bg-[#f9fafb] transition-all bg-white"
+                              to={`/teacher/tests/create?testId=${test.id}&collectionId=${selectedCollection?.id || test.collection_id}${
+                                test.is_published ? '&published=1' : ''
+                              }`}
+                              className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold border border-[#004ac6] text-[#004ac6] hover:bg-[#f9fafb] transition-all bg-white"
                             >
-                              Cấu hình & Sửa
-                              <ArrowRight className="h-3.5 w-3.5" />
+                              Chỉnh sửa
+                              
                             </Link>
                           </div>
                         </div>

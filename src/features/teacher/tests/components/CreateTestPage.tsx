@@ -11,12 +11,12 @@ import { teacherTestService } from '../services/teacherTestService';
 import type { Test } from '../types/teacherTestTypes';
 
 const STEPS = [
-  { id: 1, label: 'Khoi tao de' },
-  { id: 2, label: 'Tai media' },
-  { id: 3, label: 'Nhap Excel' },
-  { id: 4, label: 'Review groups' },
+  { id: 1, label: 'Khởi tạo đề' },
+  { id: 2, label: 'Tải Media' },
+  { id: 3, label: 'Nhập Excel' },
+  { id: 4, label: 'Review nhóm câu' },
   { id: 5, label: 'Preview' },
-  { id: 6, label: 'Xuat ban' },
+  { id: 6, label: 'Xuất bản' },
 ];
 
 export const CreateTestPage = () => {
@@ -25,30 +25,42 @@ export const CreateTestPage = () => {
 
   const urlTestId = searchParams.get('testId');
   const urlCollectionId = searchParams.get('collectionId');
+  const urlPublished = searchParams.get('published') === '1';
 
   const [testId, setTestId] = useState<number | null>(urlTestId ? parseInt(urlTestId, 10) : null);
   const [collectionId] = useState<number | null>(urlCollectionId ? parseInt(urlCollectionId, 10) : null);
-  const [activeStep, setActiveStep] = useState<number>(1);
+  const [activeStep, setActiveStep] = useState<number>(urlPublished ? 6 : 1);
   const [test, setTest] = useState<Test | null>(null);
+  const isPublished = Boolean(test?.is_published);
+
+  const refreshTest = async (id = testId) => {
+    if (!id) return;
+    try {
+      const res = await teacherTestService.getTestById(id);
+      if (res.code === 1000) {
+        setTest(res.result);
+        if (res.result.is_published) {
+          setActiveStep(6);
+        }
+      }
+    } catch (err) {
+      console.warn('Cannot load test title for wizard header:', err);
+    }
+  };
 
   useEffect(() => {
     if (!testId) {
       return;
     }
 
-    const loadTest = async () => {
-      try {
-        const res = await teacherTestService.getTestById(testId);
-        if (res.code === 1000) {
-          setTest(res.result);
-        }
-      } catch (err) {
-        console.warn('Cannot load test title for wizard header:', err);
-      }
-    };
-
-    void loadTest();
+    void refreshTest(testId);
   }, [testId]);
+
+  useEffect(() => {
+    if (isPublished && activeStep !== 6) {
+      setActiveStep(6);
+    }
+  }, [activeStep, isPublished]);
 
   const handleSetTestId = (id: number) => {
     setTestId(id);
@@ -59,20 +71,38 @@ export const CreateTestPage = () => {
   };
 
   const nextStep = () => {
+    if (isPublished) return;
     if (activeStep < STEPS.length) {
       setActiveStep((prev) => prev + 1);
     }
   };
 
   const prevStep = () => {
+    if (isPublished) return;
     if (activeStep > 1) {
       setActiveStep((prev) => prev - 1);
     }
   };
 
   const goToStep = (stepId: number) => {
+    if (isPublished && stepId !== 6) return;
     if (testId || stepId === 1) {
       setActiveStep(stepId);
+    }
+  };
+
+  const handlePublishStatusChange = (nextTest: Test) => {
+    setTest(nextTest);
+    setSearchParams((prev) => {
+      if (nextTest.is_published) {
+        prev.set('published', '1');
+      } else {
+        prev.delete('published');
+      }
+      return prev;
+    });
+    if (nextTest.is_published) {
+      setActiveStep(6);
     }
   };
 
@@ -101,7 +131,14 @@ export const CreateTestPage = () => {
         return testId ? <StepPreview testId={testId} nextStep={nextStep} prevStep={prevStep} /> : null;
       case 6:
         return testId ? (
-          <StepPublish testId={testId} collectionId={collectionId} prevStep={prevStep} onComplete={handleComplete} />
+          <StepPublish
+            testId={testId}
+            collectionId={collectionId}
+            prevStep={prevStep}
+            onComplete={handleComplete}
+            isEditLocked={isPublished}
+            onStatusChange={handlePublishStatusChange}
+          />
         ) : null;
       default:
         return null;
@@ -117,7 +154,7 @@ export const CreateTestPage = () => {
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="truncate">
-            {testId && test ? test.title : 'Quay lai danh sach'}
+            {testId && test ? test.title : 'Quay lại danh sách'}
           </span>
         </button>
 
@@ -134,7 +171,7 @@ export const CreateTestPage = () => {
             {STEPS.map((step) => {
               const isCompleted = activeStep > step.id;
               const isActive = activeStep === step.id;
-              const isDisabled = !testId && step.id > 1;
+              const isDisabled = (!testId && step.id > 1) || (isPublished && step.id !== 6);
 
               return (
                 <button

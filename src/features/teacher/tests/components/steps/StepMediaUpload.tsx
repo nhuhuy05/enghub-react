@@ -40,13 +40,26 @@ const detectMediaType = (file: File): 'image' | 'audio' => {
   return /\.(mp3|wav|m4a|aac|ogg)$/i.test(file.name) ? 'audio' : 'image';
 };
 
-const getLabelWarning = (label: string) => {
-  if (!label.trim()) return 'Label is required.';
-  if (/\.[a-z0-9]{2,5}$/i.test(label)) return 'Remove file extension from label.';
-  if (/\s+\(\d+\)$/.test(label)) return 'Remove space before image suffix, for example 176-180(1).';
-  if (/\s/.test(label)) return 'Label contains whitespace. Backend matching may fail.';
-  if (/^\d+$/.test(label)) return 'Single-number labels should be real q_number only. For Part 3/4, use a range like 32-34 or p03-q032-034.';
+const getLabelWarning = (label: string, type: UploadItem['type']) => {
+  if (!label.trim()) return 'Label là bắt buộc.';
+  if (/\.[a-z0-9]{2,5}$/i.test(label)) return 'Bỏ phần mở rộng file khỏi label.';
+  if (/\s+\(\d+\)$/.test(label)) return 'Bỏ khoảng trắng trước hậu tố ảnh, ví dụ 176-180(1).';
+  if (/\s/.test(label)) return 'Label có khoảng trắng. Backend có thể match sai.';
+  if (type === 'image' && label.includes('_')) {
+    const [, title, extra] = label.split('_');
+    if (!title) return 'Thiếu title sau dấu _. Ví dụ: 176-180(1)_webpage.';
+    if (extra !== undefined) return 'Title chỉ dùng một dấu _ để tách khỏi range, không dùng _ trong title.';
+    if (!/^[a-z0-9-]+$/.test(title)) return 'Title ảnh nên lowercase, không dấu, nối từ bằng dấu -, không dùng space hoặc _.';
+  }
+  if (/^\d+$/.test(label)) return 'Label số đơn chỉ nên là q_number thật. Với Part 3/4, dùng range như 32-34 hoặc p03-q032-034.';
   return '';
+};
+
+const getUploadStatusLabel = (status: UploadItem['status']) => {
+  if (status === 'queued') return 'Chờ tải';
+  if (status === 'uploading') return 'Đang tải';
+  if (status === 'uploaded') return 'Đã tải';
+  return 'Lỗi';
 };
 
 const getErrorMessage = (err: unknown, fallback: string) => {
@@ -66,6 +79,8 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [previewImage, setPreviewImage] = useState<MediaAsset | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<MediaAsset | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const updateFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const fetchMedia = async () => {
@@ -76,10 +91,10 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
       if (res.code === 1000) {
         setMediaAssets(res.result || []);
       } else {
-        setErrorMsg(res.message || 'Cannot load media.');
+        setErrorMsg(res.message || 'Không thể tải danh sách Media.');
       }
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Cannot load media.'));
+      setErrorMsg(getErrorMessage(err, 'Không thể tải danh sách Media.'));
     } finally {
       setLoading(false);
     }
@@ -113,23 +128,23 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
 
   const uploadOne = async (item: UploadItem) => {
     const label = item.label.trim();
-    const labelWarning = getLabelWarning(label);
-    if (!label || labelWarning.startsWith('Remove')) {
-      updateUploadItem(item.id, { status: 'failed', error: labelWarning || 'Invalid label.' });
+    const labelWarning = getLabelWarning(label, item.type);
+    if (!label || labelWarning.startsWith('Bỏ')) {
+      updateUploadItem(item.id, { status: 'failed', error: labelWarning || 'Label không hợp lệ.' });
       return;
     }
 
     updateUploadItem(item.id, { status: 'uploading', error: undefined });
     try {
       const res = await teacherTestService.uploadMedia(testId, item.file, label, item.type);
-      if (res.code !== 1000) throw new Error(res.message || 'Upload failed.');
+      if (res.code !== 1000) throw new Error(res.message || 'Tải file thất bại.');
       updateUploadItem(item.id, { status: 'uploaded' });
       setMediaAssets((prev) => {
         const withoutSame = prev.filter((asset) => !(asset.label === res.result.label && asset.media_type === res.result.media_type));
         return [...withoutSame, res.result];
       });
     } catch (err) {
-      updateUploadItem(item.id, { status: 'failed', error: getErrorMessage(err, 'Upload failed.') });
+      updateUploadItem(item.id, { status: 'failed', error: getErrorMessage(err, 'Tải file thất bại.') });
     }
   };
 
@@ -143,21 +158,24 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
       await uploadOne(item);
     }
     setUploading(false);
-    setSuccessMsg('Upload queue completed.');
+    setSuccessMsg('Đã tải xong hàng đợi.');
     await fetchMedia();
   };
 
   const deleteMedia = async (assetId: number) => {
-    if (!window.confirm('Delete this media file?')) return;
     try {
+      setDeletingId(assetId);
       setErrorMsg('');
       setSuccessMsg('');
       const res = await teacherTestService.deleteMedia(testId, assetId);
-      if (res.code !== 1000) throw new Error(res.message || 'Delete failed.');
+      if (res.code !== 1000) throw new Error(res.message || 'Xóa file thất bại.');
       setMediaAssets((prev) => prev.filter((asset) => asset.id !== assetId));
-      setSuccessMsg('Media deleted.');
+      setDeleteTarget(null);
+      setSuccessMsg('Đã xóa Media.');
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Delete failed.'));
+      setErrorMsg(getErrorMessage(err, 'Xóa file thất bại.'));
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -175,11 +193,11 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
       setErrorMsg('');
       setSuccessMsg('');
       const res = await teacherTestService.updateMedia(testId, updatingId, file);
-      if (res.code !== 1000) throw new Error(res.message || 'Update failed.');
+      if (res.code !== 1000) throw new Error(res.message || 'Cập nhật file thất bại.');
       setMediaAssets((prev) => prev.map((asset) => (asset.id === updatingId ? res.result : asset)));
-      setSuccessMsg('Media file updated.');
+      setSuccessMsg('Đã cập nhật file Media.');
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Update failed.'));
+      setErrorMsg(getErrorMessage(err, 'Cập nhật file thất bại.'));
     } finally {
       setUpdatingId(null);
     }
@@ -205,29 +223,47 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-12">
         <section className="min-h-0 lg:col-span-5">
           <div className="flex h-full min-h-0 flex-col rounded-2xl border border-[#e4e7ec] bg-[#f9fafb] p-3">
-            <h3 className="mb-2 text-sm font-bold text-[#111827]">Upload media files</h3>
-            <div className="relative rounded-xl border-2 border-dashed border-[#d8dced] bg-white p-3 text-center transition hover:border-[#004ac6]">
-              <input
-                type="file"
-                multiple
-                onChange={handleFilesChange}
-                accept="image/*,audio/*"
-                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                disabled={uploading}
-              />
-              <Upload className="mx-auto mb-1.5 h-6 w-6 text-[#98a2b3]" />
-              <p className="text-sm font-bold text-[#344054]">Drop or click to select files</p>
-              <p className="mt-1 text-xs text-[#667085]">Images and audio. Labels are generated from filename.</p>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h3 className="text-sm font-bold text-[#111827]">Tải file Media</h3>
+              {uploadItems.length > 0 && (
+                <label className="relative inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#d8dced] bg-white px-3 py-1.5 text-xs font-bold text-[#344054] transition hover:bg-[#f9fafb]">
+                  <Upload className="h-3.5 w-3.5" />
+                  Chọn thêm
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleFilesChange}
+                    accept="image/*,audio/*"
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                    disabled={uploading}
+                  />
+                </label>
+              )}
             </div>
+            {uploadItems.length === 0 && (
+              <div className="relative rounded-xl border-2 border-dashed border-[#d8dced] bg-white p-3 text-center transition hover:border-[#004ac6]">
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFilesChange}
+                  accept="image/*,audio/*"
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  disabled={uploading}
+                />
+                <Upload className="mx-auto mb-1.5 h-6 w-6 text-[#98a2b3]" />
+                <p className="text-sm font-bold text-[#344054]">Kéo thả hoặc bấm để chọn file</p>
+                <p className="mt-1 text-xs text-[#667085]">Image và Audio. Label được tạo từ tên file.</p>
+              </div>
+            )}
 
-            <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+            <div className={`${uploadItems.length === 0 ? 'mt-3' : 'mt-1'} min-h-0 flex-1 space-y-2 overflow-y-auto pr-1`}>
               {uploadItems.map((item) => {
-                const labelWarning = getLabelWarning(item.label);
+                const labelWarning = getLabelWarning(item.label, item.type);
                 return (
                   <div key={item.id} className="rounded-xl border border-[#e4e7ec] bg-white p-3">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate text-xs font-black text-[#111827]">{item.file.name}</p>
+                        <p className="truncate text-xs font-bold text-[#111827]">{item.file.name}</p>
                         <p className="text-[10px] font-semibold text-[#667085]">
                           {item.type} - {(item.file.size / (1024 * 1024)).toFixed(2)} MB
                         </p>
@@ -243,7 +279,7 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
                                 : 'bg-[#f3f5fb] text-[#505f76]'
                         }`}
                       >
-                        {item.status}
+                        {getUploadStatusLabel(item.status)}
                       </span>
                     </div>
                     <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -271,7 +307,7 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
                         className="mt-2 inline-flex items-center gap-1 rounded-lg border border-[#d8dced] px-3 py-1.5 text-xs font-bold"
                       >
                         <RefreshCw className="h-3.5 w-3.5" />
-                        Retry
+                        Thử lại
                       </button>
                     )}
                   </div>
@@ -284,7 +320,7 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
               disabled={uploading || !uploadItems.some((item) => item.status === 'queued' || item.status === 'failed')}
               className="mt-3 w-full shrink-0 rounded-lg bg-[#004ac6] py-2 text-sm font-bold text-white shadow-md transition hover:bg-[#003da3] disabled:opacity-40"
             >
-              {uploading ? 'Uploading...' : 'Upload queued files'}
+              {uploading ? 'Đang tải...' : 'Tải các file trong hàng đợi'}
             </button>
           </div>
         </section>
@@ -293,15 +329,15 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
           {loading ? (
             <div className="rounded-2xl border border-[#d8dced] bg-white p-8 text-center">
               <Loader2 className="mx-auto h-7 w-7 animate-spin text-[#004ac6]" />
-              <p className="mt-3 text-xs font-semibold text-[#667085]">Loading media...</p>
+              <p className="mt-3 text-xs font-semibold text-[#667085]">Đang tải Media...</p>
             </div>
           ) : (
             <>
               <MediaTable
-                title={`Media files (${mediaAssets.length})`}
+                title={`File Media (${mediaAssets.length})`}
                 icon={<FileAudio className="h-4.5 w-4.5 text-[#004ac6]" />}
                 assets={mediaAssets}
-                onDelete={deleteMedia}
+                onRequestDelete={(asset) => setDeleteTarget(asset)}
                 onUpdate={triggerUpdate}
                 onRefresh={fetchMedia}
                 onPreviewImage={setPreviewImage}
@@ -325,19 +361,57 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
         </div>
       )}
 
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111827]/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-[#fecdca] bg-white p-5 shadow-xl">
+            <h3 className="text-sm font-bold text-[#111827]">Xóa file Media?</h3>
+            <p className="mt-2 text-xs leading-5 text-[#667085]">
+              File <strong className="text-[#111827]">{deleteTarget.label}</strong> sẽ bị xóa khỏi đề thi.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!deletingId) setDeleteTarget(null);
+                }}
+                disabled={Boolean(deletingId)}
+                className="rounded-lg border border-[#d8dced] px-3 py-2 text-xs font-bold text-[#344054] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={() => void deleteMedia(deleteTarget.id)}
+                disabled={Boolean(deletingId)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#d92d20] px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {deletingId ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Đang xóa...
+                  </>
+                ) : (
+                  'Xóa'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between border-t border-[#f3f5fb] pt-3">
         <button
           onClick={prevStep}
           className="inline-flex items-center gap-1.5 rounded-lg border border-[#d8dced] bg-white px-3 py-2 text-sm font-semibold text-[#344054] transition hover:bg-[#f9fafb]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          Quay lại
         </button>
         <button
           onClick={nextStep}
           className="inline-flex items-center gap-1.5 rounded-lg bg-[#004ac6] px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-[#003da3]"
         >
-          Continue
+          Tiếp tục
           <ArrowRight className="h-4 w-4" />
         </button>
       </div>
@@ -349,40 +423,40 @@ interface MediaTableProps {
   title: string;
   icon: ReactNode;
   assets: MediaAsset[];
-  onDelete: (assetId: number) => void;
+  onRequestDelete: (asset: MediaAsset) => void;
   onUpdate: (assetId: number) => void;
   onRefresh: () => void;
   onPreviewImage: (asset: MediaAsset) => void;
 }
 
-const MediaTable = ({ title, icon, assets, onDelete, onUpdate, onRefresh, onPreviewImage }: MediaTableProps) => (
+const MediaTable = ({ title, icon, assets, onRequestDelete, onUpdate, onRefresh, onPreviewImage }: MediaTableProps) => (
   <div className="flex h-full min-h-0 flex-col rounded-2xl border border-[#d8dced] bg-white p-3 shadow-sm">
     <div className="mb-2 flex items-center justify-between border-b border-[#f3f5fb] pb-2">
-      <h3 className="flex items-center gap-2 text-sm font-extrabold text-[#111827]">
+      <h3 className="flex items-center gap-2 text-sm font-bold text-[#111827]">
         {icon}
         {title}
       </h3>
       <button
         onClick={() => void onRefresh()}
         className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[#d8dced] text-[#344054] hover:bg-[#f9fafb]"
-        title="Refresh"
-        aria-label="Refresh media"
+        title="Làm mới"
+        aria-label="Làm mới Media"
       >
         <RefreshCw className="h-3.5 w-3.5" />
       </button>
     </div>
     {assets.length === 0 ? (
-      <p className="py-8 text-center text-xs font-semibold text-[#667085]">No files uploaded.</p>
+      <p className="py-8 text-center text-xs font-semibold text-[#667085]">Chưa có file nào được tải lên.</p>
     ) : (
       <div className="min-h-0 flex-1 overflow-auto pr-1">
         <table className="min-w-full text-left text-xs">
           <thead className="sticky top-0 z-10 bg-[#f9fafb] text-[#344054]">
             <tr>
               <th className="px-3 py-2">Preview</th>
-              <th className="px-3 py-2">Type</th>
-              <th className="px-3 py-2">Filename</th>
+              <th className="px-3 py-2">Loại</th>
+              <th className="px-3 py-2">Tên file</th>
               <th className="px-3 py-2">Label</th>
-              <th className="px-3 py-2">Actions</th>
+              <th className="px-3 py-2">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e4e7ec]">
@@ -393,7 +467,7 @@ const MediaTable = ({ title, icon, assets, onDelete, onUpdate, onRefresh, onPrev
                     <button
                       onClick={() => onPreviewImage(asset)}
                       className="group h-12 w-20 overflow-hidden rounded border border-[#e4e7ec] bg-white"
-                      title="Preview image"
+                      title="Preview ảnh"
                     >
                       <img src={asset.url} alt={asset.label} className="h-full w-full object-contain transition group-hover:scale-105" />
                     </button>
@@ -419,12 +493,12 @@ const MediaTable = ({ title, icon, assets, onDelete, onUpdate, onRefresh, onPrev
                       onClick={() => onUpdate(asset.id)}
                       className="rounded-lg border border-[#d8dced] px-3 py-2 text-xs font-bold text-[#344054]"
                     >
-                      Update
+                      Cập nhật
                     </button>
                     <button
-                      onClick={() => onDelete(asset.id)}
+                      onClick={() => onRequestDelete(asset)}
                       className="rounded-lg border border-[#fecdca] p-2 text-[#d92d20] hover:bg-[#fef3f2]"
-                      title="Delete"
+                      title="Xóa"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
