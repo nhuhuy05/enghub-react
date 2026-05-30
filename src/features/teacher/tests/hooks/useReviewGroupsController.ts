@@ -7,6 +7,7 @@ import type {
   QuestionGroupDetail,
   QuestionGroupSummary,
   ReviewStatus,
+  GenerateGroupAiSupportInput,
 } from '../types/teacherTestTypes';
 import { persistDirtyReviewGroupDetail } from '../components/review-groups/reviewGroupPersistence';
 import {
@@ -16,6 +17,7 @@ import {
   getErrorMessage,
   getPassageTitleFromLabel,
   hasDirtyState,
+  type AiGenerateAction,
   type DirtyPatch,
   type DirtyState,
   type SaveStatus,
@@ -26,6 +28,13 @@ interface UseReviewGroupsControllerParams {
   nextStep: () => void;
   prevStep: () => void;
 }
+
+const getAiErrorMessage = (message: string) => {
+  if (message.includes('AI_MISSING_REQUIRED_CONTEXT') || message.includes('AI generation is missing required context')) {
+    return 'Thiếu dữ liệu để tạo giải thích. Part 1 cần transcript, image, answer text và đáp án đúng; Part 2 cần transcript, answer text và đáp án đúng; Part 3/4 cần transcript và đáp án đúng, thêm image nếu có graphic; Part 5 cần question text, answers và đáp án đúng; Part 6/7 cần passage text hoặc passage image, answers và đáp án đúng.';
+  }
+  return message;
+};
 
 export const useReviewGroupsController = ({
   testId,
@@ -41,6 +50,7 @@ export const useReviewGroupsController = ({
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [generatingAiAction, setGeneratingAiAction] = useState<AiGenerateAction | null>(null);
   const [dirtyVersion, setDirtyVersion] = useState(0);
   const [errorMsg, setErrorMsg] = useState('');
   const detailRef = useRef<QuestionGroupDetail | null>(null);
@@ -70,10 +80,11 @@ export const useReviewGroupsController = ({
     const parts = Array.from(new Set(groups.map((group) => group.part_number))).sort((a, b) => a - b);
     return parts.length ? parts : [1, 2, 3, 4, 5, 6, 7];
   }, [groups]);
-  const filteredGroups = useMemo(
+  const activePartGroups = useMemo(
     () => groups.filter((group) => group.part_number === activePart),
     [groups, activePart]
   );
+  const filteredGroups = activePartGroups;
   const reviewableGroups = useMemo(
     () =>
       groups.filter(
@@ -164,6 +175,13 @@ export const useReviewGroupsController = ({
   useEffect(() => {
     void loadGroups();
   }, [loadGroups]);
+
+  const resetDirtyState = () => {
+    dirtyRef.current = createDirtyState();
+    dirtyVersionRef.current = 0;
+    setDirtyVersion(0);
+    setSaveStatus('idle');
+  };
 
   const updateCurrentGroup = (nextDetail: QuestionGroupDetail) => {
     setDetail(nextDetail);
@@ -349,6 +367,90 @@ export const useReviewGroupsController = ({
     }
   };
 
+  const applyGeneratedDetail = (nextDetail: QuestionGroupDetail) => {
+    updateCurrentGroup(nextDetail);
+    resetDirtyState();
+  };
+
+  const generateAiDetail = async (
+    action: AiGenerateAction,
+    request: (groupId: number) => ReturnType<typeof teacherTestService.generateGroupTranscript>,
+    fallbackMessage: string
+  ) => {
+    const currentDetail = detailRef.current;
+    if (!currentDetail) return;
+
+    const saved = await saveDirtyDetail();
+    if (!saved) return;
+
+    const latestDetail = detailRef.current;
+    if (!latestDetail) return;
+
+    try {
+      setGeneratingAiAction(action);
+      setErrorMsg('');
+      const res = await request(latestDetail.id);
+      if (res.code === 1000) {
+        applyGeneratedDetail(res.result);
+      } else {
+        const message = res.message || fallbackMessage;
+        setErrorMsg(getAiErrorMessage(message));
+      }
+    } catch (err) {
+      const message = getErrorMessage(err, fallbackMessage);
+      setErrorMsg(getAiErrorMessage(message));
+    } finally {
+      setGeneratingAiAction(null);
+    }
+  };
+
+  const generateGroupSupport = async (input: GenerateGroupAiSupportInput) => {
+    const currentDetail = detailRef.current;
+    if (!currentDetail) return;
+
+    const saved = await saveDirtyDetail();
+    if (!saved) return;
+
+    const latestDetail = detailRef.current;
+    if (!latestDetail) return;
+
+    try {
+      setGeneratingAiAction('group');
+      setErrorMsg('');
+      const res = await teacherTestService.generateGroupAiSupport(latestDetail.id, input);
+      if (res.code === 1000) {
+        applyGeneratedDetail(res.result);
+      } else {
+        setErrorMsg(getAiErrorMessage(res.message || 'Không thể tạo nội dung cho group.'));
+      }
+    } catch (err) {
+      setErrorMsg(getAiErrorMessage(getErrorMessage(err, 'Không thể tạo nội dung cho group.')));
+    } finally {
+      setGeneratingAiAction(null);
+    }
+  };
+
+  const generateTranscript = () =>
+    generateAiDetail(
+      'transcript',
+      teacherTestService.generateGroupTranscript,
+      'Không thể tạo transcript.'
+    );
+
+  const generateTranslation = () =>
+    generateAiDetail(
+      'translation',
+      teacherTestService.generateQuestionTranslation,
+      'Không thể tạo bản dịch.'
+    );
+
+  const generateExplanations = () =>
+    generateAiDetail(
+      'explanations',
+      teacherTestService.generateQuestionExplanations,
+      'Không thể tạo giải thích.'
+    );
+
   const goPrevStep = async () => {
     const saved = await saveDirtyDetail();
     if (saved) prevStep();
@@ -497,7 +599,6 @@ export const useReviewGroupsController = ({
         : saveStatus === 'saving'
           ? 'text-[#004ac6]'
           : 'text-[#027a48]';
-
   return {
     activePart,
     addImage,
@@ -508,6 +609,11 @@ export const useReviewGroupsController = ({
     detail,
     errorMsg,
     filteredGroups,
+    generateExplanations,
+    generateGroupSupport,
+    generateTranscript,
+    generateTranslation,
+    generatingAiAction,
     goNextStep,
     goPrevStep,
     hasBlockingFlags,

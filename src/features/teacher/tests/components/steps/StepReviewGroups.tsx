@@ -1,5 +1,7 @@
-import { AlertCircle, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertCircle, ArrowLeft, ArrowRight, Loader2, X } from 'lucide-react';
 import { AudioTranscriptEditor } from '../review-groups/AudioTranscriptEditor';
+import { AiGroupSupportControl } from '../review-groups/AiGroupSupportControl';
 import { GroupSidebar } from '../review-groups/GroupSidebar';
 import { ImagesEditor } from '../review-groups/ImagesEditor';
 import { PassagesEditor } from '../review-groups/PassagesEditor';
@@ -13,6 +15,11 @@ interface StepReviewGroupsProps {
   prevStep: () => void;
 }
 
+const isAiMissingContextError = (message: string) =>
+  message.includes('AI_MISSING_REQUIRED_CONTEXT') ||
+  message.includes('AI generation is missing required context') ||
+  message.includes('Thiếu dữ liệu để tạo giải thích');
+
 export const StepReviewGroups = ({ testId, nextStep, prevStep }: StepReviewGroupsProps) => {
   const {
     activePart,
@@ -24,6 +31,11 @@ export const StepReviewGroups = ({ testId, nextStep, prevStep }: StepReviewGroup
     detail,
     errorMsg,
     filteredGroups,
+    generateExplanations,
+    generateGroupSupport,
+    generateTranscript,
+    generateTranslation,
+    generatingAiAction,
     goNextStep,
     goPrevStep,
     hasBlockingFlags,
@@ -44,6 +56,12 @@ export const StepReviewGroups = ({ testId, nextStep, prevStep }: StepReviewGroup
     setDetailValue,
     setQuestionValue,
   } = useReviewGroupsController({ testId, nextStep, prevStep });
+  const [dismissedPopupForError, setDismissedPopupForError] = useState('');
+  const showAiContextPopup = Boolean(errorMsg && isAiMissingContextError(errorMsg) && dismissedPopupForError !== errorMsg);
+
+  useEffect(() => {
+    setDismissedPopupForError('');
+  }, [errorMsg]);
 
   if (loadingList) {
     return (
@@ -56,10 +74,46 @@ export const StepReviewGroups = ({ testId, nextStep, prevStep }: StepReviewGroup
 
   return (
     <div className="space-y-6">
-      {errorMsg && (
+      {errorMsg && !isAiMissingContextError(errorMsg) && (
         <div className="flex items-center gap-2 rounded-xl border border-[#fee4e2] bg-[#fef3f2] p-4 text-sm font-semibold text-[#b42318]">
           <AlertCircle className="h-5 w-5 shrink-0" />
           {errorMsg}
+        </div>
+      )}
+      {showAiContextPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111827]/45 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-[560px] rounded-2xl border border-[#fee4e2] bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex gap-3">
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#fef3f2] text-[#d92d20]">
+                  <AlertCircle className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-bold leading-6 text-[#111827]">Thiếu dữ liệu để tạo giải thích</h3>
+                  <p className="mt-1.5 text-[13px] font-semibold leading-5 text-[#475467]">
+                    Part 1 cần transcript, image, answer text và đáp án đúng. Part 2 cần transcript, answer text và đáp án đúng. Part 3/4 cần transcript và đáp án đúng, thêm image nếu có graphic. Part 5 cần question text, answers và đáp án đúng. Part 6/7 cần passage text hoặc passage image, answers và đáp án đúng.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDismissedPopupForError(errorMsg)}
+                className="rounded-lg p-1 text-[#667085] transition-colors hover:bg-[#f2f4f7] hover:text-[#111827]"
+                aria-label="Đóng thông báo"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDismissedPopupForError(errorMsg)}
+                className="rounded-lg bg-[#004ac6] px-3.5 py-2 text-[13px] font-bold text-white transition-colors hover:bg-[#003da3]"
+              >
+                Đã hiểu
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -86,6 +140,33 @@ export const StepReviewGroups = ({ testId, nextStep, prevStep }: StepReviewGroup
               </div>
             ) : detail ? (
               <div className="space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f3f5fb] pb-4">
+                  <AiGroupSupportControl
+                    generatingAction={generatingAiAction}
+                    saving={saving}
+                    onGenerate={(input) => void generateGroupSupport(input)}
+                  />
+                  <div className="flex flex-wrap items-center justify-end gap-3">
+                    <span className={`text-xs font-bold ${saveStatusClass}`}>{saveStatusText}</span>
+                    <button
+                      onClick={() => void patchReviewStatus(detail.review_status === 'reviewed' ? 'needs_review' : 'reviewed')}
+                      disabled={saving || (detail.review_status !== 'reviewed' && hasBlockingFlags)}
+                      className={`rounded-lg px-4 py-2 text-sm font-bold disabled:opacity-40 ${
+                        detail.review_status === 'reviewed'
+                          ? 'border border-[#d8dced] text-[#344054]'
+                          : 'bg-[#027a48] text-white'
+                      }`}
+                      title={
+                        detail.review_status !== 'reviewed' && hasBlockingFlags
+                          ? 'Bổ sung dữ liệu thiếu trước khi đánh dấu đã review.'
+                          : undefined
+                      }
+                    >
+                      {detail.review_status === 'reviewed' ? 'Chuyển về cần review' : 'Đánh dấu đã review'}
+                    </button>
+                  </div>
+                </div>
+
                 {detail.missing_flags && detail.missing_flags.length > 0 && (
                   <div className="rounded-xl border border-[#fecdca] bg-[#fff1f0] p-3">
                     <p className="text-xs font-bold uppercase text-[#b42318]">Thiếu dữ liệu</p>
@@ -110,6 +191,9 @@ export const StepReviewGroups = ({ testId, nextStep, prevStep }: StepReviewGroup
                   detail={detail}
                   audioAssets={audioAssets}
                   setDetailValue={setDetailValue}
+                  generatingAction={generatingAiAction}
+                  saving={saving}
+                  onGenerateTranscript={() => void generateTranscript()}
                 />
 
                 {detail.part_number >= 6 && (
@@ -126,27 +210,12 @@ export const StepReviewGroups = ({ testId, nextStep, prevStep }: StepReviewGroup
                   setQuestionValue={setQuestionValue}
                   setAnswerValue={setAnswerValue}
                   setCorrectAnswer={setCorrectAnswer}
+                  generatingAction={generatingAiAction}
+                  saving={saving}
+                  onGenerateTranslation={() => void generateTranslation()}
+                  onGenerateExplanations={() => void generateExplanations()}
                 />
 
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#f3f5fb] pt-4">
-                  <span className={`text-xs font-bold ${saveStatusClass}`}>{saveStatusText}</span>
-                  <button
-                    onClick={() => void patchReviewStatus(detail.review_status === 'reviewed' ? 'needs_review' : 'reviewed')}
-                    disabled={saving || (detail.review_status !== 'reviewed' && hasBlockingFlags)}
-                    className={`rounded-lg px-4 py-2 text-sm font-bold disabled:opacity-40 ${
-                      detail.review_status === 'reviewed'
-                        ? 'border border-[#d8dced] text-[#344054]'
-                        : 'bg-[#027a48] text-white'
-                    }`}
-                    title={
-                      detail.review_status !== 'reviewed' && hasBlockingFlags
-                        ? 'Bổ sung dữ liệu thiếu trước khi đánh dấu đã review.'
-                        : undefined
-                    }
-                  >
-                    {detail.review_status === 'reviewed' ? 'Chuyển về cần review' : 'Đánh dấu đã review'}
-                  </button>
-                </div>
               </div>
             ) : (
               <div className="py-20 text-center text-sm font-semibold text-[#667085]">Chưa chọn nhóm câu.</div>

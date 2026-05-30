@@ -55,7 +55,7 @@ export const AppRoutes = () => {
           <Route path="/exam/take" element={<ExamInterface />} />
         </Route>
 
-        <Route element={<RoleRoute allowedRoles={['TEACHER']} />}>
+        <Route element={<RoleRoute allowedRoles={['TEACHER', 'ADMIN']} />}>
           <Route element={<TeacherLayout />}>
             <Route path="/teacher/dashboard" element={<TeacherDashboardPage />} />
             <Route path="/teacher/classes" element={<TeacherClassesPage />} />

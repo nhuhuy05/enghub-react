@@ -4,9 +4,10 @@ import type { PreviewResult } from '../../types/teacherTestTypes';
 interface ValidationPanelProps {
   validation: PreviewResult;
   onRefresh: () => void;
+  onFixReview: () => void;
 }
 
-export const ValidationPanel = ({ validation, onRefresh }: ValidationPanelProps) => {
+export const ValidationPanel = ({ validation, onRefresh, onFixReview }: ValidationPanelProps) => {
   const checks = [
     { label: 'Số Question', value: `${validation.question_count} / 200`, ok: validation.question_count === 200 },
     {
@@ -54,13 +55,23 @@ export const ValidationPanel = ({ validation, onRefresh }: ValidationPanelProps)
             Backend sẽ tính lại validation. Hãy sửa Review nhóm câu nếu còn lỗi.
           </p>
         </div>
-        <button
-          onClick={onRefresh}
-          className="ml-auto inline-flex items-center gap-1 rounded-lg border border-white/70 bg-white px-3 py-1.5 text-xs font-bold text-[#344054]"
-        >
-          <RefreshCw className="h-3.5 w-3.5" />
-          Làm mới
-        </button>
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+          {!validation.publishable && (
+            <button
+              onClick={onFixReview}
+              className="rounded-lg border border-white/70 bg-white px-3 py-1.5 text-xs font-bold text-[#b42318]"
+            >
+              Sửa Review nhóm câu
+            </button>
+          )}
+          <button
+            onClick={onRefresh}
+            className="inline-flex items-center gap-1 rounded-lg border border-white/70 bg-white px-3 py-1.5 text-xs font-bold text-[#344054]"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Làm mới
+          </button>
+        </div>
       </div>
 
       {failedChecks.length > 0 && (

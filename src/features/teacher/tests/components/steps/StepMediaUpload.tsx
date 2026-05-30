@@ -177,7 +177,7 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
       <input ref={updateFileInputRef} type="file" accept="image/*,audio/*" className="hidden" onChange={handleUpdateFile} />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-12">
-        <section className="min-h-0 lg:col-span-5">
+        <section className="min-h-0 lg:col-span-4">
           <UploadQueuePanel
             uploadItems={uploadItems}
             uploading={uploading}
@@ -188,7 +188,7 @@ export const StepMediaUpload = ({ testId, nextStep, prevStep }: StepMediaUploadP
           />
         </section>
 
-        <section className="min-h-0 space-y-4 lg:col-span-7">
+        <section className="min-h-0 space-y-4 lg:col-span-8">
           {loading ? (
             <div className="rounded-2xl border border-[#d8dced] bg-white p-8 text-center">
               <Loader2 className="mx-auto h-7 w-7 animate-spin text-[#004ac6]" />

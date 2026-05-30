@@ -1,10 +1,11 @@
-import { LayoutDashboard, ShieldCheck, Users } from 'lucide-react';
+import { FileSpreadsheet, LayoutDashboard, ShieldCheck, Users } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { EngHubLogo } from '@/components/brand/EngHubLogo';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Đề thi', href: '/teacher/tests', icon: FileSpreadsheet },
   { label: 'Roles', href: '/admin/roles', icon: ShieldCheck },
 ];
 

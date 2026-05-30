@@ -1,11 +1,17 @@
 import type { GroupQuestion } from '../../types/teacherTestTypes';
+import { AiGenerateButton } from './AiGenerateButton';
 import { AutoResizeTextarea } from './AutoResizeTextarea';
+import type { AiGenerateAction } from './reviewGroupUtils';
 
 interface QuestionsEditorProps {
   questions: GroupQuestion[];
   setQuestionValue: (questionId: number, field: keyof GroupQuestion, value: string | null) => void;
   setAnswerValue: (answerId: number, field: 'answer_text_en' | 'answer_text_vi', value: string | null) => void;
   setCorrectAnswer: (questionId: number, answerId: number) => void;
+  generatingAction: AiGenerateAction | null;
+  saving: boolean;
+  onGenerateTranslation: () => void;
+  onGenerateExplanations: () => void;
 }
 
 export const QuestionsEditor = ({
@@ -13,8 +19,28 @@ export const QuestionsEditor = ({
   setQuestionValue,
   setAnswerValue,
   setCorrectAnswer,
+  generatingAction,
+  saving,
+  onGenerateTranslation,
+  onGenerateExplanations,
 }: QuestionsEditorProps) => (
   <div className="space-y-4">
+    <div className="flex flex-wrap justify-end gap-2">
+      <AiGenerateButton
+        action="translation"
+        label="Tạo bản dịch"
+        generatingAction={generatingAction}
+        saving={saving}
+        onClick={onGenerateTranslation}
+      />
+      <AiGenerateButton
+        action="explanations"
+        label="Tạo giải thích"
+        generatingAction={generatingAction}
+        saving={saving}
+        onClick={onGenerateExplanations}
+      />
+    </div>
     {questions.map((question) => (
       <div key={question.id} className="rounded-2xl border border-[#e4e7ec] p-4">
         <div className="mb-3 flex items-center justify-between">

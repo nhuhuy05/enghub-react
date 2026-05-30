@@ -1,25 +1,48 @@
 import { Headphones } from 'lucide-react';
 import type { MediaAsset, QuestionGroupDetail } from '../../types/teacherTestTypes';
+import { AiGenerateButton } from './AiGenerateButton';
 import { AutoResizeTextarea } from './AutoResizeTextarea';
-import type { DirtyPatch } from './reviewGroupUtils';
+import type { AiGenerateAction, DirtyPatch } from './reviewGroupUtils';
 
 interface AudioTranscriptEditorProps {
   detail: QuestionGroupDetail;
   audioAssets: MediaAsset[];
   setDetailValue: (updater: (current: QuestionGroupDetail) => QuestionGroupDetail, dirtyPatch: DirtyPatch) => void;
+  generatingAction: AiGenerateAction | null;
+  saving: boolean;
+  onGenerateTranscript: () => void;
 }
 
-export const AudioTranscriptEditor = ({ detail, audioAssets, setDetailValue }: AudioTranscriptEditorProps) => {
+export const AudioTranscriptEditor = ({
+  detail,
+  audioAssets,
+  setDetailValue,
+  generatingAction,
+  saving,
+  onGenerateTranscript,
+}: AudioTranscriptEditorProps) => {
   if (detail.part_number > 4) return null;
 
   return (
     <div className="rounded-2xl border border-[#e4e7ec] p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h4 className="flex items-center gap-2 text-sm font-bold text-[#111827]">
-          <Headphones className="h-4 w-4 text-[#004ac6]" />
-          Audio và Transcript
-        </h4>
-        {detail.audio && (
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <h4 className="flex items-center gap-2 text-sm font-bold text-[#111827]">
+            <Headphones className="h-4 w-4 text-[#004ac6]" />
+            Audio và Transcript
+          </h4>
+        </div>
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <AiGenerateButton
+            action="transcript"
+            label="Tạo transcript"
+            generatingAction={generatingAction}
+            saving={saving}
+            onClick={onGenerateTranscript}
+            disabled={!detail.audio?.media_asset_id}
+            title={detail.audio?.media_asset_id ? undefined : 'Cần gắn Audio trước khi tạo transcript.'}
+          />
+          {detail.audio && (
           <button
             onClick={() =>
               setDetailValue((current) => ({
@@ -31,8 +54,8 @@ export const AudioTranscriptEditor = ({ detail, audioAssets, setDetailValue }: A
           >
             Xóa
           </button>
-        )}
-        {!detail.audio && (
+          )}
+          {!detail.audio && (
           <button
             onClick={() => {
               const firstAudio = audioAssets[0];
@@ -54,7 +77,8 @@ export const AudioTranscriptEditor = ({ detail, audioAssets, setDetailValue }: A
           >
             Gắn Audio
           </button>
-        )}
+          )}
+        </div>
       </div>
       {!detail.audio ? (
         <p className="text-xs font-semibold text-[#667085]">Chưa gắn Audio.</p>

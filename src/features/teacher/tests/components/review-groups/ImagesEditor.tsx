@@ -10,7 +10,7 @@ interface ImagesEditorProps {
 }
 
 export const ImagesEditor = ({ detail, imageAssets, setDetailValue, addImage }: ImagesEditorProps) => {
-  if (detail.part_number !== 1) return null;
+  if (![1, 3, 4].includes(detail.part_number)) return null;
 
   return (
     <div className="rounded-2xl border border-[#e4e7ec] p-4">

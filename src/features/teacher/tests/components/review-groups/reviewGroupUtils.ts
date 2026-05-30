@@ -18,6 +18,8 @@ export type DirtyState = {
 
 export type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
 
+export type AiGenerateAction = 'transcript' | 'translation' | 'explanations' | 'group';
+
 export const BLOCKING_REVIEW_FLAGS = ['missing_questions', 'missing_image', 'missing_audio', 'missing_passage'];
 
 export const createDirtyState = (): DirtyState => ({
@@ -41,8 +43,22 @@ export const hasDirtyState = (dirty: DirtyState) =>
 
 export const getErrorMessage = (err: unknown, fallback: string) => {
   if (typeof err === 'object' && err !== null && 'response' in err) {
-    const response = (err as { response?: { data?: { message?: string } } }).response;
-    return response?.data?.message || fallback;
+    const response = (err as { response?: { data?: unknown } }).response;
+    const data = response?.data;
+    if (typeof data === 'string') return data;
+    if (typeof data === 'object' && data !== null) {
+      const payload = data as {
+        message?: unknown;
+        error?: unknown;
+        details?: unknown;
+        result?: unknown;
+      };
+      const candidates = [payload.message, payload.error, payload.details, payload.result];
+      for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.trim()) return candidate;
+        if (Array.isArray(candidate) && candidate.length) return candidate.join('\n');
+      }
+    }
   }
   return err instanceof Error ? err.message : fallback;
 };

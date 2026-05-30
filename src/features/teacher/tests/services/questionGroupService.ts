@@ -1,6 +1,7 @@
 import apiClient from '@/api/apiClient';
 import type { ApiResponse } from '@/types/apiTypes';
 import type {
+  GenerateGroupAiSupportInput,
   PatchAnswerInput,
   PatchGroupAudioInput,
   PatchGroupImageInput,
@@ -92,6 +93,38 @@ export const questionGroupService = {
     const response = await apiClient.patch<ApiResponse<QuestionGroupDetail>>(
       `/admin/question-groups/${groupId}/review-status`,
       { review_status }
+    );
+    return response.data;
+  },
+
+  generateGroupTranscript: async (groupId: number): Promise<ApiResponse<QuestionGroupDetail>> => {
+    const response = await apiClient.post<ApiResponse<QuestionGroupDetail>>(
+      `/admin/question-groups/${groupId}/generate-transcript`
+    );
+    return response.data;
+  },
+
+  generateQuestionTranslation: async (groupId: number): Promise<ApiResponse<QuestionGroupDetail>> => {
+    const response = await apiClient.post<ApiResponse<QuestionGroupDetail>>(
+      `/admin/question-groups/${groupId}/generate-question-translation`
+    );
+    return response.data;
+  },
+
+  generateQuestionExplanations: async (groupId: number): Promise<ApiResponse<QuestionGroupDetail>> => {
+    const response = await apiClient.post<ApiResponse<QuestionGroupDetail>>(
+      `/admin/question-groups/${groupId}/generate-explanations`
+    );
+    return response.data;
+  },
+
+  generateGroupAiSupport: async (
+    groupId: number,
+    data: GenerateGroupAiSupportInput
+  ): Promise<ApiResponse<QuestionGroupDetail>> => {
+    const response = await apiClient.post<ApiResponse<QuestionGroupDetail>>(
+      `/admin/question-groups/${groupId}/generate-ai-support`,
+      data
     );
     return response.data;
   },

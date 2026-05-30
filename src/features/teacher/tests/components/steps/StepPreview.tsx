@@ -92,7 +92,7 @@ export const StepPreview = ({ testId, nextStep, prevStep }: StepPreviewProps) =>
 
   return (
     <div className="space-y-6">
-      <ValidationPanel validation={validation} onRefresh={fetchPreview} />
+      <ValidationPanel validation={validation} onRefresh={fetchPreview} onFixReview={prevStep} />
 
       <div className="rounded-2xl border border-[#d8dced] bg-white shadow-sm">
         <div className="border-b border-[#f3f5fb] px-5 py-3">

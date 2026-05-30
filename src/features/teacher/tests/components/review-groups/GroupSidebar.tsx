@@ -33,7 +33,7 @@ export const GroupSidebar = ({
 }: GroupSidebarProps) => (
   <aside className="min-w-0">
     <div className="rounded-2xl border border-[#d8dced] bg-white p-4 shadow-sm">
-      <div className="mb-3 flex flex-wrap gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {availableParts.map((partNumber) => (
           <button
             key={partNumber}
@@ -47,16 +47,16 @@ export const GroupSidebar = ({
             Part {partNumber}
           </button>
         ))}
+        <button
+          onClick={onMarkAllReviewed}
+          disabled={saving || !reviewableCount}
+          className="rounded-full border border-[#027a48] bg-[#027a48] px-3 py-1 text-xs font-bold text-white disabled:opacity-40"
+          title={blockedReviewCount ? `${blockedReviewCount} nhóm còn thiếu dữ liệu và sẽ được bỏ qua.` : undefined}
+        >
+          Đã review tất cả
+        </button>
       </div>
 
-      <button
-        onClick={onMarkAllReviewed}
-        disabled={saving || !reviewableCount}
-        className="mb-3 w-full rounded-lg bg-[#027a48] px-3 py-2 text-xs font-bold text-white disabled:opacity-40"
-        title={blockedReviewCount ? `${blockedReviewCount} nhóm còn thiếu dữ liệu và sẽ được bỏ qua.` : undefined}
-      >
-        Đánh dấu tất cả đã review ({reviewableCount})
-      </button>
       {blockedReviewCount > 0 && (
         <p className="mb-3 text-[10px] font-semibold text-[#b25e00]">
           {blockedReviewCount} nhóm cần bổ sung dữ liệu trước khi review.
@@ -64,6 +64,11 @@ export const GroupSidebar = ({
       )}
 
       <div className="max-h-[640px] space-y-2 overflow-y-auto pr-1">
+        {filteredGroups.length === 0 && (
+          <div className="rounded-xl border border-dashed border-[#d8dced] p-4 text-center text-xs font-semibold text-[#667085]">
+            Part này chưa có group.
+          </div>
+        )}
         {filteredGroups.map((group) => (
           <button
             key={group.id}

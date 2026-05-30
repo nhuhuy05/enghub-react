@@ -164,6 +164,13 @@ export interface PatchAnswerInput {
   is_correct: boolean;
 }
 
+export interface GenerateGroupAiSupportInput {
+  transcript: boolean;
+  question_translation: boolean;
+  explanation: boolean;
+  overwrite: boolean;
+}
+
 export interface ImportSummary {
   total_rows: number;
   valid_rows: number;
