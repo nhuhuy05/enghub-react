@@ -127,7 +127,7 @@ export const TestListPage = () => {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-[#111827] tracking-tight">Quản lý đề thi TOEIC</h1>
+            <h1 className="text-3xl font-bold text-[#111827] tracking-tight">Quản lý đề thi TOEIC</h1>
             <p className="mt-2 text-sm text-[#667085]">Thiết lập bộ sưu tập, tải lên và cấu hình chi tiết đề thi dành cho học viên.</p>
           </div>
           <div className="flex gap-3">
@@ -210,7 +210,7 @@ export const TestListPage = () => {
                 <div className="pb-5 border-b border-[#f3f5fb] flex items-center justify-between flex-wrap gap-4">
                   <div>
                     <span className="text-xs font-bold text-[#004ac6] uppercase tracking-wider">Đang xem bộ đề</span>
-                    <h2 className="text-xl font-extrabold text-[#111827] mt-0.5">{selectedCollection.name}</h2>
+                    <h2 className="text-xl font-bold text-[#111827] mt-0.5">{selectedCollection.name}</h2>
                     {selectedCollection.description && (
                       <p className="text-sm text-[#667085] mt-1">{selectedCollection.description}</p>
                     )}
@@ -258,7 +258,7 @@ export const TestListPage = () => {
                               <span className="inline-flex items-center justify-center bg-[#f3f5fb] text-[#004ac6] text-xs font-bold px-2 py-0.5 rounded border border-[#e4e7ec]">
                                 Đề #{test.test_number}
                               </span>
-                              <h3 className="text-base font-extrabold text-[#111827]">{test.title}</h3>
+                              <h3 className="text-base font-bold text-[#111827]">{test.title}</h3>
                               {test.is_published ? (
                                 <span className="inline-flex items-center gap-1 bg-[#ecfdf3] text-[#027a48] text-xs font-semibold px-2 py-0.5 rounded-full border border-[#abedf6]/10">
                                   <CheckCircle className="h-3 w-3" />
@@ -326,7 +326,7 @@ export const TestListPage = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111827]/50 backdrop-blur-sm p-4">
             <div className="bg-white w-full max-w-md rounded-2xl border border-[#d8dced] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
               <div className="px-6 py-5 border-b border-[#f3f5fb]">
-                <h3 className="text-lg font-extrabold text-[#111827]">Tạo bộ sưu tập đề thi</h3>
+                <h3 className="text-lg font-bold text-[#111827]">Tạo bộ sưu tập đề thi</h3>
                 <p className="text-xs text-[#667085] mt-1">Phân loại các đề thi TOEIC (ví dụ: ETS 2023, Hacker TOEIC...)</p>
               </div>
 

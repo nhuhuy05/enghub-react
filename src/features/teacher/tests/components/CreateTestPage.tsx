@@ -31,10 +31,25 @@ export const CreateTestPage = () => {
   const [collectionId] = useState<number | null>(urlCollectionId ? parseInt(urlCollectionId, 10) : null);
   const [activeStep, setActiveStep] = useState<number>(urlPublished ? 6 : 1);
   const [test, setTest] = useState<Test | null>(null);
+  const [loadingTest, setLoadingTest] = useState<boolean>(Boolean(urlTestId));
   const isPublished = Boolean(test?.is_published);
+  const isEditLocked = loadingTest || isPublished;
+
+  const canVisitStep = (stepId: number) => {
+    if (!testId) {
+      return stepId === 1;
+    }
+
+    if (loadingTest) {
+      return activeStep === 6 && stepId === 6;
+    }
+
+    return !isPublished || stepId === 6;
+  };
 
   const refreshTest = async (id = testId) => {
     if (!id) return;
+    setLoadingTest(true);
     try {
       const res = await teacherTestService.getTestById(id);
       if (res.code === 1000) {
@@ -45,6 +60,8 @@ export const CreateTestPage = () => {
       }
     } catch (err) {
       console.warn('Cannot load test title for wizard header:', err);
+    } finally {
+      setLoadingTest(false);
     }
   };
 
@@ -64,6 +81,7 @@ export const CreateTestPage = () => {
 
   const handleSetTestId = (id: number) => {
     setTestId(id);
+    setLoadingTest(true);
     setSearchParams((prev) => {
       prev.set('testId', id.toString());
       return prev;
@@ -71,22 +89,21 @@ export const CreateTestPage = () => {
   };
 
   const nextStep = () => {
-    if (isPublished) return;
-    if (activeStep < STEPS.length) {
-      setActiveStep((prev) => prev + 1);
+    const next = activeStep + 1;
+    if (next <= STEPS.length && canVisitStep(next)) {
+      setActiveStep(next);
     }
   };
 
   const prevStep = () => {
-    if (isPublished) return;
-    if (activeStep > 1) {
-      setActiveStep((prev) => prev - 1);
+    const prev = activeStep - 1;
+    if (prev >= 1 && canVisitStep(prev)) {
+      setActiveStep(prev);
     }
   };
 
   const goToStep = (stepId: number) => {
-    if (isPublished && stepId !== 6) return;
-    if (testId || stepId === 1) {
+    if (canVisitStep(stepId)) {
       setActiveStep(stepId);
     }
   };
@@ -111,6 +128,14 @@ export const CreateTestPage = () => {
   };
 
   const renderStepComponent = () => {
+    if (testId && loadingTest) {
+      return (
+        <div className="flex min-h-[240px] items-center justify-center text-sm font-semibold text-[#667085]">
+          Đang tải dữ liệu đề thi...
+        </div>
+      );
+    }
+
     switch (activeStep) {
       case 1:
         return (
@@ -136,7 +161,7 @@ export const CreateTestPage = () => {
             collectionId={collectionId}
             prevStep={prevStep}
             onComplete={handleComplete}
-            isEditLocked={isPublished}
+            isEditLocked={isEditLocked}
             onStatusChange={handlePublishStatusChange}
           />
         ) : null;
@@ -171,7 +196,7 @@ export const CreateTestPage = () => {
             {STEPS.map((step) => {
               const isCompleted = activeStep > step.id;
               const isActive = activeStep === step.id;
-              const isDisabled = (!testId && step.id > 1) || (isPublished && step.id !== 6);
+              const isDisabled = !canVisitStep(step.id);
 
               return (
                 <button
