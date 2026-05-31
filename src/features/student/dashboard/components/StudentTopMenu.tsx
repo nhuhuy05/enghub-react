@@ -8,7 +8,7 @@ const navItems = [
   { label: 'Từ vựng', href: '/vocabulary' },
   { label: 'Nghe', href: '/listening' },
   { label: 'Đọc', href: '/reading' },
-  { label: 'Đề thi', href: '/exam' },
+  { label: 'Đề thi', href: '/tests' },
 ];
 
 export const StudentTopMenu = () => {

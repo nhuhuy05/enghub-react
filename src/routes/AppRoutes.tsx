@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { AdminLayout } from '../components/layout/AdminLayout';
 import { StudentLayout } from '../components/layout/StudentLayout';
@@ -15,13 +15,15 @@ import { VocabularyPage } from '../features/vocabulary/components/VocabularyPage
 import { VocabularyDetail } from '../features/vocabulary/components/VocabularyDetail';
 import { GrammarPage } from '../features/grammar/components/GrammarPage';
 import { GrammarDetail } from '../features/grammar/components/GrammarDetail';
-import { ExamPage } from '../features/exam/components/ExamPage';
-import { ExamInterface } from '../features/exam/components/ExamInterface';
 import { ListeningPage } from '../features/listening/components/ListeningPage';
 import { ListeningPracticePage } from '../features/listening/components/ListeningPracticePage';
 import { ReadingPage } from '../features/reading/components/ReadingPage';
 import { ReadingPracticePage } from '../features/reading/components/ReadingPracticePage';
 import { ProfilePage } from '../features/profile/components/ProfilePage';
+import { TestCatalogPage } from '../features/test-attempt/components/TestCatalogPage';
+import { AttemptHistoryPage } from '../features/test-attempt/components/AttemptHistoryPage';
+import { AttemptRunnerPage } from '../features/test-attempt/components/AttemptRunnerPage';
+import { AttemptResultPage } from '../features/test-attempt/components/AttemptResultPage';
 import { TeacherDashboardPage } from '../features/teacher/dashboard/components/TeacherDashboardPage';
 import { TeacherClassesPage } from '../features/teacher/classes/components/TeacherClassesPage';
 import { TeacherAssignmentsPage } from '../features/teacher/assignments/components/TeacherAssignmentsPage';
@@ -35,6 +37,12 @@ export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<RootRedirect />} />
+      <Route element={<StudentLayout />}>
+        <Route path="/tests" element={<TestCatalogPage />} />
+        <Route path="/tests/:testId" element={<Navigate to="/tests" replace />} />
+        <Route path="/exam" element={<Navigate to="/tests" replace />} />
+      </Route>
+      <Route path="/exam/take" element={<Navigate to="/tests" replace />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/profile" element={<ProfilePage />} />
@@ -46,13 +54,14 @@ export const AppRoutes = () => {
             <Route path="/vocabulary/:id" element={<VocabularyDetail />} />
             <Route path="/grammar" element={<GrammarPage />} />
             <Route path="/grammar/:id" element={<GrammarDetail />} />
-            <Route path="/exam" element={<ExamPage />} />
+            <Route path="/attempts" element={<AttemptHistoryPage />} />
             <Route path="/listening" element={<ListeningPage />} />
             <Route path="/listening/:testId/:partId" element={<ListeningPracticePage />} />
             <Route path="/reading" element={<ReadingPage />} />
             <Route path="/reading/:passageId" element={<ReadingPracticePage />} />
           </Route>
-          <Route path="/exam/take" element={<ExamInterface />} />
+          <Route path="/attempts/:attemptId" element={<AttemptRunnerPage />} />
+          <Route path="/attempts/:attemptId/result" element={<AttemptResultPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRoles={['TEACHER', 'ADMIN']} />}>

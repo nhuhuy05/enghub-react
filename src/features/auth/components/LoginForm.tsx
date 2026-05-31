@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { EngHubLogo } from '../../../components/brand/EngHubLogo';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -16,7 +17,8 @@ export const LoginForm: React.FC = () => {
     e.preventDefault();
     const result = await login({ email, password });
     if (result.success) {
-      navigate('/');
+      const from = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+      navigate(from?.pathname ? `${from.pathname}${from.search || ''}` : '/', { replace: true });
     }
   };
 

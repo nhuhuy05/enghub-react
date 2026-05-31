@@ -1,4 +1,5 @@
 import { ArrowRight, Lightbulb, Rocket, TimerReset } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const weeklyProgress = [
   { label: 'T1', value: 42, color: 'bg-[#dfe4fb]' },
@@ -29,8 +30,8 @@ const lessons = [
 ];
 
 const quickCards = [
-  { title: 'Daily Quiz', icon: Rocket },
-  { title: 'Mock Exam', icon: TimerReset },
+  { title: 'Daily Quiz', icon: Rocket, href: '/tests' },
+  { title: 'Mock Exam', icon: TimerReset, href: '/tests' },
 ];
 
 export const StudentDashboardPage = () => {
@@ -42,10 +43,10 @@ export const StudentDashboardPage = () => {
             <h1 className="text-[38px] font-extrabold tracking-[-0.03em] text-[#111827]">Xin chào, Student!</h1>
             <p className="mt-2 text-base text-[#667085]">Bạn đã hoàn thành 75% mục tiêu tuần này. Giữ vững phong độ nhé!</p>
           </div>
-          <button className="inline-flex items-center gap-3 rounded-xl bg-[#0d4ecb] px-6 py-4 text-base font-semibold text-white shadow-[0_10px_24px_rgba(13,78,203,0.28)] transition hover:translate-y-[-1px] hover:bg-[#0b43b0] active:scale-[0.98]">
+          <Link to="/tests" className="inline-flex items-center gap-3 rounded-xl bg-[#0d4ecb] px-6 py-4 text-base font-semibold text-white shadow-[0_10px_24px_rgba(13,78,203,0.28)] transition hover:translate-y-[-1px] hover:bg-[#0b43b0] active:scale-[0.98]">
             <Rocket className="h-5 w-5" />
             Luyện thi ngay
-          </button>
+          </Link>
         </section>
 
         <section className="grid gap-6 lg:grid-cols-[280px_1fr]">
@@ -109,10 +110,10 @@ export const StudentDashboardPage = () => {
                 {quickCards.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <button key={item.title} className="flex min-h-[104px] flex-col justify-between rounded-2xl border border-[#d9ddec] bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99]">
+                    <Link to={item.href} key={item.title} className="flex min-h-[104px] flex-col justify-between rounded-2xl border border-[#d9ddec] bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99]">
                       <Icon className="h-5 w-5 text-[#0d4ecb]" />
                       <span className="text-sm font-semibold text-[#111827]">{item.title}</span>
-                    </button>
+                    </Link>
                   );
                 })}
               </div>
