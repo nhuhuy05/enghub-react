@@ -22,6 +22,7 @@ export const AudioTranscriptEditor = ({
   onGenerateTranscript,
 }: AudioTranscriptEditorProps) => {
   if (detail.part_number > 4) return null;
+  const isWritingTranscript = generatingAction === 'transcript' || generatingAction === 'group';
 
   return (
     <div className="rounded-2xl border border-[#e4e7ec] p-4">
@@ -114,6 +115,7 @@ export const AudioTranscriptEditor = ({
               }), { audio: true })
             }
             placeholder="Transcript EN"
+            isWriting={isWritingTranscript}
           />
           <AutoResizeTextarea
             value={detail.audio.transcript_vi ?? ''}
@@ -124,6 +126,7 @@ export const AudioTranscriptEditor = ({
               }), { audio: true })
             }
             placeholder="Transcript VI"
+            isWriting={isWritingTranscript}
           />
         </div>
       )}

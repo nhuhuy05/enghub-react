@@ -775,7 +775,7 @@ Các API này dùng ở màn `Review Groups`. Backend gọi Gemini, lưu kết q
 Hiện tại backend **không còn API generate toàn bộ test**. FE chỉ cần hỗ trợ:
 
 - gen lẻ 3 phần
-- gen cả 1 group
+  - gen cả 1 group
 
 #### Gen lẻ từng phần
 

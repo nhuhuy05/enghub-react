@@ -23,7 +23,11 @@ export const QuestionsEditor = ({
   saving,
   onGenerateTranslation,
   onGenerateExplanations,
-}: QuestionsEditorProps) => (
+}: QuestionsEditorProps) => {
+  const isWritingTranslation = generatingAction === 'translation' || generatingAction === 'group';
+  const isWritingExplanations = generatingAction === 'explanations' || generatingAction === 'group';
+
+  return (
   <div className="space-y-4">
     <div className="flex flex-wrap justify-end gap-2">
       <AiGenerateButton
@@ -58,12 +62,14 @@ export const QuestionsEditor = ({
             onChange={(event) => setQuestionValue(question.id, 'question_text_vi', event.target.value)}
             placeholder="Question text VI"
             rows={1}
+            isWriting={isWritingTranslation}
           />
           <AutoResizeTextarea
             value={question.explanation_vi ?? ''}
             onChange={(event) => setQuestionValue(question.id, 'explanation_vi', event.target.value)}
             placeholder="Explanation VI"
             rows={1}
+            isWriting={isWritingExplanations}
           />
         </div>
         <div className="mt-4 space-y-3">
@@ -91,6 +97,7 @@ export const QuestionsEditor = ({
                   onChange={(event) => setAnswerValue(answer.id, 'answer_text_vi', event.target.value)}
                   placeholder="Answer VI"
                   rows={1}
+                  isWriting={isWritingTranslation}
                 />
               </div>
             </div>
@@ -99,4 +106,5 @@ export const QuestionsEditor = ({
       </div>
     ))}
   </div>
-);
+  );
+};
