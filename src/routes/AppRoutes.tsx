@@ -32,6 +32,7 @@ import { TeacherClassesPage } from '../features-teacher/classes/components/Teach
 import { TeacherAssignmentsPage } from '../features-teacher/assignments/components/TeacherAssignmentsPage';
 import { TestListPage } from '../features-teacher/tests/components/TestListPage';
 import { CreateTestPage } from '../features-teacher/tests/components/CreateTestPage';
+import { AdminListeningPage } from '../features-teacher/listening/components/AdminListeningPage';
 import { AdminDashboardPage } from '../features-admin/dashboard/components/AdminDashboardPage';
 import { AdminUsersPage } from '../features-admin/users/components/AdminUsersPage';
 import { AdminRolesPage } from '../features-admin/roles/components/AdminRolesPage';
@@ -76,6 +77,7 @@ export const AppRoutes = () => {
             <Route path="/teacher/assignments" element={<TeacherAssignmentsPage />} />
             <Route path="/teacher/tests" element={<TestListPage />} />
             <Route path="/teacher/tests/create" element={<CreateTestPage />} />
+            <Route path="/teacher/listening" element={<AdminListeningPage />} />
             <Route path="/admin/vocabulary" element={<AdminVocabularyTopicsPage />} />
             <Route path="/admin/vocabulary/topics" element={<Navigate to="/admin/vocabulary" replace />} />
             <Route path="/admin/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />
@@ -88,6 +90,7 @@ export const AppRoutes = () => {
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/teacher/tests" element={<TestListPage />} />
             <Route path="/teacher/tests/create" element={<CreateTestPage />} />
+            <Route path="/admin/listening" element={<AdminListeningPage />} />
             <Route path="/admin/vocabulary" element={<AdminVocabularyTopicsPage />} />
             <Route path="/admin/vocabulary/topics" element={<Navigate to="/admin/vocabulary" replace />} />
             <Route path="/admin/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />

@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ClipboardList,
   FileSpreadsheet,
+  Headphones,
   LayoutDashboard,
 } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
@@ -16,6 +17,7 @@ const navItems = [
   { label: 'Lớp học', href: '/teacher/classes', icon: BookOpenCheck },
   { label: 'Bài giao', href: '/teacher/assignments', icon: ClipboardList },
   { label: 'Đề thi', href: '/teacher/tests', icon: FileSpreadsheet },
+  { label: 'Luyện nghe', href: '/teacher/listening', icon: Headphones },
   { label: 'Từ vựng', href: '/admin/vocabulary', icon: BookText },
 ];
 

@@ -45,19 +45,20 @@ export const ListeningPage = () => {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-[1200px] px-4 py-6 pb-16 sm:px-6 lg:px-8">
+    <main className="min-h-[calc(100vh-4rem)] bg-[#f6f7fc] px-4 py-6 pb-16 text-[#191b23] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1200px]">
       <section className="mb-6">
         <div>
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eaf0ff] text-[#004ac6]">
               <Waves className="h-5 w-5" />
             </div>
-            <span className="text-sm font-black uppercase tracking-widest text-cyan-600">
+            <span className="text-sm font-black uppercase tracking-widest text-[#004ac6]">
               TOEIC Listening
             </span>
           </div>
-          <p className="mt-2 max-w-2xl text-[15px] font-medium leading-7 text-[#505f76]">
-            Chọn bộ đề, luyện từng Part với các chế độ Nghe Check, Nghe Chép và Nghe Full transcript.
+          <p className="mt-2 max-w-2xl text-[15px] font-medium leading-7 text-[#667085]">
+            Chọn bộ đề, luyện từng Part bằng nghe chép từng câu với tùy chọn ẩn 30%, 50% hoặc toàn bộ câu.
           </p>
         </div>
 
@@ -72,7 +73,7 @@ export const ListeningPage = () => {
               className={`whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-bold transition-all ${
                 activeCollection === collection
                   ? 'bg-[#004ac6] text-white shadow-lg shadow-blue-100'
-                  : 'border border-[#e2e8f0] bg-white text-[#505f76] hover:border-[#004ac6] hover:text-[#004ac6]'
+                  : 'border border-[#d8dced] bg-white text-[#505f76] hover:border-[#004ac6] hover:text-[#004ac6]'
               }`}
             >
               {collection === 'All' ? 'Tất cả' : collection}
@@ -89,12 +90,12 @@ export const ListeningPage = () => {
       ) : filteredTests.length > 0 ? (
         <section className="space-y-8">
           {filteredTests.map((test) => (
-            <article key={test.id} className="rounded-3xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
+            <article key={test.id} className="rounded-2xl border border-[#d8dced] bg-white p-6 shadow-sm">
               <div className="mb-6 flex flex-wrap items-center gap-3">
                 
-                <h2 className="text-2xl font-black text-[#191b23]">{test.title}</h2>
+                <h2 className="text-2xl font-black text-[#111827]">{test.title}</h2>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-lg bg-cyan-50 px-3 py-1 text-[11px] font-black uppercase text-cyan-600">
+                  <span className="rounded-lg bg-[#eaf0ff] px-3 py-1 text-[11px] font-black uppercase text-[#004ac6]">
                     {test.collection}
                   </span>
                   {test.isNew && (
@@ -111,7 +112,7 @@ export const ListeningPage = () => {
                     key={part.id}
                     type="button"
                     onClick={() => navigate(`/listening/${test.id}/${part.id}`)}
-                    className="group flex min-h-[190px] flex-col rounded-2xl border border-[#e2e8f0] bg-[#fbfcff] p-5 text-left transition-all hover:-translate-y-1 hover:border-[#004ac6] hover:bg-white hover:shadow-xl"
+                    className="group flex min-h-[190px] flex-col rounded-2xl border border-[#d8dced] bg-[#fbfcff] p-5 text-left transition-all hover:-translate-y-1 hover:border-[#004ac6] hover:bg-white hover:shadow-lg"
                   >
                     <div className="mb-4 flex items-start justify-between gap-3">
                       <span className="rounded-xl bg-[#004ac6] px-3 py-1 text-xs font-black text-white">
@@ -119,15 +120,15 @@ export const ListeningPage = () => {
                       </span>
                       <ChevronRight className="h-5 w-5 text-[#94a3b8] transition group-hover:translate-x-1 group-hover:text-[#004ac6]" />
                     </div>
-                    <h3 className="text-lg font-black text-[#191b23]">{part.title}</h3>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#64748b]">{part.description}</p>
+                    <h3 className="text-lg font-black text-[#111827]">{part.title}</h3>
+                    <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#667085]">{part.description}</p>
                     <div className="mt-auto pt-5">
-                      <div className="mb-2 flex items-center justify-between text-xs font-bold text-[#94a3b8]">
+                      <div className="mb-2 flex items-center justify-between text-xs font-bold text-[#667085]">
                         <span>{statusLabel[part.status]}</span>
                         <span>{Math.round((part.progress / 100) * part.questionsCount)}/{part.questionsCount} câu</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-white">
-                        <div className="h-full rounded-full bg-cyan-500" style={{ width: `${part.progress}%` }} />
+                        <div className="h-full rounded-full bg-[#004ac6]" style={{ width: `${part.progress}%` }} />
                       </div>
                     </div>
                   </button>
@@ -141,8 +142,8 @@ export const ListeningPage = () => {
           <div className="mb-4 rounded-full bg-gray-100 p-4">
             <Search className="h-8 w-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-bold text-[#191b23]">Không có bài nghe phù hợp</h3>
-          <p className="text-sm text-[#64748b]">Hãy chọn bộ đề khác hoặc quay lại sau.</p>
+          <h3 className="text-lg font-bold text-[#111827]">Không có bài nghe phù hợp</h3>
+          <p className="text-sm text-[#667085]">Hãy chọn bộ đề khác hoặc quay lại sau.</p>
         </div>
       )}
 
@@ -154,6 +155,7 @@ export const ListeningPage = () => {
       >
         <RotateCcw className="h-5 w-5" />
       </button>
+      </div>
     </main>
   );
 };

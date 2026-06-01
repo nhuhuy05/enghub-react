@@ -9,13 +9,13 @@ interface HintTabsProps {
 }
 
 export const HintTabs = ({ value, onChange, compact = false }: HintTabsProps) => (
-  <div className={`inline-flex rounded-lg bg-[#f1f5f9] p-0.5 ${compact ? '' : 'mt-3'}`}>
+  <div className={`inline-flex rounded-lg bg-[#eef2f7] p-0.5 ${compact ? '' : 'mt-3'}`}>
     {hintLevels.map((level) => (
       <button
         key={level}
         onClick={() => onChange(level)}
         className={`rounded-md px-3 py-1.5 text-xs font-bold leading-4 ${
-          value === level ? 'bg-[#173b68] text-white' : 'text-[#526985]'
+          value === level ? 'bg-[#173b68] text-white shadow-sm' : 'text-[#667085] hover:text-[#173b68]'
         }`}
       >
         {level}%
