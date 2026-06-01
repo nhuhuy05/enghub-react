@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   BookOpenCheck,
+  BookOpenText,
   BookText,
   ChevronLeft,
   ChevronRight,
@@ -18,6 +19,7 @@ const navItems = [
   { label: 'Bài giao', href: '/teacher/assignments', icon: ClipboardList },
   { label: 'Đề thi', href: '/teacher/tests', icon: FileSpreadsheet },
   { label: 'Luyện nghe', href: '/teacher/listening', icon: Headphones },
+  { label: 'Luyện đọc', href: '/teacher/reading', icon: BookOpenText },
   { label: 'Từ vựng', href: '/admin/vocabulary', icon: BookText },
 ];
 

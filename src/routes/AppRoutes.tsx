@@ -33,6 +33,7 @@ import { TeacherAssignmentsPage } from '../features-teacher/assignments/componen
 import { TestListPage } from '../features-teacher/tests/components/TestListPage';
 import { CreateTestPage } from '../features-teacher/tests/components/CreateTestPage';
 import { AdminListeningPage } from '../features-teacher/listening/components/AdminListeningPage';
+import { AdminReadingPage } from '../features-teacher/reading/components/AdminReadingPage';
 import { AdminDashboardPage } from '../features-admin/dashboard/components/AdminDashboardPage';
 import { AdminUsersPage } from '../features-admin/users/components/AdminUsersPage';
 import { AdminRolesPage } from '../features-admin/roles/components/AdminRolesPage';
@@ -64,7 +65,7 @@ export const AppRoutes = () => {
             <Route path="/listening" element={<ListeningPage />} />
             <Route path="/listening/:testId/:partId" element={<ListeningPracticePage />} />
             <Route path="/reading" element={<ReadingPage />} />
-            <Route path="/reading/:passageId" element={<ReadingPracticePage />} />
+            <Route path="/reading/:lessonId" element={<ReadingPracticePage />} />
           </Route>
           <Route path="/attempts/:attemptId" element={<AttemptRunnerPage />} />
           <Route path="/attempts/:attemptId/result" element={<AttemptResultPage />} />
@@ -78,6 +79,7 @@ export const AppRoutes = () => {
             <Route path="/teacher/tests" element={<TestListPage />} />
             <Route path="/teacher/tests/create" element={<CreateTestPage />} />
             <Route path="/teacher/listening" element={<AdminListeningPage />} />
+            <Route path="/teacher/reading" element={<AdminReadingPage />} />
             <Route path="/admin/vocabulary" element={<AdminVocabularyTopicsPage />} />
             <Route path="/admin/vocabulary/topics" element={<Navigate to="/admin/vocabulary" replace />} />
             <Route path="/admin/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />
@@ -91,6 +93,7 @@ export const AppRoutes = () => {
             <Route path="/teacher/tests" element={<TestListPage />} />
             <Route path="/teacher/tests/create" element={<CreateTestPage />} />
             <Route path="/admin/listening" element={<AdminListeningPage />} />
+            <Route path="/admin/reading" element={<AdminReadingPage />} />
             <Route path="/admin/vocabulary" element={<AdminVocabularyTopicsPage />} />
             <Route path="/admin/vocabulary/topics" element={<Navigate to="/admin/vocabulary" replace />} />
             <Route path="/admin/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />

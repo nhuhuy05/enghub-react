@@ -1,55 +1,51 @@
 import { useEffect, useMemo, useState } from 'react';
 import { readingService } from '../services/readingService';
-import type { ReadingPassageGroup, ReadingPassageSummary } from '../types';
+import type { ReadingLessonListItem, ReadingLessonType } from '../types';
 
-export type ReadingPassageGroupFilter = ReadingPassageGroup | 'All';
+export type ReadingLessonTypeFilter = ReadingLessonType | 'All';
 
 export const useReading = () => {
-  const [passages, setPassages] = useState<ReadingPassageSummary[]>([]);
-  const [activePassageGroup, setActivePassageGroup] = useState<ReadingPassageGroupFilter>('All');
+  const [lessons, setLessons] = useState<ReadingLessonListItem[]>([]);
+  const [activeReadingType, setActiveReadingType] = useState<ReadingLessonTypeFilter>('All');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let ignore = false;
 
-    const fetchPassages = async () => {
+    const fetchLessons = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await readingService.getPassages(controller.signal);
-        if (controller.signal.aborted) return;
-        setPassages(data);
+        const data = await readingService.getReadingLessons();
+        if (!ignore) setLessons(data);
       } catch {
-        if (controller.signal.aborted) return;
-        setError('Không thể tải danh sách bài đọc.');
+        if (!ignore) setError('Không thể tải danh sách bài đọc.');
       } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
+        if (!ignore) setIsLoading(false);
       }
     };
 
-    fetchPassages();
+    void fetchLessons();
 
     return () => {
-      controller.abort();
+      ignore = true;
     };
   }, []);
 
-  const passageGroups = useMemo(() => {
-    return ['All', ...Array.from(new Set(passages.map((passage) => passage.passageGroup)))] as ReadingPassageGroupFilter[];
-  }, [passages]);
+  const readingTypes = useMemo(() => {
+    return ['All', ...Array.from(new Set(lessons.map((lesson) => lesson.readingType)))] as ReadingLessonTypeFilter[];
+  }, [lessons]);
 
-  const filteredPassages = useMemo(() => {
-    return passages.filter((passage) => activePassageGroup === 'All' || passage.passageGroup === activePassageGroup);
-  }, [activePassageGroup, passages]);
+  const filteredLessons = useMemo(() => {
+    return lessons.filter((lesson) => activeReadingType === 'All' || lesson.readingType === activeReadingType);
+  }, [activeReadingType, lessons]);
 
   return {
-    filteredPassages,
-    passageGroups,
-    activePassageGroup,
-    setActivePassageGroup,
+    filteredLessons,
+    readingTypes,
+    activeReadingType,
+    setActiveReadingType,
     isLoading,
     error,
   };

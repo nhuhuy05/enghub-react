@@ -1,64 +1,52 @@
 import { useEffect, useState } from 'react';
 import { readingService } from '../services/readingService';
-import type { ReadingAnswerOption, ReadingPassageDetail } from '../types';
+import type { ReadingLessonDetail } from '../types';
 
-export const useReadingSession = (passageId: string) => {
-  const [passage, setPassage] = useState<ReadingPassageDetail | null>(null);
+export const useReadingSession = (lessonId: string) => {
+  const [lesson, setLesson] = useState<ReadingLessonDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, ReadingAnswerOption['id']>>({});
-  const [isBilingual, setIsBilingual] = useState(false);
+  const [isBilingual, setIsBilingual] = useState(true);
   const [showVocabulary, setShowVocabulary] = useState(true);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let ignore = false;
 
-    const fetchPassage = async () => {
+    const fetchLesson = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await readingService.getPassage(passageId, controller.signal);
-        if (controller.signal.aborted) return;
-        setPassage(data);
-        setSelectedAnswers({});
+        const data = await readingService.getReadingLesson(lessonId);
+        if (!ignore) setLesson(data);
       } catch {
-        if (controller.signal.aborted) return;
-        setPassage(null);
-        setError('Không tìm thấy bài đọc.');
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
+        if (!ignore) {
+          setLesson(null);
+          setError('Không tìm thấy bài đọc hoặc bài chưa được publish.');
         }
+      } finally {
+        if (!ignore) setIsLoading(false);
       }
     };
 
-    if (passageId) fetchPassage();
+    if (lessonId) {
+      void fetchLesson();
+    } else {
+      setIsLoading(false);
+      setError('Thiếu thông tin bài đọc.');
+    }
 
     return () => {
-      controller.abort();
+      ignore = true;
     };
-  }, [passageId]);
-
-  const selectAnswer = (questionId: string, answerId: ReadingAnswerOption['id']) => {
-    setSelectedAnswers((prev) => {
-      if (prev[questionId]) return prev;
-
-      return {
-        ...prev,
-        [questionId]: answerId,
-      };
-    });
-  };
+  }, [lessonId]);
 
   return {
-    passage,
+    lesson,
     isLoading,
     error,
-    selectedAnswers,
     isBilingual,
     setIsBilingual,
     showVocabulary,
     setShowVocabulary,
-    selectAnswer,
   };
 };

@@ -1,4 +1,4 @@
-import { BookText, FileSpreadsheet, Headphones, LayoutDashboard, ShieldCheck, Users } from 'lucide-react';
+import { BookOpenText, BookText, FileSpreadsheet, Headphones, LayoutDashboard, ShieldCheck, Users } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { EngHubLogo } from '@/components/brand/EngHubLogo';
 
@@ -7,6 +7,7 @@ const navItems = [
   { label: 'Người dùng', href: '/admin/users', icon: Users },
   { label: 'Đề thi', href: '/teacher/tests', icon: FileSpreadsheet },
   { label: 'Luyện nghe', href: '/admin/listening', icon: Headphones },
+  { label: 'Luyện đọc', href: '/admin/reading', icon: BookOpenText },
   { label: 'Vai trò', href: '/admin/roles', icon: ShieldCheck },
   { label: 'Từ vựng', href: '/admin/vocabulary', icon: BookText },
 ];
