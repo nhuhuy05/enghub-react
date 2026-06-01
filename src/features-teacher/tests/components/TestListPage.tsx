@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Plus,
   BookOpen,
@@ -14,6 +14,8 @@ import { teacherTestService } from '../services/teacherTestService';
 import type { TestCollection, Test } from '../types/teacherTestTypes';
 
 export const TestListPage = () => {
+  const location = useLocation();
+  const testsBasePath = location.pathname.startsWith('/admin') ? '/admin/tests' : '/teacher/tests';
   const [collections, setCollections] = useState<TestCollection[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<TestCollection | null>(null);
   const [tests, setTests] = useState<Test[]>([]);
@@ -140,7 +142,7 @@ export const TestListPage = () => {
             </button>
             {selectedCollection && (
               <Link
-                to={`/teacher/tests/create?collectionId=${selectedCollection.id}`}
+                to={`${testsBasePath}/create?collectionId=${selectedCollection.id}`}
                 className="inline-flex items-center gap-2 rounded-xl bg-[#004ac6] px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#003da3] transition-all"
               >
                 <Plus className="h-4.5 w-4.5" />
@@ -216,7 +218,7 @@ export const TestListPage = () => {
                     )}
                   </div>
                   <Link
-                    to={`/teacher/tests/create?collectionId=${selectedCollection.id}`}
+                    to={`${testsBasePath}/create?collectionId=${selectedCollection.id}`}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[#004ac6] hover:text-[#003da3] bg-[#eaf0ff] hover:bg-[#004ac6]/10 px-3 py-1.5 rounded-lg transition-all"
                   >
                     <Plus className="h-3.5 w-3.5" />
@@ -239,7 +241,7 @@ export const TestListPage = () => {
                         Hãy tạo đề thi TOEIC đầu tiên để nạp câu hỏi, file nghe, ảnh minh họa.
                       </p>
                       <Link
-                        to={`/teacher/tests/create?collectionId=${selectedCollection.id}`}
+                        to={`${testsBasePath}/create?collectionId=${selectedCollection.id}`}
                         className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#004ac6] px-4 py-2 text-xs font-semibold text-white hover:bg-[#003da3] transition-all shadow-sm"
                       >
                         <Plus className="h-3.5 w-3.5" />
@@ -287,7 +289,7 @@ export const TestListPage = () => {
 
                           <div className="flex items-center gap-2 sm:self-center">
                             <Link
-                              to={`/teacher/tests/create?testId=${test.id}&collectionId=${selectedCollection?.id || test.collection_id}${
+                              to={`${testsBasePath}/create?testId=${test.id}&collectionId=${selectedCollection?.id || test.collection_id}${
                                 test.is_published ? '&published=1' : ''
                               }`}
                               className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold border border-[#004ac6] text-[#004ac6] hover:bg-[#f9fafb] transition-all bg-white"

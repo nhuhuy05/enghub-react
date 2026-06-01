@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/features-user/auth/hooks/useAuth';
 import { getDefaultDashboardPath } from '@/features-user/auth/utils/roleUtils';
+import { HomePage } from '@/features-user/home/components/HomePage';
 
 export const RootRedirect = () => {
   const { isAuthenticated, isSessionChecked, user } = useAuth();
@@ -14,7 +15,7 @@ export const RootRedirect = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <HomePage />;
   }
 
   return <Navigate to={getDefaultDashboardPath(user)} replace />;

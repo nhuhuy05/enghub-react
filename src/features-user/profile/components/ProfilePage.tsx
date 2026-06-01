@@ -309,15 +309,7 @@ export const ProfilePage = () => {
                   </div>
                 </label>
 
-                <label className="space-y-2 md:col-span-2">
-                  <span className="text-sm font-bold text-[#344054]">Ảnh đại diện</span>
-                  <input
-                    value={avatarUrl}
-                    onChange={(event) => setAvatarUrl(event.target.value)}
-                    className="h-12 w-full rounded-xl border border-[#d0d5dd] bg-white px-4 text-sm font-semibold text-[#111827] outline-none transition placeholder:text-[#98a2b3] focus:border-[#004ac6] focus:ring-2 focus:ring-blue-100"
-                    placeholder="https://example.com/avatar.jpg"
-                  />
-                </label>
+           
               </div>
             </form>
           )}

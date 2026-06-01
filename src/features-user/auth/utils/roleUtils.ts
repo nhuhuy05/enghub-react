@@ -3,8 +3,8 @@ import type { User } from '@/types/apiTypes';
 export type AppRole = 'STUDENT' | 'TEACHER' | 'ADMIN';
 
 const ROLE_DASHBOARD_PATHS: Record<AppRole, string> = {
-  ADMIN: '/admin/dashboard',
-  TEACHER: '/teacher/dashboard',
+  ADMIN: '/admin/users',
+  TEACHER: '/teacher/tests',
   STUDENT: '/dashboard',
 };
 

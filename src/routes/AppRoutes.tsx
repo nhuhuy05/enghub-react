@@ -10,14 +10,11 @@ import { LoginForm } from '../features-user/auth/components/LoginForm';
 import { RegisterForm } from '../features-user/auth/components/RegisterForm';
 import { LoginVisual } from '../features-user/auth/components/LoginVisual';
 import { RegisterVisual } from '../features-user/auth/components/RegisterVisual';
-import { StudentDashboardPage } from '../features-user/student/dashboard/components/StudentDashboardPage';
 import { VocabularyPage } from '../features-user/vocabulary/components/VocabularyPage';
 import { VocabularyDetail } from '../features-user/vocabulary/components/VocabularyDetail';
 import { VocabularyReviewPage } from '../features-user/vocabulary/components/VocabularyReviewPage';
 import { AdminVocabularyTopicsPage } from '../features-user/vocabulary/components/AdminVocabularyTopicsPage';
 import { AdminVocabularyWordsPage } from '../features-user/vocabulary/components/AdminVocabularyWordsPage';
-import { GrammarPage } from '../features-user/grammar/components/GrammarPage';
-import { GrammarDetail } from '../features-user/grammar/components/GrammarDetail';
 import { ListeningPage } from '../features-user/listening/components/ListeningPage';
 import { ListeningPracticePage } from '../features-user/listening/components/ListeningPracticePage';
 import { ReadingPage } from '../features-user/reading/components/ReadingPage';
@@ -34,9 +31,8 @@ import { TestListPage } from '../features-teacher/tests/components/TestListPage'
 import { CreateTestPage } from '../features-teacher/tests/components/CreateTestPage';
 import { AdminListeningPage } from '../features-teacher/listening/components/AdminListeningPage';
 import { AdminReadingPage } from '../features-teacher/reading/components/AdminReadingPage';
-import { AdminDashboardPage } from '../features-admin/dashboard/components/AdminDashboardPage';
 import { AdminUsersPage } from '../features-admin/users/components/AdminUsersPage';
-import { AdminRolesPage } from '../features-admin/roles/components/AdminRolesPage';
+import { HomePage } from '../features-user/home/components/HomePage';
 
 export const AppRoutes = () => {
   return (
@@ -54,13 +50,11 @@ export const AppRoutes = () => {
 
         <Route element={<RoleRoute allowedRoles={['STUDENT']} />}>
           <Route element={<StudentLayout />}>
-            <Route path="/dashboard" element={<StudentDashboardPage />} />
+             <Route path="/dashboard" element={<HomePage />} />
             <Route path="/vocabulary" element={<VocabularyPage />} />
             <Route path="/vocabulary/review" element={<VocabularyReviewPage />} />
             <Route path="/vocabulary/topics/:topicId" element={<VocabularyDetail />} />
             <Route path="/vocabulary/:id" element={<Navigate to="/vocabulary" replace />} />
-            <Route path="/grammar" element={<GrammarPage />} />
-            <Route path="/grammar/:id" element={<GrammarDetail />} />
             <Route path="/attempts" element={<AttemptHistoryPage />} />
             <Route path="/listening" element={<ListeningPage />} />
             <Route path="/listening/:testId/:partId" element={<ListeningPracticePage />} />
@@ -80,24 +74,24 @@ export const AppRoutes = () => {
             <Route path="/teacher/tests/create" element={<CreateTestPage />} />
             <Route path="/teacher/listening" element={<AdminListeningPage />} />
             <Route path="/teacher/reading" element={<AdminReadingPage />} />
-            <Route path="/admin/vocabulary" element={<AdminVocabularyTopicsPage />} />
-            <Route path="/admin/vocabulary/topics" element={<Navigate to="/admin/vocabulary" replace />} />
-            <Route path="/admin/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />
+            <Route path="/teacher/vocabulary" element={<AdminVocabularyTopicsPage />} />
+            <Route path="/teacher/vocabulary/topics" element={<Navigate to="/teacher/vocabulary" replace />} />
+            <Route path="/teacher/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />
           </Route>
         </Route>
 
         <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
           <Route element={<AdminLayout />}>
-            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/dashboard" element={<Navigate to="/admin/users" replace />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
-            <Route path="/teacher/tests" element={<TestListPage />} />
-            <Route path="/teacher/tests/create" element={<CreateTestPage />} />
+            <Route path="/admin/tests" element={<TestListPage />} />
+            <Route path="/admin/tests/create" element={<CreateTestPage />} />
             <Route path="/admin/listening" element={<AdminListeningPage />} />
             <Route path="/admin/reading" element={<AdminReadingPage />} />
             <Route path="/admin/vocabulary" element={<AdminVocabularyTopicsPage />} />
             <Route path="/admin/vocabulary/topics" element={<Navigate to="/admin/vocabulary" replace />} />
             <Route path="/admin/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />
-            <Route path="/admin/roles" element={<AdminRolesPage />} />
+            <Route path="/admin/roles" element={<Navigate to="/admin/users" replace />} />
           </Route>
         </Route>
       </Route>

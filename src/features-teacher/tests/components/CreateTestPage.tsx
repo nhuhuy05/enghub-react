@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Check } from 'lucide-react';
 import { StepCollectionTest } from './steps/StepCollectionTest';
 import { StepMediaUpload } from './steps/StepMediaUpload';
@@ -21,7 +21,9 @@ const STEPS = [
 
 export const CreateTestPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const testsBasePath = location.pathname.startsWith('/admin') ? '/admin/tests' : '/teacher/tests';
 
   const urlTestId = searchParams.get('testId');
   const urlCollectionId = searchParams.get('collectionId');
@@ -124,7 +126,7 @@ export const CreateTestPage = () => {
   };
 
   const handleComplete = () => {
-    navigate('/teacher/tests');
+    navigate(testsBasePath);
   };
 
   const renderStepComponent = () => {
@@ -174,7 +176,7 @@ export const CreateTestPage = () => {
     <main className="min-h-[calc(100vh-64px)] bg-[#f6f7fc] px-3 py-3 sm:px-4 lg:px-4">
       <div className="mx-auto max-w-[1480px]">
         <button
-          onClick={() => navigate('/teacher/tests')}
+          onClick={() => navigate(testsBasePath)}
           className="mb-3 inline-flex max-w-full items-center gap-2 text-sm font-semibold text-[#505f76] transition-colors hover:text-[#004ac6]"
         >
           <ArrowLeft className="h-4 w-4" />

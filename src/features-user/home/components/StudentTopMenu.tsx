@@ -1,10 +1,8 @@
-import { Bell, SunMedium } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '@/features-user/auth/hooks/useAuth';
 import { EngHubLogo } from '@/components/brand/EngHubLogo';
 
 const navItems = [
-  { label: 'Ngữ pháp', href: '/grammar' },
   { label: 'Từ vựng', href: '/vocabulary' },
   { label: 'Nghe', href: '/listening' },
   { label: 'Đọc', href: '/reading' },
@@ -13,6 +11,7 @@ const navItems = [
 
 export const StudentTopMenu = () => {
   const { user, isAuthenticated } = useAuth();
+  const avatarInitial = (user?.fullName || user?.email || 'U').trim().slice(0, 1).toUpperCase();
 
   return (
     <header className="fixed left-0 top-0 z-50 w-full border-b border-[#d8dced] bg-white/95 backdrop-blur">
@@ -40,12 +39,6 @@ export const StudentTopMenu = () => {
         </nav>
 
         <div className="flex items-center gap-3 text-[#434655]">
-          <button className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#ededf9] active:scale-95" type="button" aria-label="Notifications">
-            <Bell className="h-5 w-5" />
-          </button>
-          <button className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-[#ededf9] active:scale-95" type="button" aria-label="Toggle theme">
-            <SunMedium className="h-5 w-5" />
-          </button>
           {isAuthenticated ? (
             <>
               <Link to="/profile" className="hidden max-w-[180px] flex-col items-end leading-tight sm:flex">
@@ -57,14 +50,17 @@ export const StudentTopMenu = () => {
                 )}
               </Link>
               <Link to="/profile" aria-label="Profile">
-                <img
-                  src={
-                    user?.avatarUrl ||
-                    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80'
-                  }
-                  alt="User avatar"
-                  className="h-8 w-8 rounded-full object-cover ring-1 ring-transparent transition hover:ring-[#004ac6]"
-                />
+                {user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt="User avatar"
+                    className="h-8 w-8 rounded-full object-cover ring-1 ring-transparent transition hover:ring-[#004ac6]"
+                  />
+                ) : (
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eaf0ff] text-sm font-black text-[#004ac6] ring-1 ring-transparent transition hover:ring-[#004ac6]">
+                    {avatarInitial}
+                  </span>
+                )}
               </Link>
             </>
           ) : (
