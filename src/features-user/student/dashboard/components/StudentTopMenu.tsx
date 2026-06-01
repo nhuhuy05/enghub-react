@@ -1,6 +1,6 @@
 import { Bell, SunMedium } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features-user/auth/hooks/useAuth';
 import { EngHubLogo } from '@/components/brand/EngHubLogo';
 
 const navItems = [

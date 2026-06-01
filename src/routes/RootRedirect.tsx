@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { getDefaultDashboardPath } from '@/features/auth/utils/roleUtils';
+import { useAuth } from '@/features-user/auth/hooks/useAuth';
+import { getDefaultDashboardPath } from '@/features-user/auth/utils/roleUtils';
 
 export const RootRedirect = () => {
   const { isAuthenticated, isSessionChecked, user } = useAuth();

@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { getDefaultDashboardPath, hasRole, type AppRole } from '@/features/auth/utils/roleUtils';
+import { useAuth } from '@/features-user/auth/hooks/useAuth';
+import { getDefaultDashboardPath, hasRole, type AppRole } from '@/features-user/auth/utils/roleUtils';
 
 interface RoleRouteProps {
   allowedRoles: AppRole[];

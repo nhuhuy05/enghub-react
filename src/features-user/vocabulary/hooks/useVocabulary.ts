@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { VocabularyTopic } from '../types';
 import { vocabularyService } from '../services/vocabularyService';
 
 export const useVocabulary = () => {
   const [topics, setTopics] = useState<VocabularyTopic[]>([]);
+  const [dueCount, setDueCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,16 +12,22 @@ export const useVocabulary = () => {
     const fetchTopics = async () => {
       try {
         setIsLoading(true);
-        const data = await vocabularyService.getTopics();
-        setTopics(data);
+        setError(null);
+        const [nextTopics, dueWords] = await Promise.all([
+          vocabularyService.getTopics(),
+          vocabularyService.getDue(),
+        ]);
+        setTopics(nextTopics);
+        setDueCount(dueWords.length);
       } catch {
-        setError('Không thể tải danh sách từ vựng.');
+        setError('Không thể tải danh sách chủ đề từ vựng.');
       } finally {
         setIsLoading(false);
       }
     };
-    fetchTopics();
+
+    void fetchTopics();
   }, []);
 
-  return { topics, isLoading, error };
+  return { topics, dueCount, isLoading, error };
 };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, BookOpen, Clock3, Loader2 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features-user/auth/hooks/useAuth';
 import { getErrorMessage, testAttemptService } from '../services/testAttemptService';
 import type { AttemptMode, PublishedTest, PublishedTestCollection } from '../types';
 import { ModeSelectorModal } from './TestDetailPage';

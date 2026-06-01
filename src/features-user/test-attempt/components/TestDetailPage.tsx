@@ -11,7 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features-user/auth/hooks/useAuth';
 import {
   getErrorCode,
   getErrorMessage,

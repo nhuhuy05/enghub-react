@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { StudentTopMenu } from '@/features/student/dashboard/components/StudentTopMenu';
+import { StudentTopMenu } from '@/features-user/student/dashboard/components/StudentTopMenu';
 
 export const StudentLayout = () => {
   return (

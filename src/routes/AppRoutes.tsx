@@ -6,32 +6,35 @@ import { TeacherLayout } from '../components/layout/TeacherLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleRoute } from './RoleRoute';
 import { RootRedirect } from './RootRedirect';
-import { LoginForm } from '../features/auth/components/LoginForm';
-import { RegisterForm } from '../features/auth/components/RegisterForm';
-import { LoginVisual } from '../features/auth/components/LoginVisual';
-import { RegisterVisual } from '../features/auth/components/RegisterVisual';
-import { StudentDashboardPage } from '../features/student/dashboard/components/StudentDashboardPage';
-import { VocabularyPage } from '../features/vocabulary/components/VocabularyPage';
-import { VocabularyDetail } from '../features/vocabulary/components/VocabularyDetail';
-import { GrammarPage } from '../features/grammar/components/GrammarPage';
-import { GrammarDetail } from '../features/grammar/components/GrammarDetail';
-import { ListeningPage } from '../features/listening/components/ListeningPage';
-import { ListeningPracticePage } from '../features/listening/components/ListeningPracticePage';
-import { ReadingPage } from '../features/reading/components/ReadingPage';
-import { ReadingPracticePage } from '../features/reading/components/ReadingPracticePage';
-import { ProfilePage } from '../features/profile/components/ProfilePage';
-import { TestCatalogPage } from '../features/test-attempt/components/TestCatalogPage';
-import { AttemptHistoryPage } from '../features/test-attempt/components/AttemptHistoryPage';
-import { AttemptRunnerPage } from '../features/test-attempt/components/AttemptRunnerPage';
-import { AttemptResultPage } from '../features/test-attempt/components/AttemptResultPage';
-import { TeacherDashboardPage } from '../features/teacher/dashboard/components/TeacherDashboardPage';
-import { TeacherClassesPage } from '../features/teacher/classes/components/TeacherClassesPage';
-import { TeacherAssignmentsPage } from '../features/teacher/assignments/components/TeacherAssignmentsPage';
-import { TestListPage } from '../features/teacher/tests/components/TestListPage';
-import { CreateTestPage } from '../features/teacher/tests/components/CreateTestPage';
-import { AdminDashboardPage } from '../features/admin/dashboard/components/AdminDashboardPage';
-import { AdminUsersPage } from '../features/admin/users/components/AdminUsersPage';
-import { AdminRolesPage } from '../features/admin/roles/components/AdminRolesPage';
+import { LoginForm } from '../features-user/auth/components/LoginForm';
+import { RegisterForm } from '../features-user/auth/components/RegisterForm';
+import { LoginVisual } from '../features-user/auth/components/LoginVisual';
+import { RegisterVisual } from '../features-user/auth/components/RegisterVisual';
+import { StudentDashboardPage } from '../features-user/student/dashboard/components/StudentDashboardPage';
+import { VocabularyPage } from '../features-user/vocabulary/components/VocabularyPage';
+import { VocabularyDetail } from '../features-user/vocabulary/components/VocabularyDetail';
+import { VocabularyReviewPage } from '../features-user/vocabulary/components/VocabularyReviewPage';
+import { AdminVocabularyTopicsPage } from '../features-user/vocabulary/components/AdminVocabularyTopicsPage';
+import { AdminVocabularyWordsPage } from '../features-user/vocabulary/components/AdminVocabularyWordsPage';
+import { GrammarPage } from '../features-user/grammar/components/GrammarPage';
+import { GrammarDetail } from '../features-user/grammar/components/GrammarDetail';
+import { ListeningPage } from '../features-user/listening/components/ListeningPage';
+import { ListeningPracticePage } from '../features-user/listening/components/ListeningPracticePage';
+import { ReadingPage } from '../features-user/reading/components/ReadingPage';
+import { ReadingPracticePage } from '../features-user/reading/components/ReadingPracticePage';
+import { ProfilePage } from '../features-user/profile/components/ProfilePage';
+import { TestCatalogPage } from '../features-user/test-attempt/components/TestCatalogPage';
+import { AttemptHistoryPage } from '../features-user/test-attempt/components/AttemptHistoryPage';
+import { AttemptRunnerPage } from '../features-user/test-attempt/components/AttemptRunnerPage';
+import { AttemptResultPage } from '../features-user/test-attempt/components/AttemptResultPage';
+import { TeacherDashboardPage } from '../features-teacher/dashboard/components/TeacherDashboardPage';
+import { TeacherClassesPage } from '../features-teacher/classes/components/TeacherClassesPage';
+import { TeacherAssignmentsPage } from '../features-teacher/assignments/components/TeacherAssignmentsPage';
+import { TestListPage } from '../features-teacher/tests/components/TestListPage';
+import { CreateTestPage } from '../features-teacher/tests/components/CreateTestPage';
+import { AdminDashboardPage } from '../features-admin/dashboard/components/AdminDashboardPage';
+import { AdminUsersPage } from '../features-admin/users/components/AdminUsersPage';
+import { AdminRolesPage } from '../features-admin/roles/components/AdminRolesPage';
 
 export const AppRoutes = () => {
   return (
@@ -51,7 +54,9 @@ export const AppRoutes = () => {
           <Route element={<StudentLayout />}>
             <Route path="/dashboard" element={<StudentDashboardPage />} />
             <Route path="/vocabulary" element={<VocabularyPage />} />
-            <Route path="/vocabulary/:id" element={<VocabularyDetail />} />
+            <Route path="/vocabulary/review" element={<VocabularyReviewPage />} />
+            <Route path="/vocabulary/topics/:topicId" element={<VocabularyDetail />} />
+            <Route path="/vocabulary/:id" element={<Navigate to="/vocabulary" replace />} />
             <Route path="/grammar" element={<GrammarPage />} />
             <Route path="/grammar/:id" element={<GrammarDetail />} />
             <Route path="/attempts" element={<AttemptHistoryPage />} />
@@ -64,13 +69,16 @@ export const AppRoutes = () => {
           <Route path="/attempts/:attemptId/result" element={<AttemptResultPage />} />
         </Route>
 
-        <Route element={<RoleRoute allowedRoles={['TEACHER', 'ADMIN']} />}>
+        <Route element={<RoleRoute allowedRoles={['TEACHER']} />}>
           <Route element={<TeacherLayout />}>
             <Route path="/teacher/dashboard" element={<TeacherDashboardPage />} />
             <Route path="/teacher/classes" element={<TeacherClassesPage />} />
             <Route path="/teacher/assignments" element={<TeacherAssignmentsPage />} />
             <Route path="/teacher/tests" element={<TestListPage />} />
             <Route path="/teacher/tests/create" element={<CreateTestPage />} />
+            <Route path="/admin/vocabulary" element={<AdminVocabularyTopicsPage />} />
+            <Route path="/admin/vocabulary/topics" element={<Navigate to="/admin/vocabulary" replace />} />
+            <Route path="/admin/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />
           </Route>
         </Route>
 
@@ -78,6 +86,11 @@ export const AppRoutes = () => {
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/teacher/tests" element={<TestListPage />} />
+            <Route path="/teacher/tests/create" element={<CreateTestPage />} />
+            <Route path="/admin/vocabulary" element={<AdminVocabularyTopicsPage />} />
+            <Route path="/admin/vocabulary/topics" element={<Navigate to="/admin/vocabulary" replace />} />
+            <Route path="/admin/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />
             <Route path="/admin/roles" element={<AdminRolesPage />} />
           </Route>
         </Route>

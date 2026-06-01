@@ -17,8 +17,8 @@ import {
   UserRound,
 } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import { useAuth } from '@/features-user/auth/hooks/useAuth';
+import { useAuthStore } from '@/features-user/auth/store/useAuthStore';
 import { useProfile } from '../hooks/useProfile';
 
 type ProfileTab = 'progress' | 'personal';

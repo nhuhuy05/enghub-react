@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import { useAuthStore } from '@/features-user/auth/store/useAuthStore';
 import type { User } from '@/types/apiTypes';
 import { profileService } from '../services/profileService';
 import type { UpdateProfileRequest } from '../types';
