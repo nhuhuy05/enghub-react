@@ -1,23 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  BookOpen,
-  CheckCircle2,
   Clock3,
   Loader2,
   Menu,
   Send,
   Volume2,
-  X,
-  XCircle,
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { EngHubLogo } from '@/components/brand/EngHubLogo';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useAttemptRunner } from '../hooks/useAttemptRunner';
-import type { AttemptGroup, AttemptPart, AttemptQuestion, SaveAnswerResult } from '../types';
-import { AudioRangePlayer } from './AudioRangePlayer';
+import { streamPracticeQuestionChat } from '../services/testAttemptService';
+import type { AttemptGroup, AttemptPart } from '../types';
+import { ContextPanel } from './ContextPanel';
+import { PracticeQuestionChatPanel, type ChatMessage } from './PracticeQuestionChatPanel';
+import { QuestionPalette } from './QuestionPalette';
+import { QuestionPanel } from './QuestionPanel';
 
 interface QuestionRef {
   partNumber: number;
@@ -81,21 +82,12 @@ const getFirstUnansweredQuestionId = (parts: AttemptPart[]) => {
 const getSectionLabel = (partNumber: number) => (partNumber <= 4 ? 'Listening' : 'Reading');
 
 const getGroupQuestionLabel = (part: AttemptPart | null, group: AttemptGroup | null, totalQuestions: number) => {
-  if (!part || !group || group.questions.length === 0) return `Questions 0 of ${totalQuestions}`;
+  if (!part || !group || group.questions.length === 0) return `Questions 0 / ${totalQuestions}`;
   const numbers = group.questions.map((question) => question.questionNumber).sort((a, b) => a - b);
   const first = numbers[0];
   const last = numbers[numbers.length - 1];
   const range = first === last ? `${first}` : `${first} - ${last}`;
-  return `${getSectionLabel(part.partNumber)}: Questions ${range} of ${totalQuestions}`;
-};
-
-const getInstruction = (partNumber: number) => {
-  if (partNumber === 1) return 'Select the one statement that best describes what you see in the picture.';
-  if (partNumber === 2) return 'Select the best response to the question.';
-  if (partNumber <= 4) return 'Select the best response to each question.';
-  if (partNumber === 5) return 'Select the best answer to complete the sentence.';
-  if (partNumber === 6) return 'Select the best answer to complete the text.';
-  return 'Select the best answer to each question.';
+  return `${getSectionLabel(part.partNumber)}: Questions ${range} / ${totalQuestions}`;
 };
 
 export const AttemptRunnerPage = () => {
@@ -120,8 +112,18 @@ export const AttemptRunnerPage = () => {
   const [activeQuestionId, setActiveQuestionId] = useState<number | null>(null);
   const [markedQuestions, setMarkedQuestions] = useState<Record<number, boolean>>({});
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const [volume, setVolume] = useState(1);
+  const [chatByQuestionId, setChatByQuestionId] = useState<Record<number, ChatMessage[]>>({});
+  const [chatQuestionId, setChatQuestionId] = useState<number | null>(null);
+  const [chatInput, setChatInput] = useState('');
+  const [chatError, setChatError] = useState('');
+  const [chatPanelWidth, setChatPanelWidth] = useState(420);
+  const [streamingQuestionId, setStreamingQuestionId] = useState<number | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const chatAnimationRef = useRef<Record<string, { queue: string[]; timer: ReturnType<typeof window.setTimeout> | null }>>({});
+  const chatIdRef = useRef(0);
 
   const questionRefs = useMemo(() => (content ? flattenQuestions(content.parts) : []), [content]);
   const groupRefs = useMemo(() => (content ? flattenGroups(content.parts) : []), [content]);
@@ -133,6 +135,13 @@ export const AttemptRunnerPage = () => {
     ? groupRefs.findIndex((item) => item.partNumber === activeRef.partNumber && item.groupId === activeRef.groupId)
     : -1;
   const hasGroupAudio = Boolean(activeGroup?.audio?.url);
+  const showFooterNavigation = content?.attempt.mode === 'PRACTICE' || Boolean(activePart?.partNumber && activePart.partNumber >= 5);
+  const chatQuestion = useMemo(
+    () => questionRefs.find((item) => item.questionId === chatQuestionId) || null,
+    [chatQuestionId, questionRefs]
+  );
+  const canUseAiChat =
+    content?.attempt.mode === 'PRACTICE' && content.attempt.status === 'IN_PROGRESS' && Number.isFinite(numericAttemptId);
 
   useEffect(() => {
     if (!activeQuestionId && resumeQuestionId) {
@@ -145,6 +154,15 @@ export const AttemptRunnerPage = () => {
       audio.volume = volume;
     });
   }, [volume, activeGroup?.id]);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+      Object.values(chatAnimationRef.current).forEach((entry) => {
+        if (entry.timer) window.clearTimeout(entry.timer);
+      });
+    };
+  }, []);
 
   const goGroupByOffset = (offset: number) => {
     const nextGroup = groupRefs[activeGroupIndex + offset];
@@ -159,8 +177,12 @@ export const AttemptRunnerPage = () => {
   };
 
   const handleSubmit = () => {
-    const confirmed = window.confirm('Submit this attempt? You cannot edit answers after submitting.');
-    if (confirmed) void submitAttempt();
+    setIsSubmitConfirmOpen(true);
+  };
+
+  const confirmSubmit = () => {
+    setIsSubmitConfirmOpen(false);
+    void submitAttempt();
   };
 
   const toggleMarked = () => {
@@ -168,11 +190,162 @@ export const AttemptRunnerPage = () => {
     setMarkedQuestions((current) => ({ ...current, [activeQuestionId]: !current[activeQuestionId] }));
   };
 
+  const createChatMessageId = () => {
+    chatIdRef.current += 1;
+    return `chat-${Date.now()}-${chatIdRef.current}`;
+  };
+
+  const scheduleAssistantTyping = (questionId: number, messageId: string) => {
+    const entry = chatAnimationRef.current[messageId];
+    if (!entry || entry.timer || entry.queue.length === 0) return;
+
+    entry.timer = window.setTimeout(() => {
+      const currentEntry = chatAnimationRef.current[messageId];
+      if (!currentEntry) return;
+
+      currentEntry.timer = null;
+      const nextText = currentEntry.queue.splice(0, currentEntry.queue[0] === '\n' ? 1 : 3).join('');
+
+      setChatByQuestionId((current) => ({
+        ...current,
+        [questionId]: (current[questionId] || []).map((item) =>
+          item.id === messageId ? { ...item, content: item.content + nextText } : item
+        ),
+      }));
+
+      if (currentEntry.queue.length > 0) {
+        scheduleAssistantTyping(questionId, messageId);
+      }
+    }, 18);
+  };
+
+  const appendAssistantDelta = (questionId: number, messageId: string, text: string) => {
+    if (!text) return;
+    const entry = chatAnimationRef.current[messageId] ?? { queue: [], timer: null };
+    entry.queue.push(...Array.from(text));
+    chatAnimationRef.current[messageId] = entry;
+    scheduleAssistantTyping(questionId, messageId);
+  };
+
+  const clearChatAnimations = () => {
+    Object.values(chatAnimationRef.current).forEach((entry) => {
+      if (entry.timer) window.clearTimeout(entry.timer);
+    });
+    chatAnimationRef.current = {};
+  };
+
+  const openAiChat = (questionId: number) => {
+    setChatQuestionId(questionId);
+    setChatError('');
+  };
+
+  const closeAiChat = () => {
+    setChatQuestionId(null);
+    setChatInput('');
+    setChatError('');
+  };
+
+  const stopAiChat = () => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    clearChatAnimations();
+    setStreamingQuestionId(null);
+    setChatByQuestionId((current) => {
+      if (!chatQuestionId) return current;
+      return {
+        ...current,
+        [chatQuestionId]: (current[chatQuestionId] || []).map((message) =>
+          message.streaming ? { ...message, streaming: false } : message
+        ),
+      };
+    });
+  };
+
+  const sendAiChatMessage = async () => {
+    const questionId = chatQuestionId;
+    const message = chatInput.trim();
+    if (!questionId || !message || !canUseAiChat || streamingQuestionId) return;
+
+    const userMessage: ChatMessage = {
+      id: createChatMessageId(),
+      role: 'user',
+      content: message,
+    };
+    const assistantMessage: ChatMessage = {
+      id: createChatMessageId(),
+      role: 'assistant',
+      content: '',
+      streaming: true,
+    };
+    const controller = new AbortController();
+
+    abortControllerRef.current = controller;
+    setChatInput('');
+    setChatError('');
+    setStreamingQuestionId(questionId);
+    setChatByQuestionId((current) => ({
+      ...current,
+      [questionId]: [...(current[questionId] || []), userMessage, assistantMessage],
+    }));
+
+    try {
+      await streamPracticeQuestionChat({
+        attemptId: numericAttemptId,
+        questionId,
+        request: { message },
+        signal: controller.signal,
+        handlers: {
+          onDelta: (text) => {
+            appendAssistantDelta(questionId, assistantMessage.id, text);
+          },
+          onDone: () => {
+            setChatByQuestionId((current) => ({
+              ...current,
+              [questionId]: (current[questionId] || []).map((item) =>
+                item.id === assistantMessage.id ? { ...item, streaming: false } : item
+              ),
+            }));
+          },
+          onError: (message) => {
+            setChatError(message);
+            setChatByQuestionId((current) => ({
+              ...current,
+              [questionId]: (current[questionId] || []).map((item) =>
+                item.id === assistantMessage.id ? { ...item, content: item.content || message, streaming: false } : item
+              ),
+            }));
+          },
+        },
+      });
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      const message = err instanceof Error ? err.message : 'Không gửi được tin nhắn AI';
+      setChatError(message);
+      setChatByQuestionId((current) => ({
+        ...current,
+        [questionId]: (current[questionId] || []).map((item) =>
+          item.id === assistantMessage.id ? { ...item, content: item.content || message, streaming: false } : item
+        ),
+      }));
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
+      setStreamingQuestionId(null);
+      setChatByQuestionId((current) => ({
+        ...current,
+        [questionId]: (current[questionId] || []).map((item) =>
+          item.id === assistantMessage.id ? { ...item, streaming: false } : item
+        ),
+      }));
+    }
+  };
+
   if (!Number.isFinite(numericAttemptId)) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#f6f7fc] p-4">
         <p className="rounded-xl border border-[#fee4e2] bg-white p-5 text-sm font-bold text-[#b42318]">
-          Invalid attempt id.
+          Mã lượt làm bài không hợp lệ.
         </p>
       </main>
     );
@@ -182,7 +355,7 @@ export const AttemptRunnerPage = () => {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#f6f7fc]">
         <Loader2 className="h-8 w-8 animate-spin text-[#004ac6]" />
-        <p className="text-sm font-bold text-[#667085]">Loading attempt...</p>
+        <p className="text-sm font-bold text-[#667085]">Đang tải bài làm...</p>
       </main>
     );
   }
@@ -198,7 +371,7 @@ export const AttemptRunnerPage = () => {
               className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-bold text-white/90 transition hover:bg-white/10"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back
+              Quay lại
             </button>
             <div className="flex h-10 w-16 shrink-0 items-center justify-center rounded-md bg-white shadow-sm">
               <EngHubLogo markClassName="h-7 w-10" textClassName="hidden" />
@@ -215,14 +388,14 @@ export const AttemptRunnerPage = () => {
                 type="button"
                 onClick={() => setIsVolumeOpen((value) => !value)}
                 className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1f86ff] text-white shadow-sm transition hover:bg-[#1673db]"
-                title={hasGroupAudio ? 'Audio volume' : 'Audio volume'}
+                title={hasGroupAudio ? 'Âm lượng audio' : 'Âm lượng audio'}
               >
                 <Volume2 className="h-4 w-4" />
               </button>
               {isVolumeOpen && (
                 <div className="absolute right-0 top-10 z-50 w-40 rounded-xl border border-[#d8dced] bg-white p-3 text-[#111827] shadow-xl">
                   <label className="text-xs font-bold text-[#667085]" htmlFor="attempt-volume">
-                    Volume {Math.round(volume * 100)}%
+                    Âm lượng {Math.round(volume * 100)}%
                   </label>
                   <input
                     id="attempt-volume"
@@ -251,7 +424,7 @@ export const AttemptRunnerPage = () => {
               className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#ff8a1f] px-3 text-xs font-black text-white shadow-sm transition hover:bg-[#ea760b] disabled:opacity-50"
             >
               {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              Submit
+              Nộp bài
             </button>
           </div>
         </div>
@@ -277,9 +450,11 @@ export const AttemptRunnerPage = () => {
             <QuestionPanel
               activeQuestionId={activeQuestionId}
               answers={answers}
+              canUseAiChat={canUseAiChat}
               feedbacks={feedbacks}
               group={activeGroup}
               mode={content.attempt.mode}
+              onOpenAiChat={openAiChat}
               onSaveAnswer={saveAnswer}
               savingQuestionId={savingQuestionId}
               partNumber={activePart.partNumber}
@@ -287,7 +462,7 @@ export const AttemptRunnerPage = () => {
           </>
         ) : (
           <div className="col-span-full rounded-sm border border-[#d8dced] bg-white p-10 text-center text-sm font-bold text-[#667085]">
-            No question selected.
+            Chưa chọn câu hỏi.
           </div>
         )}
       </main>
@@ -305,403 +480,78 @@ export const AttemptRunnerPage = () => {
         parts={content.parts}
       />
 
-      {activePart?.partNumber && activePart.partNumber >= 5 && (
-      <footer className="relative h-14 shrink-0 border-t border-[#d8dced] bg-white">
-        <label className="absolute left-8 top-1/2 inline-flex -translate-y-1/2 cursor-pointer items-center gap-2 text-sm font-semibold text-[#344054]">
-          <input
-            type="checkbox"
-            checked={Boolean(activeQuestionId && markedQuestions[activeQuestionId])}
-            onChange={toggleMarked}
-            className="h-4 w-4 rounded border-[#c3c6d7] text-[#004ac6] focus:ring-[#004ac6]"
-          />
-          Mark item for review
-        </label>
+      <PracticeQuestionChatPanel
+        error={chatError}
+        input={chatInput}
+        isOpen={Boolean(chatQuestionId)}
+        messages={chatQuestionId ? chatByQuestionId[chatQuestionId] || [] : []}
+        onClose={closeAiChat}
+        onInputChange={setChatInput}
+        onWidthChange={setChatPanelWidth}
+        onSend={() => void sendAiChatMessage()}
+        onStop={stopAiChat}
+        panelWidth={chatPanelWidth}
+        questionNumber={chatQuestion?.questionNumber ?? null}
+        streaming={Boolean(chatQuestionId && streamingQuestionId === chatQuestionId)}
+        hasAnswer={Boolean(chatQuestionId && typeof answers[chatQuestionId] === 'number')}
+      />
 
-        <div className="absolute right-6 top-1/2 flex -translate-y-1/2 items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsPaletteOpen(true)}
-            className="flex h-10 w-12 items-center justify-center rounded-md bg-[#004ac6] text-white shadow-sm transition hover:bg-[#003da3]"
-            aria-label="Question navigator"
-            title="Question navigator"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => goGroupByOffset(-1)}
-            disabled={activeGroupIndex <= 0}
-            className="flex h-10 w-12 items-center justify-center rounded-md bg-[#4b9f3a] text-white shadow-sm transition hover:bg-[#3f872f] disabled:bg-[#d0d5dd]"
-            aria-label="Previous group"
-            title="Previous group"
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <button
-            type="button"
-            onClick={() => goGroupByOffset(1)}
-            disabled={activeGroupIndex >= groupRefs.length - 1}
-            className="flex h-10 w-12 items-center justify-center rounded-md bg-[#4b9f3a] text-white shadow-sm transition hover:bg-[#3f872f] disabled:bg-[#d0d5dd]"
-            aria-label="Next group"
-            title="Next group"
-          >
-            <ArrowRight className="h-6 w-6" />
-          </button>
-        </div>
-      </footer>
+      <ConfirmDialog
+        isOpen={isSubmitConfirmOpen}
+        title="Nộp bài?"
+        message="Sau khi nộp bài, bạn sẽ không thể chỉnh sửa câu trả lời."
+        confirmLabel="Nộp bài"
+        loading={submitting}
+        tone="warning"
+        onCancel={() => setIsSubmitConfirmOpen(false)}
+        onConfirm={confirmSubmit}
+      />
+
+      {showFooterNavigation && (
+        <footer className="relative h-14 shrink-0 border-t border-[#d8dced] bg-white">
+          <label className="absolute left-8 top-1/2 inline-flex -translate-y-1/2 cursor-pointer items-center gap-2 text-sm font-semibold text-[#344054]">
+            <input
+              type="checkbox"
+              checked={Boolean(activeQuestionId && markedQuestions[activeQuestionId])}
+              onChange={toggleMarked}
+              className="h-4 w-4 rounded border-[#c3c6d7] text-[#004ac6] focus:ring-[#004ac6]"
+            />
+            Đánh dấu để xem lại
+          </label>
+
+          <div className="absolute right-6 top-1/2 flex -translate-y-1/2 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPaletteOpen(true)}
+              className="flex h-10 w-12 items-center justify-center rounded-md bg-[#004ac6] text-white shadow-sm transition hover:bg-[#003da3]"
+              aria-label="Danh sách câu hỏi"
+              title="Danh sách câu hỏi"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => goGroupByOffset(-1)}
+              disabled={activeGroupIndex <= 0}
+              className="flex h-10 w-12 items-center justify-center rounded-md bg-[#4b9f3a] text-white shadow-sm transition hover:bg-[#3f872f] disabled:bg-[#d0d5dd]"
+              aria-label="Nhóm trước"
+              title="Nhóm trước"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </button>
+            <button
+              type="button"
+              onClick={() => goGroupByOffset(1)}
+              disabled={activeGroupIndex >= groupRefs.length - 1}
+              className="flex h-10 w-12 items-center justify-center rounded-md bg-[#4b9f3a] text-white shadow-sm transition hover:bg-[#3f872f] disabled:bg-[#d0d5dd]"
+              aria-label="Nhóm sau"
+              title="Nhóm sau"
+            >
+              <ArrowRight className="h-6 w-6" />
+            </button>
+          </div>
+        </footer>
       )}
     </div>
   );
 };
-
-const ContextPanel = ({ 
-  group, 
-  onAudioEnded,
-  part,
-  mode,
-  feedbacks,
-}: { 
-  group: AttemptGroup; 
-  onAudioEnded: () => void;
-  part: AttemptPart;
-  mode: 'MOCK' | 'PRACTICE';
-  feedbacks: Record<number, SaveAnswerResult>;
-}) => {
-  const isListeningPart = [1, 2, 3, 4].includes(part.partNumber);
-  const isMockListening = mode === 'MOCK' && isListeningPart;
-  const canRevealGroupFeedback =
-    mode === 'PRACTICE' && group.questions.length > 0 && group.questions.every((question) => feedbacks[question.id]);
-  const feedbackTranscript = group.questions
-    .map((question) => feedbacks[question.id])
-    .find((feedback) => feedback?.transcriptEn || feedback?.transcriptVi);
-  const transcriptEn = group.transcriptEn ?? feedbackTranscript?.transcriptEn ?? null;
-  const transcriptVi = group.transcriptVi ?? feedbackTranscript?.transcriptVi ?? null;
-  const showTranscript = isListeningPart && canRevealGroupFeedback && (transcriptEn || transcriptVi);
-
-  return (
-  <section className="min-h-0 overflow-y-auto border-b border-[#d8dced] bg-white p-4 lg:border-b-0 lg:border-r">
-    <p className="mb-3 text-sm font-bold leading-6 text-[#2b6475]">{getInstruction(part.partNumber)}</p>
-
-    {group.audio && (
-      <AudioRangePlayer
-        audio={group.audio}
-        autoPlay={true}
-        hiddenControls={isMockListening}
-        onEnded={isMockListening ? onAudioEnded : undefined}
-      />
-    )}
-
-    {group.images.length > 0 && (
-      <div className="mt-3 grid gap-3">
-        {group.images.map((image) =>
-          image.url ? (
-            <img
-              key={`${image.id}-${image.orderIndex ?? 0}`}
-              src={image.url}
-              alt={image.label || 'Question image'}
-              className="mx-auto max-h-[650px] w-full object-contain"
-            />
-          ) : null
-        )}
-      </div>
-    )}
-
-    {showTranscript && (
-      <div className="mt-4 rounded-sm border border-[#d8dced] bg-[#f8fbff] p-4 text-[#344054]">
-        <div className="mb-3 flex items-center gap-2 text-sm font-bold text-[#004ac6]">
-          <BookOpen className="h-4 w-4" />
-          <span>Audio Transcript</span>
-        </div>
-        {transcriptEn && (
-          <div className="whitespace-pre-wrap text-sm leading-6">{transcriptEn}</div>
-        )}
-        {transcriptVi && (
-          <div className={`whitespace-pre-wrap text-sm leading-6 opacity-80 ${transcriptEn ? 'mt-3 border-t border-[#d8dced] pt-3' : ''}`}>
-            {transcriptVi}
-          </div>
-        )}
-      </div>
-    )}
-
-    {group.passages.length > 0 && (
-      <div className="mt-3 space-y-4">
-        {group.passages.map((passage, index) => (
-          <article key={`${passage.id ?? index}-${passage.orderIndex ?? index}`} className="space-y-3">
-            {passage.title && <h2 className="text-sm font-bold text-[#2b6475]">{passage.title}</h2>}
-            {passage.url && (
-              <img
-                src={passage.url}
-                alt={passage.title || 'Passage'}
-                className="mx-auto max-h-[520px] w-full object-contain"
-              />
-            )}
-            {passage.contentEn && (
-              <div className="whitespace-pre-wrap rounded-sm border border-[#d8dced] bg-white p-4 text-sm leading-7 text-[#111827]">
-                {passage.contentEn}
-              </div>
-            )}
-          </article>
-        ))}
-      </div>
-    )}
-  </section>
-  );
-};
-
-const QuestionTranslationPanel = ({ question }: { question: AttemptQuestion }) => (
-  <div className="rounded-sm border border-[#d8dced] bg-[#f4f7fb] p-4 text-[#344054]">
-    <div className="mb-3 flex items-center gap-2 text-sm font-bold text-[#004ac6]">
-      <BookOpen className="h-4 w-4" />
-      <span>Question translation</span>
-    </div>
-
-    {question.questionTextVi && (
-      <p className="mb-3 whitespace-pre-wrap text-sm font-medium leading-6">
-        {question.questionTextVi}
-      </p>
-    )}
-
-    <div className="space-y-2 px-1">
-      {question.answers.map((answer) => (
-        <div key={answer.id} className="text-sm leading-6 text-[#344054]">
-          ({answer.label}) {answer.answerTextVi || ''}
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const QuestionPanel = ({
-  activeQuestionId,
-  answers,
-  feedbacks,
-  group,
-  mode,
-  onSaveAnswer,
-  savingQuestionId,
-  partNumber,
-}: {
-  activeQuestionId: number | null;
-  answers: Record<number, number | null>;
-  feedbacks: Record<number, SaveAnswerResult>;
-  group: AttemptGroup;
-  mode: 'MOCK' | 'PRACTICE';
-  onSaveAnswer: (questionId: number, selectedAnswerId: number | null) => Promise<void>;
-  savingQuestionId: number | null;
-  partNumber: number;
-}) => {
-  const canRevealGroupFeedback =
-    mode === 'PRACTICE' && group.questions.length > 0 && group.questions.every((question) => feedbacks[question.id]);
-
-  return (
-    <section className="min-h-0 overflow-y-auto bg-white p-4">
-      <h2 className="mb-3 text-base font-bold text-[#2b6475]">Question</h2>
-      <div className="space-y-5">
-        {group.questions.map((question) => (
-          <QuestionCard
-            key={question.id}
-            active={question.id === activeQuestionId}
-            canRevealFeedback={canRevealGroupFeedback}
-            feedback={feedbacks[question.id]}
-            mode={mode}
-            onSaveAnswer={onSaveAnswer}
-            question={question}
-            saving={savingQuestionId === question.id}
-            selectedAnswerId={answers[question.id] ?? null}
-            partNumber={partNumber}
-          />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-const QuestionCard = ({
-  active,
-  canRevealFeedback,
-  feedback,
-  mode,
-  onSaveAnswer,
-  question,
-  saving,
-  selectedAnswerId,
-  partNumber,
-}: {
-  active: boolean;
-  canRevealFeedback: boolean;
-  feedback?: SaveAnswerResult;
-  mode: 'MOCK' | 'PRACTICE';
-  onSaveAnswer: (questionId: number, selectedAnswerId: number | null) => Promise<void>;
-  question: AttemptQuestion;
-  saving: boolean;
-  selectedAnswerId: number | null;
-  partNumber: number;
-}) => {
-  const shouldHideText = partNumber === 1 || (partNumber === 2 && !canRevealFeedback);
-  const showInlineTranslation = canRevealFeedback && Boolean(feedback);
-
-  return (
-  <section className={active ? 'rounded-sm bg-[#f8fbff] p-2 ring-1 ring-[#b7cdf8]' : 'rounded-sm p-2'}>
-    <div className="mb-3 flex items-start justify-between gap-3">
-      <div>
-        <p className="text-sm font-bold text-[#111827]">
-          {question.questionNumber}. {question.questionTextEn || `Question ${question.questionNumber}`}
-        </p>
-      </div>
-      {saving && <Loader2 className="h-4 w-4 animate-spin text-[#004ac6]" />}
-    </div>
-
-    <div className="space-y-2">
-      {question.answers.map((answer) => {
-        const selected = selectedAnswerId === answer.id;
-        const revealedCorrect = canRevealFeedback && feedback?.correctAnswerId === answer.id;
-        const revealedIncorrect = canRevealFeedback && feedback && !feedback.correct && selected;
-        const hasFeedback = mode === 'PRACTICE' && Boolean(feedback);
-        return (
-          <button
-            key={answer.id}
-            type="button"
-            onClick={() => void onSaveAnswer(question.id, answer.id)}
-            disabled={saving || hasFeedback}
-            className={`flex min-h-10 w-full items-center gap-3 rounded-sm border px-3 py-2 text-left text-sm transition disabled:cursor-default ${
-              saving ? 'opacity-60' : ''
-            } ${
-              revealedIncorrect
-                ? 'border-[#fca5a5] bg-[#fef2f2]'
-                : revealedCorrect
-                  ? 'border-[#12b76a] bg-[#ecfdf3]'
-                  : selected
-                    ? 'border-[#004ac6] bg-[#eaf0ff]'
-                    : `border-[#d8dced] bg-white ${hasFeedback ? '' : 'hover:border-[#004ac6]'}`
-            }`}
-          >
-            {revealedIncorrect ? (
-              <XCircle className="h-4 w-4 shrink-0 text-[#ef4444]" />
-            ) : revealedCorrect ? (
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-[#12b76a]" />
-            ) : (
-              <span
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-                  selected ? 'border-[#004ac6]' : 'border-[#98a2b3]'
-                }`}
-              >
-                {selected && <span className="h-2 w-2 rounded-full bg-[#004ac6]" />}
-              </span>
-            )}
-            <span className={`font-semibold ${revealedIncorrect ? 'text-[#b91c1c]' : revealedCorrect ? 'text-[#065f46]' : 'text-[#344054]'}`}>
-              ({answer.label}){shouldHideText ? '' : ` ${answer.answerTextEn || ''}`}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-
-    {showInlineTranslation && (
-      <div className="mt-4">
-        <QuestionTranslationPanel question={question} />
-      </div>
-    )}
-
-    {canRevealFeedback && feedback?.explanationVi && (
-      <div className="mt-3 rounded-sm border border-[#d8dced] bg-[#f4f7fb] p-3 text-sm text-[#344054]">
-        <p className="mb-1.5 font-bold text-[#004ac6]">Detailed explanation:</p>
-        <p className="leading-6">{feedback.explanationVi}</p>
-      </div>
-    )}
-  </section>
-  );
-};
-
-const QuestionPalette = ({
-  isOpen,
-  onClose,
-  activeQuestionId,
-  answers,
-  markedQuestions,
-  onSelect,
-  parts,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  activeQuestionId: number | null;
-  answers: Record<number, number | null>;
-  markedQuestions: Record<number, boolean>;
-  onSelect: (questionId: number) => void;
-  parts: AttemptPart[];
-}) => (
-  <>
-    {/* Overlay */}
-    <div 
-      className={`fixed inset-0 z-40 bg-[#1e293b]/40 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
-      onClick={onClose} 
-    />
-    
-    {/* Sidebar */}
-    <div 
-      className={`fixed right-0 top-0 z-50 flex h-screen w-[340px] flex-col bg-[#f8f9fa] shadow-2xl transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-    >
-      <div className="flex shrink-0 items-center justify-between bg-[#1e293b] px-5 py-4 text-white">
-        <h2 className="text-lg font-bold">Question Navigator</h2>
-        <button onClick={onClose} className="text-white/70 transition-colors hover:text-white">
-          <X className="h-5 w-5" />
-        </button>
-      </div>
-
-      <div className="shrink-0 border-b border-gray-200 bg-white p-5">
-        <div className="grid grid-cols-2 gap-y-3 text-sm font-medium text-[#374151]">
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded-md border-2 border-[#1d4ed8] bg-[#3b82f6]"></div>
-            Current
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded-md border-2 border-gray-300 bg-white"></div>
-            Unanswered
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded-md border-2 border-gray-300 bg-[#ecfdf3]"></div>
-            Answered
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded-md border-2 border-[#f59e0b] bg-white"></div>
-            Marked
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-        <div className="space-y-6">
-          {parts.map((part) => (
-            <div key={part.partNumber}>
-              <p className="mb-3 font-bold text-[#374151]">
-                Part {part.partNumber} ({part.groups.reduce((acc, g) => acc + g.questions.length, 0)} questions)
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {part.groups.flatMap((group) =>
-                  group.questions.map((question) => {
-                    const selected = typeof answers[question.id] === 'number';
-                    const marked = Boolean(markedQuestions[question.id]);
-                    const active = activeQuestionId === question.id;
-                    return (
-                      <button
-                        key={question.id}
-                        type="button"
-                        onClick={() => onSelect(question.id)}
-                        className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 text-xs font-bold transition-all ${
-                          marked ? 'border-[#f59e0b]' : active ? 'border-[#1d4ed8]' : 'border-gray-300'
-                        } ${
-                          active ? 'bg-[#3b82f6] text-white' : selected ? 'bg-[#ecfdf3] text-[#374151]' : 'bg-white text-[#374151] hover:bg-gray-50'
-                        }`}
-                      >
-                        {question.questionNumber}
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </>
-);

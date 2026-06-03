@@ -80,7 +80,7 @@ export const AudioRangePlayer = ({
           type="button"
           onClick={() => handleRewind(1)}
           className="flex h-8 items-center gap-1.5 rounded-md border border-[#d8dced] bg-white px-3 text-xs font-bold text-[#344054] shadow-sm transition hover:bg-gray-50 hover:text-[#004ac6]"
-          title="Rewind 1 second"
+          title="Lùi 1 giây"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           1s
@@ -89,7 +89,7 @@ export const AudioRangePlayer = ({
           type="button"
           onClick={() => handleRewind(3)}
           className="flex h-8 items-center gap-1.5 rounded-md border border-[#d8dced] bg-white px-3 text-xs font-bold text-[#344054] shadow-sm transition hover:bg-gray-50 hover:text-[#004ac6]"
-          title="Rewind 3 seconds"
+          title="Lùi 3 giây"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           3s

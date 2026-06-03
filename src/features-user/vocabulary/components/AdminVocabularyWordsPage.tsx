@@ -13,6 +13,7 @@ import {
   Wand2,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { adminVocabularyService, getVocabularyErrorMessage, vocabularyService } from '../services/vocabularyService';
 import type { Vocabulary, VocabularyPayload, VocabularyTopic } from '../types';
 
@@ -199,7 +200,6 @@ export const AdminVocabularyWordsPage = () => {
   };
 
   const deleteWord = async (word: Vocabulary) => {
-    if (!window.confirm(`Xóa từ "${word.word}"?`)) return;
     try {
       setErrorMsg('');
       setSuccessMsg('');
@@ -554,6 +554,7 @@ const InlineWordEditForm = ({
   const [form, setForm] = useState(() => toForm(word));
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [lookingUp, setLookingUp] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -609,6 +610,7 @@ const InlineWordEditForm = ({
     try {
       setDeleting(true);
       await onDelete(word);
+      setDeleteConfirmOpen(false);
     } finally {
       setDeleting(false);
     }
@@ -654,13 +656,22 @@ const InlineWordEditForm = ({
               type="button"
               variant="danger"
               disabled={deleting}
-              onClick={() => void handleDelete()}
+              onClick={() => setDeleteConfirmOpen(true)}
               icon={deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             >
               Xóa từ
             </ActionButton>
           </div>
         </form>
+        <ConfirmDialog
+          isOpen={deleteConfirmOpen}
+          title="Xóa từ vựng?"
+          message={`Xóa từ "${word.word}"?`}
+          confirmLabel="Xóa"
+          loading={deleting}
+          onCancel={() => setDeleteConfirmOpen(false)}
+          onConfirm={() => void handleDelete()}
+        />
       </td>
     </tr>
   );

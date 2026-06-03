@@ -15,6 +15,7 @@ import {
   READING_LESSON_TYPES,
   READING_LESSON_TYPE_LABELS,
 } from '@/features-user/reading/constants/labels';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { adminReadingService, getReadingErrorMessage } from '@/features-user/reading/services/readingService';
 import { testCollectionService } from '@/features-teacher/tests/services/testCollectionService';
 import type { Test, TestCollection } from '@/features-teacher/tests/types/teacherTestTypes';
@@ -108,6 +109,7 @@ export const AdminReadingPage = () => {
   const [loadingTests, setLoadingTests] = useState(false);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [isLessonDrawerOpen, setIsLessonDrawerOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState<AiMode | null>(null);
   const [message, setMessage] = useState('');
@@ -388,7 +390,7 @@ export const AdminReadingPage = () => {
   };
 
   const deleteLesson = async () => {
-    if (!selectedLesson || !window.confirm('Xóa lesson này?')) return;
+    if (!selectedLesson) return;
     try {
       setSaving(true);
       setMessage('');
@@ -691,7 +693,7 @@ export const AdminReadingPage = () => {
                     <button
                       type="button"
                       disabled={saving}
-                      onClick={() => void deleteLesson()}
+                      onClick={() => setDeleteConfirmOpen(true)}
                       className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 disabled:opacity-50"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -853,6 +855,18 @@ export const AdminReadingPage = () => {
           </section>
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        title="Xóa lesson?"
+        message="Lesson này sẽ bị xóa khỏi danh sách bài luyện đọc."
+        confirmLabel="Xóa"
+        loading={saving}
+        onCancel={() => setDeleteConfirmOpen(false)}
+        onConfirm={() => {
+          setDeleteConfirmOpen(false);
+          void deleteLesson();
+        }}
+      />
     </main>
   );
 };

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, Edit3, Loader2, Plus, RefreshCcw, Search, Trash2, X } from 'lucide-react';
 import { adminUserService, getAdminUserErrorMessage } from '../services/adminUserService';
 import { useAuthStore } from '@/features-user/auth/store/useAuthStore';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import type { AdminRole, AdminUser, AdminUserCreatePayload, AdminUserUpdatePayload, PageResponse } from '../types';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
@@ -112,6 +113,7 @@ export const AdminUsersPage = () => {
   const [error, setError] = useState('');
   const [formMode, setFormMode] = useState<UserFormMode>('create');
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
   const [form, setForm] = useState<UserFormState>(defaultForm);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -257,9 +259,6 @@ export const AdminUsersPage = () => {
   };
 
   const deleteUser = async (user: AdminUser) => {
-    const confirmed = window.confirm(`Xóa người dùng ${user.email}?`);
-    if (!confirmed) return;
-
     try {
       setSaving(true);
       setError('');
@@ -446,7 +445,7 @@ export const AdminUsersPage = () => {
                             </button>
                             <button
                               type="button"
-                              onClick={() => void deleteUser(user)}
+                              onClick={() => setDeleteTarget(user)}
                               disabled={saving || isSelf}
                               className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label="Xóa người dùng"
@@ -611,6 +610,20 @@ export const AdminUsersPage = () => {
           </form>
         </div>
       )}
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Xóa người dùng?"
+        message={deleteTarget ? `Xóa người dùng ${deleteTarget.email}?` : ''}
+        confirmLabel="Xóa"
+        loading={saving}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          const target = deleteTarget;
+          setDeleteTarget(null);
+          void deleteUser(target);
+        }}
+      />
     </main>
   );
 };

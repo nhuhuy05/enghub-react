@@ -13,6 +13,7 @@ export const RegisterForm: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [validationError, setValidationError] = useState('');
   const { register, isLoading, error } = useAuth();
 
   const inputClassName =
@@ -24,8 +25,9 @@ export const RegisterForm: React.FC = () => {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    setValidationError('');
     if (formData.password !== formData.confirmPassword) {
-      alert('Mật khẩu xác nhận không khớp.');
+      setValidationError('Mật khẩu xác nhận không khớp.');
       return;
     }
 
@@ -129,7 +131,11 @@ export const RegisterForm: React.FC = () => {
           </label>
         </div>
 
-        {error && <div className="rounded-md border border-red-100 bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+        {(validationError || error) && (
+          <div className="rounded-md border border-red-100 bg-red-50 p-3 text-sm text-red-600">
+            {validationError || error}
+          </div>
+        )}
 
         <button type="submit" className={primaryButtonClassName} disabled={isLoading}>
           {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Tạo tài khoản'}

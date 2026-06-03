@@ -1,4 +1,5 @@
 import apiClient from '@/api/apiClient';
+import { useAuthStore } from '@/features-user/auth/store/useAuthStore';
 import type { ApiResponse } from '@/types/apiTypes';
 import type {
   AttemptAnswer,
@@ -13,6 +14,7 @@ import type {
   AttemptStatus,
   AttemptSummary,
   PageResult,
+  PracticeQuestionChatRequest,
   PublishedTest,
   PublishedTestCollection,
   SaveAnswerInput,
@@ -21,6 +23,12 @@ import type {
 } from '../types';
 
 type RawRecord = Record<string, unknown>;
+
+type SseHandler = {
+  onDelta: (text: string) => void;
+  onDone?: () => void;
+  onError?: (message: string) => void;
+};
 
 const asRecord = (value: unknown): RawRecord => (typeof value === 'object' && value !== null ? (value as RawRecord) : {});
 const asNumber = (value: unknown, fallback = 0) => (typeof value === 'number' ? value : fallback);
@@ -237,6 +245,124 @@ export const getErrorCode = (err: unknown) => {
     return (err as { response?: { data?: { code?: number } } }).response?.data?.code;
   }
   return undefined;
+};
+
+const getApiBaseUrl = () => (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/enghub').replace(/\/+$/, '');
+
+const parseSseBlock = (block: string) => {
+  const lines = block.split(/\r?\n/);
+  const event = lines
+    .find((line) => line.startsWith('event:'))
+    ?.slice('event:'.length)
+    .trim();
+  const data = lines
+    .filter((line) => line.startsWith('data:'))
+    .map((line) => line.slice('data:'.length).replace(/^ /, ''))
+    .join('\n');
+
+  return { event, data };
+};
+
+const parseSseData = (data: string): RawRecord & { rawText?: string } => {
+  if (!data) return {};
+  try {
+    return asRecord(JSON.parse(data));
+  } catch {
+    return { rawText: data };
+  }
+};
+
+const getStreamErrorMessage = async (response: Response) => {
+  let message = `Chat stream failed: ${response.status}`;
+  try {
+    const text = await response.text();
+    if (!text.trim()) return message;
+
+    try {
+      const body = asRecord(JSON.parse(text));
+      return asString(body.message, message);
+    } catch {
+      return text.trim();
+    }
+  } catch {
+    // Keep the HTTP status fallback.
+  }
+  return message;
+};
+
+const handleSseBlock = (block: string, handlers: SseHandler) => {
+  if (!block.trim()) return;
+
+  const { event, data } = parseSseBlock(block);
+  const parsed = parseSseData(data);
+  const text = asString(parsed.text, asString(parsed.rawText));
+  const normalizedEvent = event || (text ? 'delta' : undefined);
+
+  if (normalizedEvent === 'delta') {
+    handlers.onDelta(text);
+  } else if (normalizedEvent === 'done') {
+    handlers.onDone?.();
+  } else if (normalizedEvent === 'error') {
+    handlers.onError?.(asString(parsed.message, text || 'AI chat failed'));
+  }
+};
+
+export const streamPracticeQuestionChat = async ({
+  attemptId,
+  questionId,
+  request,
+  signal,
+  handlers,
+}: {
+  attemptId: number;
+  questionId: number;
+  request: PracticeQuestionChatRequest;
+  signal?: AbortSignal;
+  handlers: SseHandler;
+}) => {
+  const token = useAuthStore.getState().token || localStorage.getItem('token');
+  const response = await fetch(`${getApiBaseUrl()}/attempts/${attemptId}/questions/${questionId}/chat/stream`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+    },
+    body: JSON.stringify({
+      message: request.message,
+      conversation_id: request.conversationId ?? null,
+    }),
+    signal,
+  });
+
+  const contentType = response.headers.get('content-type') || '';
+  if (!response.ok || !response.body || contentType.includes('application/json')) {
+    throw new Error(await getStreamErrorMessage(response));
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) {
+      buffer += decoder.decode();
+      break;
+    }
+
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split(/\r?\n\r?\n/);
+    buffer = blocks.pop() ?? '';
+
+    for (const block of blocks) {
+      handleSseBlock(block, handlers);
+    }
+  }
+
+  if (buffer.trim()) {
+    handleSseBlock(buffer, handlers);
+  }
 };
 
 export const testAttemptService = {

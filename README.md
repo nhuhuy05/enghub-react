@@ -1,8 +1,15 @@
 # EngHub React
 
-Frontend cho EngHub, một ứng dụng luyện tiếng Anh/TOEIC với các khu vực học từ vựng, ngữ pháp, nghe, đọc, đề thi và hồ sơ người dùng.
+EngHub React là frontend cho nền tảng học tiếng Anh và luyện TOEIC EngHub. Ứng dụng tập trung vào trải nghiệm học của học viên, công cụ biên soạn nội dung cho giáo viên và khu quản trị hệ thống cho admin.
 
-## Công nghệ
+## Nội Dung Chính
+
+- Học viên: trang chủ, hồ sơ cá nhân, từ vựng, nghe chép chính tả, đọc song ngữ, danh sách đề thi, làm bài, lịch sử làm bài và kết quả.
+- Giáo viên: quản lý đề thi, tạo đề theo luồng nhiều bước, upload media, rà soát question group, publish/unpublish đề, quản lý nội dung nghe, đọc và từ vựng.
+- Admin: quản lý người dùng, vai trò, đề thi, nội dung nghe, đọc và từ vựng.
+- Xác thực: JWT lưu trong `localStorage`, Zustand quản lý session, axios interceptor tự gắn Bearer token và xử lý lỗi `401/403`.
+
+## Tech Stack
 
 - React 19
 - TypeScript
@@ -13,28 +20,40 @@ Frontend cho EngHub, một ứng dụng luyện tiếng Anh/TOEIC với các khu
 - Zustand
 - Lucide React
 - Framer Motion
+- WaveSurfer.js
+- ESLint
 
-## Yêu cầu môi trường
+## Yêu Cầu Môi Trường
 
-- Node.js phiên bản mới, khuyến nghị Node 20+
+- Node.js 20+ khuyến nghị
 - npm
-- Backend EngHub chạy tại `http://localhost:8080/enghub`
+- Backend EngHub đang chạy, mặc định tại:
 
-Base URL của API đang được cấu hình trong [src/api/apiClient.ts](C:/Code/enghub-react/src/api/apiClient.ts).
+```text
+http://localhost:8080/enghub
+```
 
-## Cài đặt
+Frontend đọc base URL từ biến môi trường `VITE_API_BASE_URL`. Nếu không cấu hình, app dùng fallback `http://localhost:8080/enghub` trong [src/api/apiClient.ts](c:/Code/enghub/enghub-react/src/api/apiClient.ts).
+
+Tạo file `.env.local` nếu cần đổi backend:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080/enghub
+```
+
+## Cài Đặt
 
 ```bash
 npm install
 ```
 
-Trên Windows PowerShell, nếu gặp lỗi execution policy khi chạy `npm`, có thể dùng:
+Trên Windows PowerShell, nếu gặp lỗi execution policy với `npm`, dùng:
 
-```bash
+```powershell
 npm.cmd install
 ```
 
-## Chạy dự án
+## Chạy Development
 
 ```bash
 npm run dev
@@ -42,125 +61,226 @@ npm run dev
 
 Hoặc trên Windows PowerShell:
 
-```bash
+```powershell
 npm.cmd run dev
 ```
 
-Ứng dụng Vite mặc định chạy ở:
+Vite mặc định mở ứng dụng tại:
 
 ```text
 http://localhost:5173
 ```
 
-## Build
+## Scripts
 
 ```bash
+npm run dev
 npm run build
-```
-
-Hoặc:
-
-```bash
-npm.cmd run build
-```
-
-Lệnh build sẽ chạy TypeScript trước, sau đó build bằng Vite.
-
-## Kiểm tra lint
-
-```bash
 npm run lint
+npm run preview
 ```
 
-## Cấu trúc thư mục
+- `dev`: chạy Vite dev server.
+- `build`: chạy `tsc -b` trước, sau đó build production bằng Vite.
+- `lint`: kiểm tra ESLint toàn project.
+- `preview`: preview bản build production.
+
+## Cấu Trúc Dự Án
 
 ```text
 src/
   api/
     apiClient.ts
+  assets/
+    images/
   components/
+    brand/
     layout/
-  features/
-    auth/
+    ui/
+  features-admin/
     dashboard/
-    exam/
-    grammar/
+    roles/
+    users/
+  features-teacher/
+    assignments/
+    classes/
+    dashboard/
+    listening/
+    reading/
+    tests/
+  features-user/
+    auth/
+    home/
     listening/
     profile/
     reading/
+    test-attempt/
     vocabulary/
   routes/
     AppRoutes.tsx
+    ProtectedRoute.tsx
+    RoleRoute.tsx
+    RootRedirect.tsx
   types/
     apiTypes.ts
 ```
 
-Các feature chính thường được chia theo mẫu:
+Quy ước trong mỗi feature:
 
-- `components`: giao diện của feature.
-- `hooks`: logic lấy dữ liệu, xử lý form hoặc session.
-- `services`: hàm gọi API hoặc mock data.
-- `types`: kiểu dữ liệu TypeScript.
+- `components`: UI và page components.
+- `hooks`: stateful logic, session logic hoặc controller logic.
+- `services`: API client methods và mapping dữ liệu.
+- `types`: TypeScript types của feature.
+- `utils`, `constants`, `data`: helper, nhãn hiển thị hoặc dữ liệu cục bộ khi feature cần.
 
-## Luồng xác thực
+Alias `@/*` trỏ tới `src/*`, cấu hình trong [vite.config.ts](c:/Code/enghub/enghub-react/vite.config.ts) và [tsconfig.app.json](c:/Code/enghub/enghub-react/tsconfig.app.json).
 
-Auth đang dùng Zustand để lưu trạng thái người dùng trong [src/features/auth/store/useAuthStore.ts](C:/Code/enghub-react/src/features/auth/store/useAuthStore.ts).
+## Routing Và Phân Quyền
+
+Routing chính nằm trong [src/routes/AppRoutes.tsx](c:/Code/enghub/enghub-react/src/routes/AppRoutes.tsx).
+
+### Public
+
+- `/`: hiển thị trang chủ nếu chưa đăng nhập, hoặc redirect theo role nếu đã đăng nhập.
+- `/login`: đăng nhập.
+- `/register`: đăng ký.
+- `/tests`: danh sách đề thi public trong layout học viên.
+
+### Protected Chung
+
+- `/profile`: hồ sơ cá nhân.
+
+### Student
+
+- `/dashboard`
+- `/vocabulary`
+- `/vocabulary/review`
+- `/vocabulary/topics/:topicId`
+- `/attempts`
+- `/attempts/:attemptId`
+- `/attempts/:attemptId/result`
+- `/listening`
+- `/listening/:testId/:partId`
+- `/reading`
+- `/reading/:lessonId`
+
+### Teacher
+
+- `/teacher/tests`
+- `/teacher/tests/create`
+- `/teacher/listening`
+- `/teacher/reading`
+- `/teacher/vocabulary`
+- `/teacher/vocabulary/topics/:topicId`
+- `/teacher/dashboard`
+- `/teacher/classes`
+- `/teacher/assignments`
+
+### Admin
+
+- `/admin/users`
+- `/admin/tests`
+- `/admin/tests/create`
+- `/admin/listening`
+- `/admin/reading`
+- `/admin/vocabulary`
+- `/admin/vocabulary/topics/:topicId`
+
+Role mặc định được xử lý trong [src/features-user/auth/utils/roleUtils.ts](c:/Code/enghub/enghub-react/src/features-user/auth/utils/roleUtils.ts):
+
+- `ADMIN` -> `/admin/users`
+- `TEACHER` -> `/teacher/tests`
+- `STUDENT` -> `/dashboard`
+
+## Luồng Xác Thực
+
+Auth được triển khai qua:
+
+- [src/features-user/auth/services/authService.ts](c:/Code/enghub/enghub-react/src/features-user/auth/services/authService.ts)
+- [src/features-user/auth/hooks/useAuth.ts](c:/Code/enghub/enghub-react/src/features-user/auth/hooks/useAuth.ts)
+- [src/features-user/auth/store/useAuthStore.ts](c:/Code/enghub/enghub-react/src/features-user/auth/store/useAuthStore.ts)
+- [src/api/apiClient.ts](c:/Code/enghub/enghub-react/src/api/apiClient.ts)
 
 Luồng chính:
 
 1. Đăng nhập qua `POST /auth/token`.
 2. Lưu JWT vào `localStorage`.
-3. Gọi `GET /users/myInfo` để lấy thông tin người dùng.
-4. Axios interceptor tự gắn `Authorization: Bearer <token>`.
-5. Khi API trả `401`, app xóa session và chuyển về `/login`.
+3. Gọi `GET /users/myInfo` để lấy thông tin user.
+4. Khi app khởi động lại, `App.tsx` gọi `initializeAuth()`.
+5. `initializeAuth()` introspect token bằng `POST /auth/introspect`, sau đó load lại user.
+6. Axios interceptor tự gắn `Authorization: Bearer <token>` cho request.
+7. Khi backend trả `401` hoặc `403`, app xóa session local và chuyển về `/login`.
 
-## API
+## API Và Tài Liệu FE-BE
 
-Tài liệu API frontend nằm ở [FRONTEND_API.md](C:/Code/enghub-react/FRONTEND_API.md).
+API response chung dùng shape:
 
-Các endpoint đang được dùng trực tiếp:
+```ts
+export interface ApiResponse<T> {
+  code: number;
+  message: string;
+  result: T;
+}
+```
 
-- `POST /auth/token`
-- `POST /auth/introspect`
-- `POST /auth/logout`
-- `POST /users`
-- `GET /users/myInfo`
-- `PUT /users/{userId}`
+Type dùng chung nằm ở [src/types/apiTypes.ts](c:/Code/enghub/enghub-react/src/types/apiTypes.ts).
 
-## Profile
+Tài liệu contract theo feature:
 
-Feature profile nằm trong [src/features/profile](C:/Code/enghub-react/src/features/profile).
+- [Admin User Management](c:/Code/enghub/enghub-react/docs/admin-user-management-fe-guide.md)
+- [Listening Dictation](c:/Code/enghub/enghub-react/docs/listening-dictation-fe-guide.md)
+- [Reading Bilingual Practice](c:/Code/enghub/enghub-react/docs/reading-bilingual-fe-guide.md)
+- [Practice Question AI Chat Streaming](c:/Code/enghub/enghub-react/docs/practice-question-chat-fe-guide.md)
 
-Các file chính:
+Các nhóm endpoint đang được frontend gọi:
 
-- [profileService.ts](C:/Code/enghub-react/src/features/profile/services/profileService.ts): gọi API profile.
-- [useProfile.ts](C:/Code/enghub-react/src/features/profile/hooks/useProfile.ts): quản lý state tải/sửa hồ sơ.
-- [ProfilePage.tsx](C:/Code/enghub-react/src/features/profile/components/ProfilePage.tsx): giao diện hồ sơ.
-- [index.ts](C:/Code/enghub-react/src/features/profile/types/index.ts): type request update profile.
+- Auth/profile: `/auth/token`, `/auth/introspect`, `/auth/logout`, `/users`, `/users/myInfo`, `/users/{userId}`.
+- Student tests/attempts: `/test-collections`, `/tests`, `/attempts`, `/attempts/{attemptId}/content`, `/attempts/{attemptId}/answers`, `/attempts/{attemptId}/submit`, `/attempts/{attemptId}/result`.
+- Vocabulary: `/vocabulary/*`, `/admin/vocabulary/*`.
+- Reading: `/reading-lessons/*`, `/admin/reading-lessons/*`.
+- Listening dictation: `/listening/tests/{testId}/parts/{partNumber}/dictation`.
+- Teacher/admin tests: `/admin/test-collections`, `/admin/tests`, `/admin/question-groups`, `/admin/tests/{testId}/media`, preview và publish endpoints.
+- Admin users: `/admin/users`, `/roles`.
 
-Thông tin có thể cập nhật:
+## Feature Overview
 
-- Họ tên
-- Số điện thoại
-- Ảnh đại diện
-- Mật khẩu mới
+### Student
 
-## Trạng thái dữ liệu
+- `features-user/home`: dashboard và top navigation.
+- `features-user/auth`: đăng nhập, đăng ký, restore session, logout.
+- `features-user/profile`: xem và cập nhật hồ sơ.
+- `features-user/vocabulary`: danh sách chủ đề, chi tiết từ, học từ và ôn tập.
+- `features-user/listening`: danh sách bài nghe và màn hình nghe chép chính tả.
+- `features-user/reading`: danh sách bài đọc song ngữ và màn hình luyện đọc.
+- `features-user/test-attempt`: catalog đề, tạo attempt, làm bài, audio range player, bảng câu hỏi, nộp bài, kết quả, lịch sử và chat AI theo câu hỏi trong practice mode.
 
-Một số module đã gọi backend thật:
+### Teacher
 
-- `auth`
-- `profile`
+- `features-teacher/tests`: danh sách đề, tạo đề, import câu hỏi, upload media, review groups, preview, publish/unpublish.
+- `features-teacher/listening`: quản lý transcript lines cho listening dictation.
+- `features-teacher/reading`: quản lý reading lessons từ TOEIC Part 7, hỗ trợ AI translation/vocabulary.
+- `features-teacher/classes` và `features-teacher/assignments`: khung giao diện cho lớp học và bài giao.
+- `features-teacher/dashboard`: dashboard giáo viên.
 
-Một số module vẫn đang dùng mock data:
+### Admin
 
-- `vocabulary`
-- `grammar`
-- `exam`
+- `features-admin/users`: danh sách user, lọc, phân trang, tạo/sửa/xóa, bật tắt trạng thái và gán role.
+- `features-admin/roles`: entry quản lý role hiện redirect về user management theo route hiện tại.
+- Admin cũng dùng lại các module tests, listening, reading và vocabulary ở khu teacher/admin.
 
-## Ghi chú phát triển
+## Ghi Chú Phát Triển
 
-- Alias `@/*` trỏ tới `src/*`, cấu hình trong [tsconfig.app.json](C:/Code/enghub-react/tsconfig.app.json).
-- API client hiện hard-code base URL `http://localhost:8080/enghub`.
-- Nếu build fail vì `noUnusedLocals`, cần xóa các import/type không dùng trong source.
-- Nếu tiếng Việt hiển thị sai dạng `ThÃ´ng tin`, cần kiểm tra lại encoding file và terminal/editor, ưu tiên lưu file ở UTF-8.
+- Không commit `dist/`, `node_modules/` hoặc file build cache.
+- Nếu build fail vì TypeScript unused checks, xóa import/type/variable không dùng trước khi build lại.
+- Giữ service layer chịu trách nhiệm mapping snake_case từ backend sang camelCase nếu UI đang dùng camelCase.
+- Với streaming SSE của AI chat, dùng `fetch()` và `ReadableStream`; không dùng `EventSource` vì endpoint cần `POST` và Bearer token.
+- Với audio theo đoạn, ưu tiên dùng `start_ms` và `end_ms` từ backend để phát đúng segment.
+
+## Kiểm Tra Trước Khi Gửi Code
+
+```bash
+npm run lint
+npm run build
+```
+
+Nếu chỉ thay đổi tài liệu, không bắt buộc build lại, nhưng nên đảm bảo README vẫn phản ánh đúng scripts, routes và API client hiện tại.

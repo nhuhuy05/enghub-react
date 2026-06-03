@@ -186,7 +186,7 @@ export const TestCatalogPage = () => {
                   </span>
                 </div>
                 <span className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-[#004ac6] px-4 py-3 text-sm font-bold text-white shadow-sm transition group-hover:bg-[#003da3]">
-                  Bắt đầu lam bài
+                  Bắt đầu làm bài
                 </span>
               </button>
             ))}

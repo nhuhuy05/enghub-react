@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, MouseEventHandler, ReactNode } from 'react';
 import { ArrowRight, BookText, Edit3, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { adminVocabularyService, getVocabularyErrorMessage } from '../services/vocabularyService';
 import type { VocabularyTopic } from '../types';
 
@@ -16,6 +17,7 @@ export const AdminVocabularyTopicsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<VocabularyTopic | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   const loadTopics = async () => {
@@ -93,13 +95,15 @@ export const AdminVocabularyTopicsPage = () => {
   };
 
   const deleteTopic = async (topic: VocabularyTopic) => {
-    if (!window.confirm(`Xóa chủ đề "${topic.name}"? Từ vựng sẽ không bị xóa.`)) return;
     try {
+      setSaving(true);
       setErrorMsg('');
       await adminVocabularyService.deleteTopic(topic.id);
       setTopics((current) => current.filter((item) => item.id !== topic.id));
     } catch (err) {
       setErrorMsg(getVocabularyErrorMessage(err, 'Không thể xóa chủ đề.'));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -252,7 +256,7 @@ export const AdminVocabularyTopicsPage = () => {
                             label="Xóa chủ đề"
                             onClick={(event) => {
                               event.stopPropagation();
-                              void deleteTopic(topic);
+                              setDeleteTarget(topic);
                             }}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -267,6 +271,20 @@ export const AdminVocabularyTopicsPage = () => {
           )}
         </section>
       </div>
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Xóa chủ đề?"
+        message={deleteTarget ? `Xóa chủ đề "${deleteTarget.name}"? Từ vựng sẽ không bị xóa.` : ''}
+        confirmLabel="Xóa"
+        loading={saving}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          const target = deleteTarget;
+          setDeleteTarget(null);
+          void deleteTopic(target);
+        }}
+      />
     </main>
   );
 };

@@ -80,8 +80,6 @@ export const AttemptResultPage = () => {
     );
   }
 
-  const partialAttempt = result.attempt.partNumbers.length > 0 && result.attempt.partNumbers.length < 7;
-
   return (
     <main className="min-h-screen bg-[#f6f7fc] px-4 py-8 text-[#191b23] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1280px] space-y-6">
@@ -103,19 +101,13 @@ export const AttemptResultPage = () => {
         </div>
 
         <section className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <Metric label="Tổng điểm" value={result.attempt.totalScore ?? '-'} />
-          <Metric label="Listening" value={result.attempt.listeningScore ?? '-'} />
-          <Metric label="Reading" value={result.attempt.readingScore ?? '-'} />
+          <Metric label="Tổng điểm" value={result.attempt.totalScore ?? 0} />
+          <Metric label="Listening" value={result.attempt.listeningScore ?? 0} />
+          <Metric label="Reading" value={result.attempt.readingScore ?? 0} />
           <Metric label="Số câu đúng" value={`${result.attempt.correctCount}/${result.attempt.totalQuestions}`} />
           <Metric label="Đã làm" value={`${result.attempt.answeredCount}/${result.attempt.totalQuestions}`} />
           <Metric label="Thời gian" value={formatDuration(result.attempt.durationSeconds)} />
         </section>
-
-        {partialAttempt && (
-          <div className="rounded-xl border border-[#fedf89] bg-[#fffaeb] p-4 text-sm font-semibold text-[#b25e00]">
-            Điểm được quy đổi theo các Part đã chọn trong lượt làm bài này.
-          </div>
-        )}
 
         <section className="space-y-6">
           {result.parts.map((part) => (

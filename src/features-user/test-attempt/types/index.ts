@@ -147,3 +147,13 @@ export interface AttemptResult {
   attempt: AttemptSummary;
   parts: AttemptPart[];
 }
+
+export interface PracticeQuestionChatRequest {
+  message: string;
+  conversationId?: string | null;
+}
+
+export type PracticeQuestionChatEvent =
+  | { event: 'delta'; data: { text: string } }
+  | { event: 'done'; data: Record<string, never> }
+  | { event: 'error'; data: { message: string } };
