@@ -1,5 +1,6 @@
 import { ArrowRight, BookOpenText, CheckCircle2, Headphones, LineChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '@/features-user/auth/store/useAuthStore';
 
 const features = [
   {
@@ -22,6 +23,9 @@ const features = [
 const highlights = ['Miễn phí bắt đầu', 'Có full test TOEIC', 'Phù hợp tự học mỗi ngày'];
 
 export const HomePage = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const startPath = isAuthenticated ? '/tests' : '/register';
+
   return (
     <main className="min-h-screen bg-[#f6f8fb] text-[#172033]">
       <section className="mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
@@ -40,7 +44,7 @@ export const HomePage = () => {
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link
-              to="/register"
+              to={startPath}
               className="inline-flex items-center justify-center gap-3 rounded-lg bg-[#004ac6] px-7 py-3.5 text-base font-black text-white shadow-[0_18px_42px_rgba(24,169,214,0.22)] transition hover:bg-[#1099c6]"
             >
               Bắt đầu học
