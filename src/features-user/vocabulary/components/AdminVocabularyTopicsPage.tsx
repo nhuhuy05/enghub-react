@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, MouseEventHandler, ReactNode } from 'react';
 import { ArrowRight, BookText, Edit3, Loader2, Plus, Search, Trash2, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { adminVocabularyService, getVocabularyErrorMessage } from '../services/vocabularyService';
 import type { VocabularyTopic } from '../types';
@@ -10,6 +10,8 @@ const emptyForm = { name: '', description: '' };
 
 export const AdminVocabularyTopicsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const vocabularyBasePath = location.pathname.startsWith('/teacher') ? '/teacher/vocabulary' : '/admin/vocabulary';
   const [topics, setTopics] = useState<VocabularyTopic[]>([]);
   const [editingTopic, setEditingTopic] = useState<VocabularyTopic | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -217,7 +219,7 @@ export const AdminVocabularyTopicsPage = () => {
                   {filteredTopics.map((topic) => (
                     <tr
                       key={topic.id}
-                      onClick={() => navigate(`/admin/vocabulary/topics/${topic.id}`)}
+                      onClick={() => navigate(`${vocabularyBasePath}/topics/${topic.id}`)}
                       className="cursor-pointer transition hover:bg-[#f8fbff]"
                     >
                       <td className="px-5 py-4">

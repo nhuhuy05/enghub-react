@@ -12,7 +12,7 @@ import {
   Volume2,
   Wand2,
 } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { adminVocabularyService, getVocabularyErrorMessage, vocabularyService } from '../services/vocabularyService';
 import type { Vocabulary, VocabularyPayload, VocabularyTopic } from '../types';
@@ -68,6 +68,8 @@ const playAudio = (url: string | null) => {
 
 export const AdminVocabularyWordsPage = () => {
   const { topicId } = useParams<{ topicId: string }>();
+  const location = useLocation();
+  const vocabularyBasePath = location.pathname.startsWith('/teacher') ? '/teacher/vocabulary' : '/admin/vocabulary';
   const routeTopicId = topicId ? Number(topicId) : null;
   const selectedTopicId = routeTopicId && Number.isFinite(routeTopicId) ? routeTopicId : undefined;
   const [topics, setTopics] = useState<VocabularyTopic[]>([]);
@@ -246,7 +248,7 @@ export const AdminVocabularyWordsPage = () => {
       <div className="mx-auto max-w-[1240px] space-y-5">
         <header>
           <div className="mt-1 flex items-center gap-3">
-            <Link to="/admin/vocabulary" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d8dced] bg-white text-[#667085] transition hover:bg-[#f8fafc] hover:text-[#101828]" title="Quay lại">
+            <Link to={vocabularyBasePath} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d8dced] bg-white text-[#667085] transition hover:bg-[#f8fafc] hover:text-[#101828]" title="Quay lại">
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <h1 className="text-2xl font-black tracking-tight text-[#101828]">
