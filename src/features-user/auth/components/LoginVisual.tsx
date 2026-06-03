@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Users } from 'lucide-react';
+import loginHero from '@/assets/images/auth/login-hero.png';
 
 export const LoginVisual: React.FC = () => {
   return (
@@ -34,7 +35,7 @@ export const LoginVisual: React.FC = () => {
           <img 
             alt="Student studying" 
             className="aspect-video w-full rounded-lg object-cover shadow-inner"
-            src="/src/assets/images/auth/login-hero.png"
+            src={loginHero}
           />
         </div>
 

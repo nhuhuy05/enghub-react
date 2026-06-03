@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, BadgeCheck, Timer } from 'lucide-react';
+import registerBg from '@/assets/images/auth/register-bg.png';
 
 export const RegisterVisual: React.FC = () => {
   return (
@@ -8,7 +9,7 @@ export const RegisterVisual: React.FC = () => {
       <div className="absolute inset-0 z-0">
         <img 
           className="h-full w-full object-cover opacity-30" 
-          src="/src/assets/images/auth/register-bg.png" 
+          src={registerBg} 
           alt="Study Background"
         />
       </div>

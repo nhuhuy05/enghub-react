@@ -1,3 +1,5 @@
+import logoPng from '@/assets/images/brand/logo.png';
+
 interface EngHubLogoProps {
   className?: string;
   markClassName?: string;
@@ -12,7 +14,7 @@ export const EngHubLogo = ({
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
       <img
-        src="/src/assets/images/brand/logo.png"
+        src={logoPng}
         alt=""
         aria-hidden="true"
         className={`${markClassName} object-contain`}
