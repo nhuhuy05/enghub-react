@@ -40,7 +40,6 @@ const defaultForm: UserFormState = {
 
 const roleTone: Record<string, string> = {
   ADMIN: 'bg-red-50 text-red-700 ring-red-100',
-  TEACHER: 'bg-indigo-50 text-indigo-700 ring-indigo-100',
   STUDENT: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
 };
 
@@ -68,7 +67,7 @@ const toFormState = (user: AdminUser): UserFormState => ({
   phone: user.phone || '',
   avatarUrl: user.avatar_url || '',
   active: user.active,
-  roles: user.roles.map((role) => role.name),
+  roles: user.roles.map((role) => role.name).filter((role) => role === 'ADMIN' || role === 'STUDENT'),
 });
 
 const cleanOptional = (value: string) => {
@@ -166,8 +165,8 @@ export const AdminUsersPage = () => {
   }, [loadUsers]);
 
   const roleOptions = useMemo(() => {
-    const names = roles.map((role) => role.name);
-    return names.length ? names : ['ADMIN', 'TEACHER', 'STUDENT'];
+    const names = roles.map((role) => role.name).filter((role) => role === 'ADMIN' || role === 'STUDENT');
+    return names.length ? names : ['ADMIN', 'STUDENT'];
   }, [roles]);
 
   const openCreate = () => {

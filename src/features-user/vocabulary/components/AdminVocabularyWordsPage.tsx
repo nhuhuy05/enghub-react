@@ -12,7 +12,7 @@ import {
   Volume2,
   Wand2,
 } from 'lucide-react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { adminVocabularyService, getVocabularyErrorMessage, vocabularyService } from '../services/vocabularyService';
 import type { Vocabulary, VocabularyPayload, VocabularyTopic } from '../types';
@@ -68,8 +68,7 @@ const playAudio = (url: string | null) => {
 
 export const AdminVocabularyWordsPage = () => {
   const { topicId } = useParams<{ topicId: string }>();
-  const location = useLocation();
-  const vocabularyBasePath = location.pathname.startsWith('/teacher') ? '/teacher/vocabulary' : '/admin/vocabulary';
+  const vocabularyBasePath = '/admin/vocabulary';
   const routeTopicId = topicId ? Number(topicId) : null;
   const selectedTopicId = routeTopicId && Number.isFinite(routeTopicId) ? routeTopicId : undefined;
   const [topics, setTopics] = useState<VocabularyTopic[]>([]);

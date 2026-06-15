@@ -1,17 +1,16 @@
 import type { User } from '@/types/apiTypes';
 
-export type AppRole = 'STUDENT' | 'TEACHER' | 'ADMIN';
+export type AppRole = 'STUDENT' | 'ADMIN';
 
 const ROLE_DASHBOARD_PATHS: Record<AppRole, string> = {
   ADMIN: '/admin/users',
-  TEACHER: '/teacher/tests',
   STUDENT: '/dashboard',
 };
 
 const normalizeRoleName = (roleName: string): AppRole | null => {
   const normalized = roleName.trim().toUpperCase();
 
-  if (normalized === 'STUDENT' || normalized === 'TEACHER' || normalized === 'ADMIN') {
+  if (normalized === 'STUDENT' || normalized === 'ADMIN') {
     return normalized;
   }
 
@@ -38,10 +37,6 @@ export const getDefaultDashboardPath = (user: User | null) => {
 
   if (roles.includes('ADMIN')) {
     return ROLE_DASHBOARD_PATHS.ADMIN;
-  }
-
-  if (roles.includes('TEACHER')) {
-    return ROLE_DASHBOARD_PATHS.TEACHER;
   }
 
   return ROLE_DASHBOARD_PATHS.STUDENT;

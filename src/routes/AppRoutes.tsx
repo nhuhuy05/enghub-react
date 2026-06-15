@@ -2,7 +2,6 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { AdminLayout } from '../components/layout/AdminLayout';
 import { StudentLayout } from '../components/layout/StudentLayout';
-import { TeacherLayout } from '../components/layout/TeacherLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleRoute } from './RoleRoute';
 import { RootRedirect } from './RootRedirect';
@@ -24,13 +23,10 @@ import { TestCatalogPage } from '../features-user/test-attempt/components/TestCa
 import { AttemptHistoryPage } from '../features-user/test-attempt/components/AttemptHistoryPage';
 import { AttemptRunnerPage } from '../features-user/test-attempt/components/AttemptRunnerPage';
 import { AttemptResultPage } from '../features-user/test-attempt/components/AttemptResultPage';
-import { TeacherDashboardPage } from '../features-teacher/dashboard/components/TeacherDashboardPage';
-import { TeacherClassesPage } from '../features-teacher/classes/components/TeacherClassesPage';
-import { TeacherAssignmentsPage } from '../features-teacher/assignments/components/TeacherAssignmentsPage';
-import { TestListPage } from '../features-teacher/tests/components/TestListPage';
-import { CreateTestPage } from '../features-teacher/tests/components/CreateTestPage';
-import { AdminListeningPage } from '../features-teacher/listening/components/AdminListeningPage';
-import { AdminReadingPage } from '../features-teacher/reading/components/AdminReadingPage';
+import { TestListPage } from '../features-admin/tests/components/TestListPage';
+import { CreateTestPage } from '../features-admin/tests/components/CreateTestPage';
+import { AdminListeningPage } from '../features-admin/listening/components/AdminListeningPage';
+import { AdminReadingPage } from '../features-admin/reading/components/AdminReadingPage';
 import { AdminUsersPage } from '../features-admin/users/components/AdminUsersPage';
 import { HomePage } from '../features-user/home/components/HomePage';
 
@@ -63,21 +59,6 @@ export const AppRoutes = () => {
           </Route>
           <Route path="/attempts/:attemptId" element={<AttemptRunnerPage />} />
           <Route path="/attempts/:attemptId/result" element={<AttemptResultPage />} />
-        </Route>
-
-        <Route element={<RoleRoute allowedRoles={['TEACHER']} />}>
-          <Route element={<TeacherLayout />}>
-            <Route path="/teacher/dashboard" element={<TeacherDashboardPage />} />
-            <Route path="/teacher/classes" element={<TeacherClassesPage />} />
-            <Route path="/teacher/assignments" element={<TeacherAssignmentsPage />} />
-            <Route path="/teacher/tests" element={<TestListPage />} />
-            <Route path="/teacher/tests/create" element={<CreateTestPage />} />
-            <Route path="/teacher/listening" element={<AdminListeningPage />} />
-            <Route path="/teacher/reading" element={<AdminReadingPage />} />
-            <Route path="/teacher/vocabulary" element={<AdminVocabularyTopicsPage />} />
-            <Route path="/teacher/vocabulary/topics" element={<Navigate to="/teacher/vocabulary" replace />} />
-            <Route path="/teacher/vocabulary/topics/:topicId" element={<AdminVocabularyWordsPage />} />
-          </Route>
         </Route>
 
         <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>

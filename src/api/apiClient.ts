@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '@/features-user/auth/store/useAuthStore';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ||'https://enghub-spring.onrender.com/enghub',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/enghub',
   headers: {
     'Content-Type': 'application/json',
   },

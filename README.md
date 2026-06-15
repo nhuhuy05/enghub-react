@@ -1,13 +1,12 @@
-# EngHub React
+﻿# EngHub React
 
-EngHub React là frontend cho nền tảng học tiếng Anh và luyện TOEIC EngHub. Ứng dụng tập trung vào trải nghiệm học của học viên, công cụ biên soạn nội dung cho giáo viên và khu quản trị hệ thống cho admin.
+EngHub React la frontend cho nen tang hoc tieng Anh va luyen TOEIC EngHub. Ung dung co hai nhom vai tro chinh: student va admin.
 
-## Nội Dung Chính
+## Noi Dung Chinh
 
-- Học viên: trang chủ, hồ sơ cá nhân, từ vựng, nghe chép chính tả, đọc song ngữ, danh sách đề thi, làm bài, lịch sử làm bài và kết quả.
-- Giáo viên: quản lý đề thi, tạo đề theo luồng nhiều bước, upload media, rà soát question group, publish/unpublish đề, quản lý nội dung nghe, đọc và từ vựng.
-- Admin: quản lý người dùng, vai trò, đề thi, nội dung nghe, đọc và từ vựng.
-- Xác thực: JWT lưu trong `localStorage`, Zustand quản lý session, axios interceptor tự gắn Bearer token và xử lý lỗi `401/403`.
+- Student: trang chu, ho so ca nhan, tu vung, nghe chep chinh ta, doc song ngu, danh sach de thi, lam bai, lich su lam bai va ket qua.
+- Admin: quan ly nguoi dung, vai tro, de thi, tao de theo luong nhieu buoc, upload media, review question group, publish/unpublish de, quan ly noi dung nghe, doc va tu vung.
+- Xac thuc: JWT luu trong `localStorage`, Zustand quan ly session, axios interceptor tu gan Bearer token va xu ly loi `401/403`.
 
 ## Tech Stack
 
@@ -23,53 +22,26 @@ EngHub React là frontend cho nền tảng học tiếng Anh và luyện TOEIC E
 - WaveSurfer.js
 - ESLint
 
-## Yêu Cầu Môi Trường
+## Yeu Cau Moi Truong
 
-- Node.js 20+ khuyến nghị
+- Node.js 20+ khuyen nghi
 - npm
-- Backend EngHub đang chạy, mặc định tại:
+- Backend EngHub dang chay, mac dinh tai `http://localhost:8080/enghub`
 
-```text
-http://localhost:8080/enghub
-```
-
-Frontend đọc base URL từ biến môi trường `VITE_API_BASE_URL`. Nếu không cấu hình, app dùng fallback `http://localhost:8080/enghub` trong [src/api/apiClient.ts](c:/Code/enghub/enghub-react/src/api/apiClient.ts).
-
-Tạo file `.env.local` nếu cần đổi backend:
+Frontend doc base URL tu bien moi truong `VITE_API_BASE_URL`. Neu khong cau hinh, app dung fallback trong [src/api/apiClient.ts](c:/Code/enghub/enghub-react/src/api/apiClient.ts).
 
 ```env
 VITE_API_BASE_URL=http://localhost:8080/enghub
 ```
 
-## Cài Đặt
+## Cai Dat Va Chay
 
 ```bash
 npm install
-```
-
-Trên Windows PowerShell, nếu gặp lỗi execution policy với `npm`, dùng:
-
-```powershell
-npm.cmd install
-```
-
-## Chạy Development
-
-```bash
 npm run dev
 ```
 
-Hoặc trên Windows PowerShell:
-
-```powershell
-npm.cmd run dev
-```
-
-Vite mặc định mở ứng dụng tại:
-
-```text
-http://localhost:5173
-```
+Vite mac dinh mo ung dung tai `http://localhost:5173`.
 
 ## Scripts
 
@@ -80,34 +52,30 @@ npm run lint
 npm run preview
 ```
 
-- `dev`: chạy Vite dev server.
-- `build`: chạy `tsc -b` trước, sau đó build production bằng Vite.
-- `lint`: kiểm tra ESLint toàn project.
-- `preview`: preview bản build production.
+- `dev`: chay Vite dev server.
+- `build`: chay `tsc -b` truoc, sau do build production bang Vite.
+- `lint`: kiem tra ESLint toan project.
+- `preview`: preview ban build production.
 
-## Cấu Trúc Dự Án
+## Cau Truc Du An
 
 ```text
 src/
   api/
-    apiClient.ts
   assets/
-    images/
   components/
     brand/
     layout/
     ui/
   features-admin/
-    dashboard/
-    roles/
-    users/
-  features-teacher/
     assignments/
     classes/
     dashboard/
     listening/
     reading/
+    roles/
     tests/
+    users/
   features-user/
     auth/
     home/
@@ -117,38 +85,33 @@ src/
     test-attempt/
     vocabulary/
   routes/
-    AppRoutes.tsx
-    ProtectedRoute.tsx
-    RoleRoute.tsx
-    RootRedirect.tsx
   types/
-    apiTypes.ts
 ```
 
-Quy ước trong mỗi feature:
+Quy uoc trong moi feature:
 
-- `components`: UI và page components.
-- `hooks`: stateful logic, session logic hoặc controller logic.
-- `services`: API client methods và mapping dữ liệu.
-- `types`: TypeScript types của feature.
-- `utils`, `constants`, `data`: helper, nhãn hiển thị hoặc dữ liệu cục bộ khi feature cần.
+- `components`: UI va page components.
+- `hooks`: stateful logic, session logic hoac controller logic.
+- `services`: API client methods va mapping du lieu.
+- `types`: TypeScript types cua feature.
+- `utils`, `constants`, `data`: helper, nhan hien thi hoac du lieu cuc bo khi feature can.
 
-Alias `@/*` trỏ tới `src/*`, cấu hình trong [vite.config.ts](c:/Code/enghub/enghub-react/vite.config.ts) và [tsconfig.app.json](c:/Code/enghub/enghub-react/tsconfig.app.json).
+Alias `@/*` tro toi `src/*`, cau hinh trong [vite.config.ts](c:/Code/enghub/enghub-react/vite.config.ts) va [tsconfig.app.json](c:/Code/enghub/enghub-react/tsconfig.app.json).
 
-## Routing Và Phân Quyền
+## Routing Va Phan Quyen
 
-Routing chính nằm trong [src/routes/AppRoutes.tsx](c:/Code/enghub/enghub-react/src/routes/AppRoutes.tsx).
+Routing chinh nam trong [src/routes/AppRoutes.tsx](c:/Code/enghub/enghub-react/src/routes/AppRoutes.tsx).
 
 ### Public
 
-- `/`: hiển thị trang chủ nếu chưa đăng nhập, hoặc redirect theo role nếu đã đăng nhập.
-- `/login`: đăng nhập.
-- `/register`: đăng ký.
-- `/tests`: danh sách đề thi public trong layout học viên.
+- `/`: hien thi trang chu neu chua dang nhap, hoac redirect theo role neu da dang nhap.
+- `/login`: dang nhap.
+- `/register`: dang ky.
+- `/tests`: danh sach de thi public trong layout student.
 
 ### Protected Chung
 
-- `/profile`: hồ sơ cá nhân.
+- `/profile`: ho so ca nhan.
 
 ### Student
 
@@ -164,18 +127,6 @@ Routing chính nằm trong [src/routes/AppRoutes.tsx](c:/Code/enghub/enghub-reac
 - `/reading`
 - `/reading/:lessonId`
 
-### Teacher
-
-- `/teacher/tests`
-- `/teacher/tests/create`
-- `/teacher/listening`
-- `/teacher/reading`
-- `/teacher/vocabulary`
-- `/teacher/vocabulary/topics/:topicId`
-- `/teacher/dashboard`
-- `/teacher/classes`
-- `/teacher/assignments`
-
 ### Admin
 
 - `/admin/users`
@@ -186,34 +137,33 @@ Routing chính nằm trong [src/routes/AppRoutes.tsx](c:/Code/enghub/enghub-reac
 - `/admin/vocabulary`
 - `/admin/vocabulary/topics/:topicId`
 
-Role mặc định được xử lý trong [src/features-user/auth/utils/roleUtils.ts](c:/Code/enghub/enghub-react/src/features-user/auth/utils/roleUtils.ts):
+Role mac dinh duoc xu ly trong [src/features-user/auth/utils/roleUtils.ts](c:/Code/enghub/enghub-react/src/features-user/auth/utils/roleUtils.ts):
 
 - `ADMIN` -> `/admin/users`
-- `TEACHER` -> `/teacher/tests`
 - `STUDENT` -> `/dashboard`
 
-## Luồng Xác Thực
+## Luong Xac Thuc
 
-Auth được triển khai qua:
+Auth duoc trien khai qua:
 
 - [src/features-user/auth/services/authService.ts](c:/Code/enghub/enghub-react/src/features-user/auth/services/authService.ts)
 - [src/features-user/auth/hooks/useAuth.ts](c:/Code/enghub/enghub-react/src/features-user/auth/hooks/useAuth.ts)
 - [src/features-user/auth/store/useAuthStore.ts](c:/Code/enghub/enghub-react/src/features-user/auth/store/useAuthStore.ts)
 - [src/api/apiClient.ts](c:/Code/enghub/enghub-react/src/api/apiClient.ts)
 
-Luồng chính:
+Luong chinh:
 
-1. Đăng nhập qua `POST /auth/token`.
-2. Lưu JWT vào `localStorage`.
-3. Gọi `GET /users/myInfo` để lấy thông tin user.
-4. Khi app khởi động lại, `App.tsx` gọi `initializeAuth()`.
-5. `initializeAuth()` introspect token bằng `POST /auth/introspect`, sau đó load lại user.
-6. Axios interceptor tự gắn `Authorization: Bearer <token>` cho request.
-7. Khi backend trả `401` hoặc `403`, app xóa session local và chuyển về `/login`.
+1. Dang nhap qua `POST /auth/token`.
+2. Luu JWT vao `localStorage`.
+3. Goi `GET /users/myInfo` de lay thong tin user.
+4. Khi app khoi dong lai, `App.tsx` goi `initializeAuth()`.
+5. `initializeAuth()` introspect token bang `POST /auth/introspect`, sau do load lai user.
+6. Axios interceptor tu gan `Authorization: Bearer <token>` cho request.
+7. Khi backend tra `401` hoac `403`, app xoa session local va chuyen ve `/login`.
 
-## API Và Tài Liệu FE-BE
+## API Va Tai Lieu FE-BE
 
-API response chung dùng shape:
+API response chung dung shape:
 
 ```ts
 export interface ApiResponse<T> {
@@ -223,64 +173,58 @@ export interface ApiResponse<T> {
 }
 ```
 
-Type dùng chung nằm ở [src/types/apiTypes.ts](c:/Code/enghub/enghub-react/src/types/apiTypes.ts).
+Type dung chung nam o [src/types/apiTypes.ts](c:/Code/enghub/enghub-react/src/types/apiTypes.ts).
 
-Tài liệu contract theo feature:
+Tai lieu contract theo feature:
 
 - [Admin User Management](c:/Code/enghub/enghub-react/docs/admin-user-management-fe-guide.md)
 - [Listening Dictation](c:/Code/enghub/enghub-react/docs/listening-dictation-fe-guide.md)
 - [Reading Bilingual Practice](c:/Code/enghub/enghub-react/docs/reading-bilingual-fe-guide.md)
 - [Practice Question AI Chat Streaming](c:/Code/enghub/enghub-react/docs/practice-question-chat-fe-guide.md)
 
-Các nhóm endpoint đang được frontend gọi:
+Cac nhom endpoint dang duoc frontend goi:
 
 - Auth/profile: `/auth/token`, `/auth/introspect`, `/auth/logout`, `/users`, `/users/myInfo`, `/users/{userId}`.
 - Student tests/attempts: `/test-collections`, `/tests`, `/attempts`, `/attempts/{attemptId}/content`, `/attempts/{attemptId}/answers`, `/attempts/{attemptId}/submit`, `/attempts/{attemptId}/result`.
 - Vocabulary: `/vocabulary/*`, `/admin/vocabulary/*`.
 - Reading: `/reading-lessons/*`, `/admin/reading-lessons/*`.
 - Listening dictation: `/listening/tests/{testId}/parts/{partNumber}/dictation`.
-- Teacher/admin tests: `/admin/test-collections`, `/admin/tests`, `/admin/question-groups`, `/admin/tests/{testId}/media`, preview và publish endpoints.
+- Admin tests: `/admin/test-collections`, `/admin/tests`, `/admin/question-groups`, `/admin/tests/{testId}/media`, preview va publish endpoints.
 - Admin users: `/admin/users`, `/roles`.
 
 ## Feature Overview
 
 ### Student
 
-- `features-user/home`: dashboard và top navigation.
-- `features-user/auth`: đăng nhập, đăng ký, restore session, logout.
-- `features-user/profile`: xem và cập nhật hồ sơ.
-- `features-user/vocabulary`: danh sách chủ đề, chi tiết từ, học từ và ôn tập.
-- `features-user/listening`: danh sách bài nghe và màn hình nghe chép chính tả.
-- `features-user/reading`: danh sách bài đọc song ngữ và màn hình luyện đọc.
-- `features-user/test-attempt`: catalog đề, tạo attempt, làm bài, audio range player, bảng câu hỏi, nộp bài, kết quả, lịch sử và chat AI theo câu hỏi trong practice mode.
-
-### Teacher
-
-- `features-teacher/tests`: danh sách đề, tạo đề, import câu hỏi, upload media, review groups, preview, publish/unpublish.
-- `features-teacher/listening`: quản lý transcript lines cho listening dictation.
-- `features-teacher/reading`: quản lý reading lessons từ TOEIC Part 7, hỗ trợ AI translation/vocabulary.
-- `features-teacher/classes` và `features-teacher/assignments`: khung giao diện cho lớp học và bài giao.
-- `features-teacher/dashboard`: dashboard giáo viên.
+- `features-user/home`: dashboard va top navigation.
+- `features-user/auth`: dang nhap, dang ky, restore session, logout.
+- `features-user/profile`: xem va cap nhat ho so.
+- `features-user/vocabulary`: danh sach chu de, chi tiet tu, hoc tu va on tap.
+- `features-user/listening`: danh sach bai nghe va man hinh nghe chep chinh ta.
+- `features-user/reading`: danh sach bai doc song ngu va man hinh luyen doc.
+- `features-user/test-attempt`: catalog de, tao attempt, lam bai, audio range player, bang cau hoi, nop bai, ket qua, lich su va chat AI theo cau hoi trong practice mode.
 
 ### Admin
 
-- `features-admin/users`: danh sách user, lọc, phân trang, tạo/sửa/xóa, bật tắt trạng thái và gán role.
-- `features-admin/roles`: entry quản lý role hiện redirect về user management theo route hiện tại.
-- Admin cũng dùng lại các module tests, listening, reading và vocabulary ở khu teacher/admin.
+- `features-admin/users`: danh sach user, loc, phan trang, tao/sua/xoa, bat tat trang thai va gan role.
+- `features-admin/roles`: entry quan ly role hien redirect ve user management theo route hien tai.
+- `features-admin/tests`: danh sach de, tao de, import cau hoi, upload media, review groups, preview, publish/unpublish.
+- `features-admin/listening`: quan ly transcript lines cho listening dictation.
+- `features-admin/reading`: quan ly reading lessons tu TOEIC Part 7, ho tro AI translation/vocabulary.
+- `features-admin/classes` va `features-admin/assignments`: khung giao dien cho lop hoc va bai giao.
+- Admin vocabulary management nam trong `features-user/vocabulary` va duoc route qua `/admin/vocabulary`.
 
-## Ghi Chú Phát Triển
+## Ghi Chu Phat Trien
 
-- Không commit `dist/`, `node_modules/` hoặc file build cache.
-- Nếu build fail vì TypeScript unused checks, xóa import/type/variable không dùng trước khi build lại.
-- Giữ service layer chịu trách nhiệm mapping snake_case từ backend sang camelCase nếu UI đang dùng camelCase.
-- Với streaming SSE của AI chat, dùng `fetch()` và `ReadableStream`; không dùng `EventSource` vì endpoint cần `POST` và Bearer token.
-- Với audio theo đoạn, ưu tiên dùng `start_ms` và `end_ms` từ backend để phát đúng segment.
+- Khong commit `dist/`, `node_modules/` hoac file build cache.
+- Neu build fail vi TypeScript unused checks, xoa import/type/variable khong dung truoc khi build lai.
+- Giu service layer chiu trach nhiem mapping snake_case tu backend sang camelCase neu UI dang dung camelCase.
+- Voi streaming SSE cua AI chat, dung `fetch()` va `ReadableStream`; khong dung `EventSource` vi endpoint can `POST` va Bearer token.
+- Voi audio theo doan, uu tien dung `start_ms` va `end_ms` tu backend de phat dung segment.
 
-## Kiểm Tra Trước Khi Gửi Code
+## Kiem Tra Truoc Khi Gui Code
 
 ```bash
 npm run lint
 npm run build
 ```
-
-Nếu chỉ thay đổi tài liệu, không bắt buộc build lại, nhưng nên đảm bảo README vẫn phản ánh đúng scripts, routes và API client hiện tại.
